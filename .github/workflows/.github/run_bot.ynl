@@ -1,4 +1,4 @@
-name: Run Nobitex Bot
+        name: Run Nobitex Bot
 
 on:
   schedule:
