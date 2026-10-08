@@ -197,9 +197,10 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
     pnl = ((exit_price - entry) / entry) * 100 * leverage
     return round(pnl, 2)
 
-def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str):
+def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
     return (
+        f"سیگنال شماره {daily_count}\n"
         f"1 نام: {name}\n"
         f"2 دسته بندی رشد: {cat_name}\n"
         f"3 میزان رشد: +{growth:.2f}%\n"
@@ -213,9 +214,10 @@ def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, ent
         f"11 تاریخ: {date_str}"
     )
 
-def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str):
+def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
-    msg = f"{exit_type}\n"
+    msg = f"خروجی شماره {daily_count}\n"
+    msg += f"{exit_type}\n"
     msg += f"1 نام: {name}\n"
     msg += f"2 دسته بندی رشد: {cat_name}\n"
     msg += f"3 میزان رشد: +{growth:.2f}%\n"
@@ -307,13 +309,27 @@ def process_markets(app_data):
                     trade['pnl'] = calculate_long_pnl(trade['entry'], current_close, leverage=7)
                 
                 neg_pct = int(cat_info['entry_drop'] * 100)
-                msg = generate_exit_message(
+                
+                # Count exits today for this specific category channel
+                cat_exit_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('close_time') == today_str and t.get('status') in ['tp', 'stop']])
+                
+                # Count exits today for the GLOBAL exit channel
+                global_exit_count = len([t for t in trades if t.get('close_time') == today_str and t.get('status') in ['tp', 'stop']])
+                
+                msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct,
-                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], vol_str, current_date_str
+                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], vol_str, current_date_str, global_exit_count
                 )
                 
-                chats = [PERSONAL_ID, CHANNEL_EXIT_MAIN, cat_info['report_channel']]
-                send_telegram_message(EXIT_BOT_TOKEN, chats, msg)
+                msg_cat = generate_exit_message(
+                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct,
+                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], vol_str, current_date_str, cat_exit_count
+                )
+                
+                # ارسال به کانال خروجی کل (با شماره انداز سراسری)
+                send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
+                # ارسال به کانال دسته‌بندی (با شماره انداز اختصاصی)
+                send_telegram_message(EXIT_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
 
         # 2. Check 72h Cooldown and Open New Trades
         cat_cooldowns = {}
@@ -372,13 +388,31 @@ def process_markets(app_data):
                 trades.append(new_trade)
                 
                 neg_pct = int(cat_info['entry_drop'] * 100)
-                msg = generate_entry_message(
+                
+                # Count entries today for this specific category channel
+                cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == today_str])
+                
+                # Count entries today for the GLOBAL channel (Buy or Sell separately based on trade_type)
+                global_entry_count = len([
+                    t for t in trades 
+                    if t.get('open_time') == today_str 
+                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == trade_type
+                ])
+                
+                msg_main = generate_entry_message(
                     symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
-                    entry_price, tp_price, stop_price, vol_str, current_date_str
+                    entry_price, tp_price, stop_price, vol_str, current_date_str, global_entry_count
                 )
                 
-                chats = [PERSONAL_ID, cat_info['entry_channel'], cat_info['report_channel']]
-                send_telegram_message(ENTRY_BOT_TOKEN, chats, msg)
+                msg_cat = generate_entry_message(
+                    symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
+                    entry_price, tp_price, stop_price, vol_str, current_date_str, cat_entry_count
+                )
+                
+                # ارسال به کانال اصلی خرید یا فروش (با شماره انداز سراسری)
+                send_telegram_message(ENTRY_BOT_TOKEN, [PERSONAL_ID, cat_info['entry_channel']], msg_main)
+                # ارسال به کانال دسته‌بندی (با شماره انداز اختصاصی)
+                send_telegram_message(ENTRY_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
                     
     app_data['trades'] = trades
     return app_data
