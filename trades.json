@@ -1,0 +1,19 @@
+{
+    "last_report_date": "",
+    "trades": [
+        {
+            "symbol": "PROMUSDT",
+            "growth": 29.183122012055705,
+            "low": 4.811,
+            "high": 6.215,
+            "entry": 5.131,
+            "tp": 4.77183,
+            "stop": 5.84934,
+            "status": "OPEN",
+            "open_time": "1405/07/16",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        }
+    ]
+}
