@@ -1,4 +1,4 @@
-          name: Run Nobitex Bot
+name: Run Nobitex Bot
 
 on:
   push:
@@ -37,4 +37,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add trades.json || true
           git commit -m "Auto-update trades.json by Bot" || exit 0
-    git push
+          git push
