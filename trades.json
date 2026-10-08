@@ -206,6 +206,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "JUPUSDT",
+            "category_id": "20_30",
+            "growth": 21.18437118437119,
+            "low": 0.3276,
+            "high": 0.397,
+            "entry": 0.3406,
+            "tp": 0.31676,
+            "stop": 0.38828,
+            "status": "OPEN",
+            "open_time": "1405/07/16",
+            "open_timestamp": 1791500230,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
