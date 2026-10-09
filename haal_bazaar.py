@@ -81,7 +81,8 @@ def main():
         keyboard = {
             "keyboard": [
                 [{"text": "حال بازار 📊"}],
-                [{"text": "راهنمای هشدار 🔔"}, {"text": "لیست هشدارها 📝"}]
+                [{"text": "هشدار قیمت 🔔"}],
+                [{"text": "لیست هشدارها 📝"}]
             ],
             "resize_keyboard": True
         }
@@ -120,9 +121,10 @@ def main():
                 msg = f"وضعیت حال بازار:\n\nروند کلی: {mood}\nدرصد ارزهای مثبت: {pos_pct:.1f}٪\n\nتعداد ارزهای مثبت: {pos_count}\nتعداد ارزهای منفی: {neg_count}"
                 send_message(chat_id, msg, keyboard)
                 
-        elif text == "راهنمای هشدار 🔔" or text == "راهنما":
-            msg = "برای تنظیم هشدار قیمت، نیازی به پر کردن فرم‌های طولانی نیست! فقط پیام خود را دقیقاً با یک فاصله به شکل زیر بنویسید:\n\nهشدار نام‌ارز حدسود حدضرر\n\nمثال:\nهشدار xrp 1.5 0.4\n\nدر این مثال، ربات روی قیمت 1.5 و 0.4 هشدار می‌دهد."
-            send_message(chat_id, msg, keyboard)
+        elif text == "هشدار قیمت 🔔" or text == "هشدار قیمت":
+            msg = "لطفاً نام ارز، تارگت اول و تارگت دوم را با فاصله بنویسید (مثلاً: xrp 1.5 0.4):"
+            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp 1.5 0.4"}
+            send_message(chat_id, msg, force_reply_markup)
             
         elif text == "لیست هشدارها 📝" or text == "لیست":
             my_alerts = [a for a in data["alerts"] if a["chat_id"] == chat_id]
@@ -134,13 +136,13 @@ def main():
                     msg += f"{i}. ارز {a['symbol'].upper()} | حد ۱: {a['tp']} | حد ۲: {a['stop']}\n"
                 send_message(chat_id, msg, keyboard)
 
-        elif text.startswith("هشدار"):
-            parts = text.split()
-            if len(parts) == 4:
+        elif text.startswith("هشدار") or "تارگت اول و تارگت دوم" in message.get("reply_to_message", {}).get("text", ""):
+            parts = text.replace("هشدار", "").strip().split()
+            if len(parts) == 3:
                 try:
-                    sym = parts[1].lower()
-                    tp = float(parts[2])
-                    stop = float(parts[3])
+                    sym = parts[0].lower()
+                    tp = float(parts[1])
+                    stop = float(parts[2])
                     
                     if sym in prices:
                         data["alerts"].append({"symbol": sym, "tp": tp, "stop": stop, "chat_id": chat_id})
@@ -148,9 +150,9 @@ def main():
                     else:
                         send_message(chat_id, f"ارز {sym} در بازار تتری پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
                 except:
-                    send_message(chat_id, "فرمت قیمت‌ها اشتباه است! لطفا فقط عدد وارد کنید. مثال:\nهشدار xrp 1.5 1.2", keyboard)
+                    send_message(chat_id, "فرمت قیمت‌ها اشتباه است! لطفا فقط عدد وارد کنید. مثال:\nxrp 1.5 1.2", keyboard)
             else:
-                send_message(chat_id, "دستور نامعتبر است! لطفاً به این شکل بفرستید:\nهشدار xrp 1.5 1.2", keyboard)
+                send_message(chat_id, "دستور نامعتبر است! لطفاً به این شکل بفرستید:\nxrp 1.5 1.2", keyboard)
                 
         else:
             # Assuming it's a single coin name request
@@ -171,22 +173,36 @@ def main():
             continue
             
         triggered = False
+        triggered_type = ""
+        trigger_price = 0
         
         upper_bound = max(alert["tp"], alert["stop"])
         lower_bound = min(alert["tp"], alert["stop"])
         
         if current_price >= upper_bound:
             triggered = True
+            if alert["tp"] == upper_bound:
+                triggered_type = "tp"
+                trigger_price = alert["tp"]
+            else:
+                triggered_type = "stop"
+                trigger_price = alert["stop"]
         elif current_price <= lower_bound:
             triggered = True
+            if alert["tp"] == lower_bound:
+                triggered_type = "tp"
+                trigger_price = alert["tp"]
+            else:
+                triggered_type = "stop"
+                trigger_price = alert["stop"]
             
         if triggered:
-            msg_alert = f"🚨 هشدار قیمت رسید! 🚨\n\n1 نام: {sym.upper()}\n2 قیمت فعلی: {current_price} دلار\n3 اهداف تنظیم شده: {alert['tp']} و {alert['stop']}"
+            msg_alert = f"نام {sym.lower()} {triggered_type} {trigger_price}"
             
             # Send to Alert Channel
             send_message(ALERT_CHANNEL, msg_alert)
             # Also notify the user in their PV
-            send_message(alert["chat_id"], f"✅ هشدار شما برای {sym.upper()} فعال شد!\nقیمت به {current_price} رسید و در کانال هشدار ارسال شد.")
+            send_message(alert["chat_id"], f"هشدار فعال شد:\n{msg_alert}")
         else:
             remaining_alerts.append(alert)
             
