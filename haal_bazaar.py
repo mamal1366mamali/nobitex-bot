@@ -187,7 +187,7 @@ def main():
                         pass
                 
                 sign = "+" if day_change > 0 else ""
-                send_message(chat_id, f"{sym} {prices[sym]} usd {sign}{day_change}%", keyboard)
+                send_message(chat_id, f"نام {sym} {prices[sym]} usd {sign}{day_change}%", keyboard)
             else:
                 send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
 
