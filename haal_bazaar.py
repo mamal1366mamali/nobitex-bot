@@ -98,10 +98,11 @@ def main():
         # Keyboard for easy access
         keyboard = {
             "keyboard": [
+                [{"text": "قیمت لحظه ای 💰"}],
                 [{"text": "حال بازار 📊"}],
                 [{"text": "بیشترین رشد و افت 📈📉"}],
-                [{"text": "هشدار قیمت 🔔"}],
-                [{"text": "لیست هشدارها 📝"}]
+                [{"text": "هشدار قیمتی 🔔"}],
+                [{"text": "لیست هشدارهای قیمتی 📝"}]
             ],
             "resize_keyboard": True
         }
@@ -109,6 +110,11 @@ def main():
         if text == "/start":
             msg = "سلام! به دستیار حال بازار و هشدار قیمت خوش آمدید.\nبرای دریافت قیمت لحظه‌ای، فقط نام ارز را به تنهایی بفرستید (مثلا xrp یا btc)."
             send_message(chat_id, msg, keyboard)
+            
+        elif text == "قیمت لحظه ای 💰" or text == "قیمت لحظه ای":
+            msg = "لطفا نام ارز مورد نظر را بنویسید (مثلاً xrp):"
+            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp"}
+            send_message(chat_id, msg, force_reply_markup)
             
         elif text == "حال بازار 📊" or text == "حال بازار":
             if stats.get("status") != "ok":
@@ -133,11 +139,11 @@ def main():
                 down_pct = int(round((down_count / total) * 100))
                 
                 if up_pct >= 60:
-                    msg = f"روند بازار صعودی +{up_pct}٪ تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
+                    msg = f"روند بازار صعودی +{up_pct}٪\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
                 elif down_pct >= 60:
-                    msg = f"روند بازار نزولی -{down_pct}٪ تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
+                    msg = f"روند بازار نزولی -{down_pct}٪\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
                 else:
-                    msg = f"روند بازار رنج تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
+                    msg = f"روند بازار رنج\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
                     
                 send_message(chat_id, msg, keyboard)
                 
@@ -166,22 +172,22 @@ def main():
             msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
             send_message(chat_id, msg, keyboard)
             
-        elif text == "هشدار قیمت 🔔" or text == "هشدار قیمت":
-            msg = "لطفاً نام ارز، تارگت اول و تارگت دوم را با فاصله بنویسید (مثلاً: xrp 1.5 0.4):"
+        elif text == "هشدار قیمتی 🔔" or text == "هشدار قیمتی" or text == "هشدار قیمت 🔔":
+            msg = "لطفا اول نام ارز سپس قیمت tp و بعد قیمت stop را وارد نمایید"
             force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp 1.5 0.4"}
             send_message(chat_id, msg, force_reply_markup)
             
-        elif text == "لیست هشدارها 📝" or text == "لیست":
+        elif text == "لیست هشدارهای قیمتی 📝" or text == "لیست هشدارها 📝" or text == "لیست":
             my_alerts = [a for a in data["alerts"] if a["chat_id"] == chat_id]
             if not my_alerts:
                 send_message(chat_id, "شما هیچ هشدار فعالی ندارید.", keyboard)
             else:
                 msg = "لیست هشدارهای فعال شما:\n\n"
                 for i, a in enumerate(my_alerts, 1):
-                    msg += f"{i}. ارز {a['symbol'].upper()} | حد ۱: {a['tp']} | حد ۲: {a['stop']}\n"
+                    msg += f"هشدار {i}:\nنام ارز {a['symbol'].upper()}\nقیمت tp {a['tp']}\nقیمت stop {a['stop']}\n\n"
                 send_message(chat_id, msg, keyboard)
 
-        elif text.startswith("هشدار") or "تارگت اول و تارگت دوم" in message.get("reply_to_message", {}).get("text", ""):
+        elif text.startswith("هشدار") or "قیمت tp و بعد قیمت stop" in message.get("reply_to_message", {}).get("text", ""):
             parts = text.replace("هشدار", "").strip().split()
             if len(parts) == 3:
                 try:
@@ -205,15 +211,19 @@ def main():
             if sym in prices:
                 # Get day change from stats
                 day_change = 0
+                day_low = 0
+                day_high = 0
                 if stats and "stats" in stats:
                     stat_info = stats["stats"].get(f"{sym}-usdt", {})
                     try:
                         day_change = float(stat_info.get("dayChange", 0))
+                        day_low = float(stat_info.get("dayLow", 0))
+                        day_high = float(stat_info.get("dayHigh", 0))
                     except:
                         pass
                 
                 sign = "+" if day_change > 0 else ""
-                msg = f"نام {sym}\nقیمت {prices[sym]} usdt\nدرصد تابلو {sign}{day_change}%"
+                msg = f"نام {sym}\nقیمت {prices[sym]} usdt\nدرصد تابلو {sign}{day_change}%\nکمترین قیمت {day_low} usdt\nبیشترین قیمت {day_high} usdt"
                 send_message(chat_id, msg, keyboard)
             else:
                 send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
