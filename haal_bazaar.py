@@ -69,10 +69,17 @@ def main():
     
     ob, stats = get_market_data()
     prices = {}
-    for k, v in ob.items():
-        if k.endswith('USDT'):
-            sym = k.replace('USDT', '').lower()
-            prices[sym] = float(v.get('lastTradePrice', 0))
+    if isinstance(ob, dict):
+        for k, v in ob.items():
+            if k.endswith('USDT'):
+                sym = k.replace('USDT', '').lower()
+                try:
+                    price_val = v.get('lastTradePrice', 0)
+                    if price_val == '':
+                        price_val = 0
+                    prices[sym] = float(price_val)
+                except:
+                    prices[sym] = 0
 
     # Process new messages
     updates = get_updates(offset=data["last_update_id"] + 1)
@@ -107,29 +114,30 @@ def main():
                 send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
                 continue
             
-            pos_count = 0
-            neg_count = 0
+            up_count = 0
+            down_count = 0
             for stat in stats.get("stats", {}).values():
                 try:
                     change = float(stat.get("dayChange", 0))
                     if change > 0:
-                        pos_count += 1
+                        up_count += 1
                     elif change < 0:
-                        neg_count += 1
+                        down_count += 1
                 except:
                     pass
                     
-            total = pos_count + neg_count
+            total = up_count + down_count
             if total > 0:
-                pos_pct = (pos_count / total) * 100
-                if pos_pct >= 60:
-                    mood = "صعودی 🚀"
-                elif pos_pct <= 40:
-                    mood = "نزولی 🔻"
+                up_pct = int(round((up_count / total) * 100))
+                down_pct = int(round((down_count / total) * 100))
+                
+                if up_pct >= 60:
+                    msg = f"روند بازار صعودی +{up_pct}٪ تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
+                elif down_pct >= 60:
+                    msg = f"روند بازار نزولی -{down_pct}٪ تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
                 else:
-                    mood = "رنج (Range) ⚖️"
+                    msg = f"روند بازار رنج تعداد ارزهای مثبت {up_count} تعداد ارزهای منفی {down_count}"
                     
-                msg = f"وضعیت حال بازار:\n\nروند کلی: {mood}\nدرصد ارزهای مثبت: {pos_pct:.1f}٪\n\nتعداد ارزهای مثبت: {pos_count}\nتعداد ارزهای منفی: {neg_count}"
                 send_message(chat_id, msg, keyboard)
                 
         elif text == "هشدار قیمت 🔔" or text == "هشدار قیمت":
@@ -169,7 +177,17 @@ def main():
             # Assuming it's a single coin name request
             sym = text.replace('usdt', '').strip()
             if sym in prices:
-                send_message(chat_id, f"قیمت لحظه‌ای {sym.upper()}:\n{prices[sym]} دلار", keyboard)
+                # Get day change from stats
+                day_change = 0
+                if stats and "stats" in stats:
+                    stat_info = stats["stats"].get(f"{sym}-usdt", {})
+                    try:
+                        day_change = float(stat_info.get("dayChange", 0))
+                    except:
+                        pass
+                
+                sign = "+" if day_change > 0 else ""
+                send_message(chat_id, f"{sym} {prices[sym]} usd {sign}{day_change}%", keyboard)
             else:
                 send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
 
