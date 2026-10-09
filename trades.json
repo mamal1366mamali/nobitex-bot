@@ -24,12 +24,12 @@
             "entry": 0.01509,
             "tp": 0.01403,
             "stop": 0.0172,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/16",
             "open_timestamp": 1791498935,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/17",
+            "close_price": 0.01788,
+            "pnl": -129.42
         },
         {
             "symbol": "WUSDT",
@@ -40,12 +40,12 @@
             "entry": 0.01509,
             "tp": 0.01735,
             "stop": 0.01298,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/16",
             "open_timestamp": 1791498935,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/17",
+            "close_price": 0.01788,
+            "pnl": 129.42
         },
         {
             "symbol": "ALGOUSDT",
