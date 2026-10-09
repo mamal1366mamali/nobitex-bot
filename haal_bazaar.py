@@ -99,6 +99,7 @@ def main():
         keyboard = {
             "keyboard": [
                 [{"text": "حال بازار 📊"}],
+                [{"text": "بیشترین رشد و افت 📈📉"}],
                 [{"text": "هشدار قیمت 🔔"}],
                 [{"text": "لیست هشدارها 📝"}]
             ],
@@ -140,6 +141,31 @@ def main():
                     
                 send_message(chat_id, msg, keyboard)
                 
+        elif text == "بیشترین رشد و افت 📈📉" or text == "بیشترین رشد و افت" or text == "بیشترین رشد" or text == "بیشترین افت":
+            if stats.get("status") != "ok":
+                send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
+                continue
+            
+            changes = []
+            for k, v in stats.get("stats", {}).items():
+                if k.endswith("-usdt"):
+                    try:
+                        sym = k.replace("-usdt", "")
+                        change = float(v.get("dayChange", 0))
+                        changes.append((sym, change))
+                    except:
+                        pass
+            
+            changes.sort(key=lambda x: x[1], reverse=True)
+            top_5 = changes[:5]
+            bottom_5 = changes[-5:][::-1]
+            
+            top_msg = "\n".join([f"{sym} +{int(round(c))}%" if c > 0 else f"{sym} {int(round(c))}%" for sym, c in top_5])
+            bottom_msg = "\n".join([f"{sym} +{int(round(c))}%" if c > 0 else f"{sym} {int(round(c))}%" for sym, c in bottom_5])
+            
+            msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
+            send_message(chat_id, msg, keyboard)
+            
         elif text == "هشدار قیمت 🔔" or text == "هشدار قیمت":
             msg = "لطفاً نام ارز، تارگت اول و تارگت دوم را با فاصله بنویسید (مثلاً: xrp 1.5 0.4):"
             force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp 1.5 0.4"}
@@ -187,7 +213,8 @@ def main():
                         pass
                 
                 sign = "+" if day_change > 0 else ""
-                send_message(chat_id, f"نام {sym} {prices[sym]} usd {sign}{day_change}%", keyboard)
+                msg = f"نام {sym}\nقیمت {prices[sym]} usdt\nدرصد تابلو {sign}{day_change}%"
+                send_message(chat_id, msg, keyboard)
             else:
                 send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
 
