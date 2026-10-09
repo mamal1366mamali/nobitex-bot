@@ -9,7 +9,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # تنظیمات و توکن‌های تلگرام
-ENTRY_BOT_TOKEN = "8843721628:AAE_ppEzKf0Am0CUC_WfjkkuBTRlsO1Bd2g"
+SELL_BOT_TOKEN = "8808538539:AAEiADT6e7lhGhDbQZx1FtxW990V_b4WiFI"
+BUY_BOT_TOKEN = "8994334309:AAHy8H4WuYTel0wzMvj7Jkif-oEZR_7BEyc"
 EXIT_BOT_TOKEN = "8781543538:AAGCr8Rjc70KouCmrfAbNcu_FhPneFJTCMs"
 REPORT_BOT_TOKEN = "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
 
@@ -285,16 +286,26 @@ def process_markets(app_data):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
+            trade_open_ts = pd.to_datetime(trade.get('open_timestamp', 0), unit='s')
+            df_since_open = df[df['time'] >= trade_open_ts]
+            
+            if not df_since_open.empty:
+                lowest_since_open = float(df_since_open['low'].min())
+                highest_since_open = float(df_since_open['high'].max())
+            else:
+                lowest_since_open = current_close
+                highest_since_open = current_close
+
             exit_type = None
             if trade_type == 'short':
-                if current_close <= trade['tp']:
+                if lowest_since_open <= trade['tp']:
                     exit_type = "tp"
-                elif current_close >= trade['stop']:
+                elif highest_since_open >= trade['stop']:
                     exit_type = "stop"
             else:
-                if current_close >= trade['tp']:
+                if highest_since_open >= trade['tp']:
                     exit_type = "tp"
-                elif current_close <= trade['stop']:
+                elif lowest_since_open <= trade['stop']:
                     exit_type = "stop"
                     
             if exit_type:
@@ -407,10 +418,13 @@ def process_markets(app_data):
                     entry_price, tp_price, stop_price, vol_str, current_date_str, cat_entry_count
                 )
                 
+                # انتخاب ربات بر اساس نوع معامله
+                bot_token = SELL_BOT_TOKEN if trade_type == 'short' else BUY_BOT_TOKEN
+                
                 # ارسال به کانال اصلی خرید یا فروش (با شماره انداز سراسری)
-                send_telegram_message(ENTRY_BOT_TOKEN, [PERSONAL_ID, cat_info['entry_channel']], msg_main)
+                send_telegram_message(bot_token, [PERSONAL_ID, cat_info['entry_channel']], msg_main)
                 # ارسال به کانال دسته‌بندی (با شماره انداز اختصاصی)
-                send_telegram_message(ENTRY_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
+                send_telegram_message(bot_token, [cat_info['report_channel']], msg_cat)
                     
     app_data['trades'] = trades
     return app_data
