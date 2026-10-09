@@ -202,34 +202,34 @@ def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, ent
     name = clean_symbol(symbol).lower()
     return (
         f"{daily_count} نام: {name}\n"
-        f"2 دسته بندی رشد: {cat_name}\n"
-        f"3 میزان رشد: +{growth:.2f}%\n"
-        f"4 درصد منفی: -{neg_percent} ٪\n"
-        f"5 low: {low} usdt\n"
-        f"6 hi: {high} usdt\n"
-        f"7 Entri: {entry}\n"
-        f"8 tp: {tp} usdt\n"
-        f"9 stop: {stop}\n"
-        f"10 حجم: {vol}\n"
-        f"11 تاریخ: {date_str}"
+        f"دسته بندی رشد: {cat_name}\n"
+        f"میزان رشد: +{growth:.2f}%\n"
+        f"درصد منفی: -{neg_percent} ٪\n"
+        f"low: {low} usdt\n"
+        f"hi: {high} usdt\n"
+        f"Entri: {entry}\n"
+        f"tp: {tp} usdt\n"
+        f"stop: {stop}\n"
+        f"حجم: {vol}\n"
+        f"تاریخ: {date_str}"
     )
 
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
     msg = f"{daily_count} نام: {name}\n"
     msg += f"{exit_type}\n"
-    msg += f"2 دسته بندی رشد: {cat_name}\n"
-    msg += f"3 میزان رشد: +{growth:.2f}%\n"
-    msg += f"4 درصد منفی: -{neg_percent} ٪\n"
-    msg += f"5 low: {low} usdt\n"
-    msg += f"6 hi: {high} usdt\n"
-    msg += f"7 Entri: {entry}\n"
+    msg += f"دسته بندی رشد: {cat_name}\n"
+    msg += f"میزان رشد: +{growth:.2f}%\n"
+    msg += f"درصد منفی: -{neg_percent} ٪\n"
+    msg += f"low: {low} usdt\n"
+    msg += f"hi: {high} usdt\n"
+    msg += f"Entri: {entry}\n"
     if exit_type == "tp":
-        msg += f"8 tp: {tp} usdt\n"
+        msg += f"tp: {tp} usdt\n"
     else:
-        msg += f"8 stop: {stop}\n"
-    msg += f"9 حجم: {vol}\n"
-    msg += f"10 تاریخ: {date_str}"
+        msg += f"stop: {stop}\n"
+    msg += f"حجم: {vol}\n"
+    msg += f"تاریخ: {date_str}"
     return msg
 
 def get_valid_categories(growth):
@@ -351,7 +351,7 @@ def process_markets(app_data):
                         break
                     else:
                         trade_ts = t.get('open_timestamp', 0)
-                        if (current_ts - trade_ts) < (72 * 3600): # 72 hours cooldown
+                        if (current_ts - trade_ts) < (24 * 3600): # 24 hours cooldown
                             can_open = False
                             break
             cat_cooldowns[cat_id] = can_open
