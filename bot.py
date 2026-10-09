@@ -200,8 +200,7 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
 def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
     return (
-        f"{daily_count}\n"
-        f"1 نام: {name}\n"
+        f"{daily_count} نام: {name}\n"
         f"2 دسته بندی رشد: {cat_name}\n"
         f"3 میزان رشد: +{growth:.2f}%\n"
         f"4 درصد منفی: -{neg_percent} ٪\n"
@@ -216,9 +215,8 @@ def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, ent
 
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
-    msg = f"{daily_count}\n"
+    msg = f"{daily_count} نام: {name}\n"
     msg += f"{exit_type}\n"
-    msg += f"1 نام: {name}\n"
     msg += f"2 دسته بندی رشد: {cat_name}\n"
     msg += f"3 میزان رشد: +{growth:.2f}%\n"
     msg += f"4 درصد منفی: -{neg_percent} ٪\n"
