@@ -12,7 +12,7 @@ ALERT_CHANNEL = "-1004462898426"
 DATA_FILE = "haal_data.json"
 
 # Nobitex API
-STATS_URL = "https://api.nobitex.ir/market/stats"
+STATS_URL = "https://apiv2.nobitex.ir/market/stats"
 ORDERBOOK_URL = "https://apiv2.nobitex.ir/v3/orderbook/all"
 
 def send_message(chat_id, text, reply_markup=None):
@@ -39,12 +39,23 @@ def get_updates(offset=None):
     return []
 
 def get_market_data():
+    ob = {}
+    stats = {}
     try:
-        ob = requests.get(ORDERBOOK_URL, timeout=15).json()
-        stats = requests.post(STATS_URL, json={"srcCurrency": "", "dstCurrency": "usdt"}, timeout=15).json()
-        return ob, stats
+        r1 = requests.get(ORDERBOOK_URL, timeout=15)
+        if r1.status_code == 200:
+            ob = r1.json()
     except:
-        return {}, {}
+        pass
+        
+    try:
+        r2 = requests.post(STATS_URL, json={"srcCurrency": "", "dstCurrency": "usdt"}, timeout=15)
+        if r2.status_code == 200:
+            stats = r2.json()
+    except:
+        pass
+        
+    return ob, stats
 
 def main():
     # Load data
