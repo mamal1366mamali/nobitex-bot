@@ -69,7 +69,13 @@ def main():
             if not symbol.endswith("USDT"):
                 continue
             
+            import re
             name = symbol.replace("USDT", "").lower()
+            
+            # Skip prediction tokens like 10964yes or 10964no
+            if re.match(r'^\d+(yes|no)$', name):
+                continue
+                
             current_price = float(ticker.get("lastPrice", 0))
             low_price = float(ticker.get("lowPrice", 0))
             high_price = float(ticker.get("highPrice", 0))
@@ -115,15 +121,19 @@ def main():
                                 pass
                             
                             # Fake vs Real logic
-                            # If current volume is less than double the previous 4h volume, it's relatively weak for an 8% pump
                             if prev_4h_vol == 0:
                                 vol_status = "⚠️ پامپ فیک (حجم قبلی نامشخص است)"
+                            elif day_change > 15.0:
+                                vol_status = "⚠️ روند کلی به شدت صعودی است. کاهش حجم به معنی اصلاح موقت است، به هیچ وجه شورت نگیرید!"
+                            elif curr_4h_vol > prev_4h_vol * 2.5:
+                                vol_status = "✅ پامپ واقعی (ورود پول هوشمند - مناسب برای لانگ / خطرناک برای شورت)"
                             elif curr_4h_vol <= prev_4h_vol * 1.5:
-                                vol_status = "⚠️ پامپ فیک قطعی (بدون ورود پول - عالی برای شورت)"
-                            elif curr_4h_vol <= prev_4h_vol * 2.5:
-                                vol_status = "⚠️ پامپ مشکوک (رشد حجم کم - نیازمند احتیاط برای شورت)"
+                                if day_change < 10.0:
+                                    vol_status = "⚠️ پامپ فیک قطعی (بدون ورود پول در روند خنثی/نزولی - عالی برای شورت)"
+                                else:
+                                    vol_status = "⚠️ پامپ ضعیف (حجم پایین است اما روند تابلو صعودی است - احتیاط برای شورت)"
                             else:
-                                vol_status = "✅ پامپ واقعی (ورود پول هوشمند - بسیار خطرناک برای شورت)"
+                                vol_status = "⚠️ پامپ مشکوک (رشد حجم متوسط - نیازمند احتیاط)"
 
                             data["daily_count"] += 1
                             sign = "+" if day_change > 0 else ""
@@ -131,14 +141,14 @@ def main():
                             msg = (
                                 f"{data['daily_count']}\n"
                                 f"نام: {name}\n"
-                                f"قیمت: {current_price} usdt\n"
                                 f"درصد رشد (۴ ساعته): +{growth:.2f}%\n"
-                                f"کمترین قیمت: {low_price} usdt\n"
-                                f"بیشترین قیمت: {high_price} usdt\n"
                                 f"درصد تابلو: {sign}{day_change:.2f}%\n"
                                 f"حجم ۴ ساعت اخیر: {format_volume(curr_4h_vol)} usdt\n"
                                 f"حجم ۴ ساعت قبل: {format_volume(prev_4h_vol)} usdt\n"
-                                f"تحلیل حجم: {vol_status}"
+                                f"تحلیل حجم: {vol_status}\n"
+                                f"قیمت: {current_price} usdt\n"
+                                f"کمترین قیمت: {low_price} usdt\n"
+                                f"بیشترین قیمت: {high_price} usdt"
                             )
                             send_telegram_message(msg)
                             
