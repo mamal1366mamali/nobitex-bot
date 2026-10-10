@@ -159,11 +159,10 @@ def format_volume(val):
 
 def get_all_usdt_symbols():
     try:
-        response = requests.get(ORDERBOOK_URL, timeout=30)
+        response = requests.get("https://api.ourbit.com/api/v3/ticker/24hr", timeout=30)
         data = response.json()
-        if data.get('status') == 'ok':
-            all_symbols = [key for key in data.keys() if key != 'status']
-            return [s for s in all_symbols if s.endswith('USDT')]
+        if isinstance(data, list):
+            return [t['symbol'] for t in data if t['symbol'].endswith('USDT')]
     except Exception:
         pass
     return []
