@@ -28,6 +28,11 @@ jobs:
           pip install requests pandas jdatetime openpyxl
 
       - name: Run Bot
+        env:
+          SELL_BOT_TOKEN: ${{ secrets.SELL_BOT_TOKEN }}
+          BUY_BOT_TOKEN: ${{ secrets.BUY_BOT_TOKEN }}
+          EXIT_BOT_TOKEN: ${{ secrets.EXIT_BOT_TOKEN }}
+          REPORT_BOT_TOKEN: ${{ secrets.REPORT_BOT_TOKEN }}
         run: python bot.py
 
       - name: Commit and save trades data
@@ -36,4 +41,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add trades.json || true
           git commit -m "Auto-update trades.json by Bot" || exit 0
-          git push
+          git pull --rebase || true
+          git push || true
