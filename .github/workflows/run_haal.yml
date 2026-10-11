@@ -1,12 +1,11 @@
-name: Run Haal Bazaar Bot
+name: Run Ourbit Haal Bazaar Bot
 
 on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '*/15 * * * *'
+  repository_dispatch:
+    types: [run-ourbit-haal]
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
