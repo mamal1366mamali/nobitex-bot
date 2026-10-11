@@ -4,7 +4,7 @@ import requests
 import jdatetime
 from datetime import datetime, timedelta
 
-BOT_TOKEN = "2097163505:AAHR9MPkRd8uxOeYf35qsV1ZNRFmkz8kUCo"
+BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN", "")
 CHANNEL_ID = "-1003961062602"
 DATA_FILE = "ourbit_data.json"
 
@@ -66,14 +66,14 @@ def main():
         try:
             symbol_raw = ticker.get("symbol", "")
             symbol = symbol_raw.upper()
-            if not symbol.endswith("USDT"):
+            if not symbol.endswith("USDT") or "~" in symbol_raw:
                 continue
             
             import re
             name = symbol.replace("USDT", "").lower()
             
             # Skip prediction tokens like 10964yes or 10964no
-            if re.match(r'^\d+(yes|no)$', name):
+            if re.search(r'\d+(yes|no)', name) or name.endswith("yes") or name.endswith("no"):
                 continue
                 
             current_price = float(ticker.get("lastPrice", 0))
@@ -120,20 +120,15 @@ def main():
                             except:
                                 pass
                             
-                            # Fake vs Real logic
+                            # Fake vs Real logic based on user rules
                             if prev_4h_vol == 0:
-                                vol_status = "⚠️ پامپ فیک (حجم قبلی نامشخص است)"
-                            elif day_change > 15.0:
-                                vol_status = "⚠️ روند کلی به شدت صعودی است. کاهش حجم به معنی اصلاح موقت است، به هیچ وجه شورت نگیرید!"
-                            elif curr_4h_vol > prev_4h_vol * 2.5:
-                                vol_status = "✅ پامپ واقعی (ورود پول هوشمند - مناسب برای لانگ / خطرناک برای شورت)"
-                            elif curr_4h_vol <= prev_4h_vol * 1.5:
-                                if day_change < 10.0:
-                                    vol_status = "⚠️ پامپ فیک قطعی (بدون ورود پول در روند خنثی/نزولی - عالی برای شورت)"
-                                else:
-                                    vol_status = "⚠️ پامپ ضعیف (حجم پایین است اما روند تابلو صعودی است - احتیاط برای شورت)"
+                                vol_status = "ریسک برای معامله"
+                            elif curr_4h_vol > prev_4h_vol * 2.0:
+                                vol_status = "مناسب معامله لانگ"
+                            elif curr_4h_vol <= prev_4h_vol * 1.3:
+                                vol_status = "پامپ فیک عالی (مناسب معامله شورت)"
                             else:
-                                vol_status = "⚠️ پامپ مشکوک (رشد حجم متوسط - نیازمند احتیاط)"
+                                vol_status = "ریسک برای معامله"
 
                             data["daily_count"] += 1
                             sign = "+" if day_change > 0 else ""
@@ -143,10 +138,10 @@ def main():
                                 f"نام: {name}\n"
                                 f"درصد رشد (۴ ساعته): +{growth:.2f}%\n"
                                 f"درصد تابلو: {sign}{day_change:.2f}%\n"
-                                f"حجم ۴ ساعت اخیر: {format_volume(curr_4h_vol)} usdt\n"
-                                f"حجم ۴ ساعت قبل: {format_volume(prev_4h_vol)} usdt\n"
-                                f"تحلیل حجم: {vol_status}\n"
                                 f"قیمت: {current_price} usdt\n"
+                                f"حجم ۴ ساعت فعلی {format_volume(curr_4h_vol)} usdt\n"
+                                f"حجم ۴ ساعت گذشته {format_volume(prev_4h_vol)} usdt\n"
+                                f"تحلیل {vol_status}\n"
                                 f"کمترین قیمت: {low_price} usdt\n"
                                 f"بیشترین قیمت: {high_price} usdt"
                             )
