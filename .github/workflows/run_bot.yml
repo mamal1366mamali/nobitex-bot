@@ -1,12 +1,11 @@
-name: Run Nobitex Bot
+name: Run Ourbit Filter Bot
 
 on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '*/15 * * * *'
+  repository_dispatch:
+    types: [run-ourbit-filter]
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
