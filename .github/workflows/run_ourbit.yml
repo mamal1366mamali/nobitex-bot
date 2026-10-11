@@ -26,6 +26,8 @@ jobs:
           pip install requests jdatetime pandas
 
       - name: Run Ourbit bot
+        env:
+          ROSHD_BOT_TOKEN: ${{ secrets.ROSHD_BOT_TOKEN }}
         run: python ourbit.py
 
       - name: Commit and save data
@@ -34,4 +36,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add ourbit_data.json || true
           git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update ourbit_data.json"
-          git push
+          git pull --rebase || true
+          git push || true
