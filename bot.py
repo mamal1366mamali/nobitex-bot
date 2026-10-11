@@ -9,10 +9,10 @@ import re
 
 warnings.filterwarnings('ignore')
 
-SELL_BOT_TOKEN = "8808538539:AAEiADT6e7lhGhDbQZx1FtxW990V_b4WiFI"
-BUY_BOT_TOKEN = "8994334309:AAHy8H4WuYTel0wzMvj7Jkif-oEZR_7BEyc"
-EXIT_BOT_TOKEN = "8781543538:AAGCr8Rjc70KouCmrfAbNcu_FhPneFJTCMs"
-REPORT_BOT_TOKEN = "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
+SELL_BOT_TOKEN = os.environ.get("SELL_BOT_TOKEN", "")
+BUY_BOT_TOKEN = os.environ.get("BUY_BOT_TOKEN", "")
+EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN", "")
+REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN", "")
 
 PERSONAL_ID = "114669886"
 CHANNEL_EXIT_MAIN = "-1004415777827"
@@ -130,6 +130,8 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 def send_telegram_message(token, chat_ids, text):
+    if not token:
+        return
     for chat_id in chat_ids:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         payload = {"chat_id": chat_id, "text": text}
@@ -139,6 +141,8 @@ def send_telegram_message(token, chat_ids, text):
             pass
 
 def send_telegram_document(token, chat_ids, file_path, caption):
+    if not token:
+        return
     for chat_id in chat_ids:
         url = f"https://api.telegram.org/bot{token}/sendDocument"
         try:
@@ -167,30 +171,31 @@ def format_volume(val):
     else:
         return f'{int(val)}usdt'
 
-def get_all_usdt_symbols():
+def get_market_overview():
     try:
-        response = requests.get(ORDERBOOK_URL, timeout=30)
+        response = requests.get(ORDERBOOK_URL, timeout=20)
         data = response.json()
-        valid = []
-        for ticker in data:
-            sym = ticker.get('symbol', '')
-            if sym.endswith('USDT'):
-                name_clean = sym.replace("USDT", "").lower()
-                if not re.match(r'^\d+(yes|no)$', name_clean):
-                    valid.append(sym)
-        return valid
+        valid_map = {}
+        if isinstance(data, list):
+            for ticker in data:
+                sym = ticker.get('symbol', '')
+                if sym.endswith('USDT') and '~' not in sym:
+                    name_clean = sym.replace("USDT", "").lower()
+                    if not re.search(r'\d+(yes|no)', name_clean) and not name_clean.endswith("yes") and not name_clean.endswith("no"):
+                        valid_map[sym] = ticker
+        return valid_map
     except Exception:
         pass
-    return []
+    return {}
 
 def get_candles(symbol, resolution=60, num_candles=24):
-    interval = '1h' if resolution == 60 else '1m'
+    interval = '60m' if resolution == 60 else '1m'
     params = {'symbol': symbol, 'interval': interval, 'limit': num_candles}
     try:
         response = requests.get(BASE_URL, params=params, timeout=15)
         data = response.json()
-        if len(data) > 0:
-            df = pd.DataFrame(data, columns=['time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'trades', 'tb_base', 'tb_quote', 'ignore'])
+        if isinstance(data, list) and len(data) > 0:
+            df = pd.DataFrame(data, columns=['time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume'])
             df['time'] = pd.to_datetime(df['time'], unit='ms')
             df['open'] = df['open'].astype(float)
             df['high'] = df['high'].astype(float)
@@ -271,11 +276,25 @@ def get_valid_categories(growth):
 
 def process_markets(app_data):
     trades = app_data.get('trades', [])
-    symbols = get_all_usdt_symbols()
+    market_overview = get_market_overview()
+    symbols = list(market_overview.keys())
     
     current_ts = iran_time.timestamp()
+    open_symbols = set([t['symbol'] for t in trades if t['status'] == 'OPEN'])
     
     for symbol in symbols:
+        ticker = market_overview[symbol]
+        
+        # Fast pre-filter: skip coins with <18% 24h change unless they already have an open trade
+        if symbol not in open_symbols:
+            try:
+                t_high = float(ticker.get('highPrice', 0))
+                t_low = float(ticker.get('lowPrice', 0))
+                if t_low <= 0 or (((t_high - t_low) / t_low) * 100) < 18.0:
+                    continue
+            except Exception:
+                continue
+
         df = get_candles(symbol)
         if df is None or len(df) < 2:
             continue
@@ -291,103 +310,95 @@ def process_markets(app_data):
             growth = ((high_24h - low_24h) / low_24h) * 100
 
         valid_cats = get_valid_categories(growth)
-        
         open_trades_for_symbol = [t for t in trades if t['symbol'] == symbol and t['status'] == 'OPEN']
         
         for trade in open_trades_for_symbol:
             cat_id = trade.get('category_id', '20_30')
-            
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
-            trade_open_ts = pd.to_datetime(trade.get('open_timestamp', 0), unit='s')
-            df_since_open = df[df['time'] >= trade_open_ts]
-            
-            if not df_since_open.empty:
-                lowest_since_open = float(df_since_open['low'].min())
-                highest_since_open = float(df_since_open['high'].max())
-            else:
-                lowest_since_open = current_close
-                highest_since_open = current_close
-
             exit_type = None
+            exit_price = None
+            
             if trade_type == 'short':
-                if lowest_since_open <= trade['tp']:
-                    exit_type = "tp"
-                elif highest_since_open >= trade['stop']:
-                    exit_type = "stop"
-            else:
-                if highest_since_open >= trade['tp']:
-                    exit_type = "tp"
-                elif lowest_since_open <= trade['stop']:
-                    exit_type = "stop"
+                if current_close <= trade['tp']:
+                    exit_type = 'tp'
+                    exit_price = trade['tp']
+                elif current_close >= trade['stop']:
+                    exit_type = 'stop'
+                    exit_price = trade['stop']
+            else: # long
+                if current_close >= trade['tp']:
+                    exit_type = 'tp'
+                    exit_price = trade['tp']
+                elif current_close <= trade['stop']:
+                    exit_type = 'stop'
+                    exit_price = trade['stop']
                     
             if exit_type:
                 trade['status'] = exit_type
                 trade['close_time'] = today_str
-                trade['close_price'] = current_close
+                trade['close_timestamp'] = int(current_ts)
+                trade['close_price'] = exit_price
+                
                 if trade_type == 'short':
-                    trade['pnl'] = calculate_short_pnl(trade['entry'], current_close, leverage=7)
+                    pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=7)
                 else:
-                    trade['pnl'] = calculate_long_pnl(trade['entry'], current_close, leverage=7)
+                    pnl = calculate_long_pnl(trade['entry'], exit_price, leverage=7)
+                trade['pnl'] = pnl
                 
                 neg_pct = int(cat_info['entry_drop'] * 100)
                 
                 cat_exit_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('close_time') == today_str and t.get('status') in ['tp', 'stop']])
-                global_exit_count = len([t for t in trades if t.get('close_time') == today_str and t.get('status') in ['tp', 'stop']])
+                global_exit_count = len([
+                    t for t in trades 
+                    if t.get('close_time') == today_str 
+                    and t.get('status') in ['tp', 'stop']
+                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == trade_type
+                ])
                 
                 msg_main = generate_exit_message(
-                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct,
-                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], vol_str, current_date_str, global_exit_count, trade_type
+                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
+                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
+                    vol_str, current_date_str, global_exit_count, trade_type
                 )
                 
                 msg_cat = generate_exit_message(
-                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct,
-                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], vol_str, current_date_str, cat_exit_count, trade_type
+                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
+                    trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
+                    vol_str, current_date_str, cat_exit_count, trade_type
                 )
                 
-                exit_bot_token = SELL_BOT_TOKEN if trade_type == 'short' else BUY_BOT_TOKEN
-                
-                send_telegram_message(exit_bot_token, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
-                send_telegram_message(exit_bot_token, [cat_info['report_channel']], msg_cat)
-
-        cat_cooldowns = {}
-        for cat_id in valid_cats:
-            can_open = True
-            for t in trades:
-                if t['symbol'] == symbol and t.get('category_id', '20_30') == cat_id:
-                    if t['status'] == 'OPEN':
-                        can_open = False
-                        break
-                    else:
-                        trade_ts = t.get('open_timestamp', 0)
-                        if (current_ts - trade_ts) < (24 * 3600): # 24 hours cooldown
-                            can_open = False
-                            break
-            cat_cooldowns[cat_id] = can_open
+                send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
+                send_telegram_message(EXIT_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
 
         for cat_id in valid_cats:
-            if not cat_cooldowns[cat_id]:
-                continue
-                
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
             
-            if cat_info.get("is_fixed"):
-                target_price = low_24h * (1 + cat_info.get("fixed_growth_target", 0.50))
-                entry_trigger = target_price * (1 - cat_info['entry_drop'])
+            existing = [t for t in trades if t['symbol'] == symbol and t.get('category_id') == cat_id and t['status'] == 'OPEN']
+            
+            is_fixed = cat_info.get('is_fixed', False)
+            if is_fixed:
+                target_ratio = 1.0 + cat_info['fixed_growth_target']
+                entry_price = round(low_24h * target_ratio, 6)
+                tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
+                stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
+                should_enter = (current_close >= entry_price) and not existing
             else:
-                entry_trigger = high_24h * (1 - cat_info['entry_drop'])
-                
-            if current_close <= entry_trigger:
-                entry_price = current_close
+                entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
-                    tp_price = round(entry_price * (1 - cat_info['tp_drop']), 5)
-                    stop_price = round(entry_price * (1 + cat_info['stop_rise']), 5)
-                else:
-                    tp_price = round(entry_price * (1 + cat_info.get('tp_rise', 0.15)), 5)
-                    stop_price = round(entry_price * (1 - cat_info.get('stop_drop', 0.14)), 5)
+                    entry_price = round(high_24h * (1 - entry_drop), 6)
+                    tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
+                    stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
+                    should_enter = (current_close <= entry_price) and not existing
+                else: # long
+                    entry_price = round(high_24h * (1 - entry_drop), 6)
+                    tp_price = round(entry_price * (1 + cat_info['tp_rise']), 6)
+                    stop_price = round(entry_price * (1 - cat_info['stop_drop']), 6)
+                    should_enter = (current_close <= entry_price) and not existing
                 
+            if should_enter:
                 new_trade = {
                     'symbol': symbol,
                     'category_id': cat_id,
@@ -433,9 +444,142 @@ def process_markets(app_data):
     return app_data
 
 def generate_and_send_daily_report(app_data):
-    pass # Implementation omitted for brevity to restore file, will keep same as nobitex if needed
+    trades = app_data.get('trades', [])
+    
+    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'past_tp': 0, 'past_stop': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': [], 'excel': []} for cat in CATEGORIES.keys()}
+    all_excel_data = []
+
+    for t in trades:
+        cat_id = t.get('category_id', '20_30')
+        if cat_id not in cat_stats:
+            cat_id = '20_30'
+            
+        name = clean_symbol(t['symbol']).lower()
+        stats = cat_stats[cat_id]
+        
+        if t['status'] == 'OPEN':
+            stats['opening'] += 1
+            df = get_candles(t['symbol'], resolution=60, num_candles=1)
+            current_close = float(df['close'].iloc[-1]) if df is not None else t['entry']
+            
+            cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
+            trade_type = cat_info.get('trade_type', 'short')
+            
+            if trade_type == 'short':
+                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=7)
+            else:
+                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=7)
+                
+            stats['open_pnl'] += live_pnl
+            
+            pnl_str = f"+{live_pnl}%" if live_pnl > 0 else f"{live_pnl}%"
+            stats['strings'].append(f"{name} : opening {pnl_str}")
+            
+            row = {'دسته': CATEGORIES[cat_id]['name_fa'], 'وضعیت عرض': 'opening', 'نام': name, 'کمترین قیمت': t['low'], 'بیشترین قیمت': t['high'], 'قیمت باز شدن معامله': t['entry'], 'قیمت بسته شدن': current_close}
+            stats['excel'].append(row)
+            all_excel_data.append(row)
+            
+        elif t['status'] in ['tp', 'stop']:
+            if t['close_time'] == today_str:
+                stats['closed_pnl'] += t['pnl']
+                pnl_str = f"+{t['pnl']}%" if t['pnl'] > 0 else f"{t['pnl']}%"
+                
+                if t['open_time'] == today_str:
+                    if t['status'] == 'tp':
+                        stats['tp'] += 1
+                        stats['strings'].append(f"{name} tp {pnl_str}")
+                    else:
+                        stats['stop'] += 1
+                        stats['strings'].append(f"{name} stop {pnl_str}")
+                else:
+                    if t['status'] == 'tp':
+                        stats['past_tp'] += 1
+                        stats['strings'].append(f"{name} : opening and cloce tp {pnl_str}")
+                    else:
+                        stats['past_stop'] += 1
+                        stats['strings'].append(f"{name} : opening and cloce stop {pnl_str}")
+            
+            row = {'دسته': CATEGORIES[cat_id]['name_fa'], 'وضعیت عرض': t['status'], 'نام': name, 'کمترین قیمت': t['low'], 'بیشترین قیمت': t['high'], 'قیمت باز شدن معامله': t['entry'], 'قیمت بسته شدن': t['close_price']}
+            stats['excel'].append(row)
+            all_excel_data.append(row)
+
+    total_all_transactions = 0
+    for cat_id, stats in cat_stats.items():
+        total = stats['tp'] + stats['stop'] + stats['opening'] + stats['past_tp'] + stats['past_stop']
+        total_all_transactions += total
+        
+        if total == 0:
+            continue
+            
+        cat_info = CATEGORIES[cat_id]
+        closed_pnl_str = f"+{stats['closed_pnl']:.0f} ٪" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.0f} ٪"
+        open_pnl_str = f"+{stats['open_pnl']:.0f} ٪" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.0f} ٪"
+
+        msg = f"1 میزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
+        msg += f"2 تعداد معاملات : {total}\n"
+        msg += f"2 1 تعداد tp : {stats['tp']}\n"
+        msg += f"2 2 تعداد stop : {stats['stop']}\n"
+        msg += f"2 3 تعداد opening : {stats['opening']}\n"
+        msg += f"2 4 تعداد opening and cloce {stats['past_tp'] + stats['past_stop']} tp {stats['past_tp']} stop {stats['past_stop']}\n"
+        msg += f"3 میزان سود یا ضرر تمامی معاملات بسته شده : {closed_pnl_str}\n"
+        msg += f"4 میزان سود یا ضرر تمامی معاملات باز {open_pnl_str}\n"
+        msg += "5 نام عرض معاملات بسته و باز همراه سود یا ضرر\n"
+        
+        for i, s in enumerate(stats['strings']):
+            msg += f"{i+1} {s}\n"
+            
+        msg += f"\n6 تاریخ\n{current_date_str}"
+
+        chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN, cat_info['report_channel']]
+        send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
+
+    if total_all_transactions == 0:
+        msg = f"تعداد معاملات 0\nتاریخ {current_date_str}"
+        chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN]
+        for c in CATEGORIES.values():
+            chats.append(c['report_channel'])
+        chats = list(set(chats))
+        send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
+        return
+
+    df_excel = pd.DataFrame(all_excel_data)
+    status_order = {'tp': 1, 'stop': 2, 'opening': 3}
+    df_excel['order'] = df_excel['وضعیت عرض'].map(status_order)
+    df_excel = df_excel.sort_values(['دسته', 'order']).reset_index(drop=True)
+    df_excel['شماره'] = range(1, len(df_excel) + 1)
+    
+    cols = ['شماره', 'دسته', 'وضعیت عرض', 'نام', 'کمترین قیمت', 'بیشترین قیمت', 'قیمت باز شدن معامله', 'قیمت بسته شدن']
+    df_excel = df_excel[cols]
+    
+    file_name = f"گزارش_{shamsi_date.replace(' ', '-')}_{iran_time.strftime('%H-%M')}.xlsx"
+    
+    with pd.ExcelWriter(file_name, engine='openpyxl') as writer:
+        df_excel.to_excel(writer, index=False, startrow=8)
+        ws = writer.sheets['Sheet1']
+        ws['A1'] = f"تعداد تمامی معاملات : {total_all_transactions}"
+        ws['A8'] = "شماره"; ws['B8'] = "دسته"; ws['C8'] = "وضعیت"; ws['D8'] = "نام"
+        ws['E8'] = "کمترین قیمت"; ws['F8'] = "بیشترین قیمت"
+        ws['G8'] = "قیمت باز شدن معامله"; ws['H8'] = "قیمت بسته شدن"
+
+        chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN]
+        for c in CATEGORIES.values():
+            chats.append(c['report_channel'])
+        chats = list(set(chats))
+        
+        send_telegram_document(REPORT_BOT_TOKEN, chats, file_name, f"گزارش معاملات - {current_date_str}")
+        
+        try:
+            os.remove(file_name)
+        except:
+            pass
 
 if __name__ == '__main__':
     app_data = load_data()
     app_data = process_markets(app_data)
+    
+    if iran_time.hour == 20 and iran_time.minute < 15:
+        if app_data.get('last_report_date') != today_str:
+            generate_and_send_daily_report(app_data)
+            app_data['last_report_date'] = today_str
+
     save_data(app_data)
