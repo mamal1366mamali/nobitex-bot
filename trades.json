@@ -1036,12 +1036,13 @@
             "entry": 0.099033,
             "tp": 0.084178,
             "stop": 0.112898,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791830736,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.084178,
+            "pnl": 105.0,
+            "close_timestamp": 1791856530
         },
         {
             "symbol": "ZCAT_USDT",
@@ -1377,6 +1378,22 @@
             "status": "OPEN",
             "open_time": "1405/07/21",
             "open_timestamp": 1791855041,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "PUMPFUN_USDT",
+            "category_id": "20_30",
+            "growth": 22.60622077658061,
+            "low": 0.004919,
+            "high": 0.006031,
+            "entry": 0.005187,
+            "tp": 0.004824,
+            "stop": 0.005913,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791856530,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
