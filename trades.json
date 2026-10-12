@@ -1029,6 +1029,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "ZCAT_USDT",
+            "category_id": "30_40",
+            "growth": 39.10318225650916,
+            "low": 0.04148,
+            "high": 0.0577,
+            "entry": 0.049045,
+            "tp": 0.041688,
+            "stop": 0.055911,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791833449,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "IO_USDT",
+            "category_id": "20_30",
+            "growth": 20.645554202192436,
+            "low": 0.1642,
+            "high": 0.1981,
+            "entry": 0.170366,
+            "tp": 0.15844,
+            "stop": 0.194217,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791833449,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
