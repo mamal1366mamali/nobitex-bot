@@ -454,6 +454,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "CTK_USDT",
+            "category_id": "20_30",
+            "growth": 20.81174438687392,
+            "low": 0.1158,
+            "high": 0.1399,
+            "entry": 0.120314,
+            "tp": 0.111892,
+            "stop": 0.137158,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791808631,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
