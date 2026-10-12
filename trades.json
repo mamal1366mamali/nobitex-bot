@@ -604,6 +604,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "BOME_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.672662272371795,
+            "low": 0.0008951,
+            "high": 0.0011607,
+            "entry": 0.000917,
+            "tp": 0.001055,
+            "stop": 0.000789,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791821431,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "ARX_USDT",
+            "category_id": "20_30",
+            "growth": 20.90942974282521,
+            "low": 0.2683,
+            "high": 0.3244,
+            "entry": 0.278984,
+            "tp": 0.259455,
+            "stop": 0.318042,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791821431,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
