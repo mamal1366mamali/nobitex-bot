@@ -163,6 +163,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "RVN_USDT",
+            "category_id": "20_30",
+            "growth": 20.197904540162988,
+            "low": 0.001718,
+            "high": 0.002065,
+            "entry": 0.001776,
+            "tp": 0.001652,
+            "stop": 0.002025,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791787832,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
