@@ -625,12 +625,13 @@
             "entry": 0.000917,
             "tp": 0.001055,
             "stop": 0.000789,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791821431,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.000789,
+            "pnl": -97.71,
+            "close_timestamp": 1791857128
         },
         {
             "symbol": "ARX_USDT",
@@ -1394,6 +1395,22 @@
             "status": "OPEN",
             "open_time": "1405/07/21",
             "open_timestamp": 1791856530,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "ARX_USDT",
+            "category_id": "long_20_30",
+            "growth": 27.016444792482382,
+            "low": 0.2554,
+            "high": 0.3244,
+            "entry": 0.256276,
+            "tp": 0.294717,
+            "stop": 0.220397,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791857128,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
