@@ -157,12 +157,13 @@
             "entry": 0.200105,
             "tp": 0.186098,
             "stop": 0.22812,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791787233,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.186098,
+            "pnl": 49.0,
+            "close_timestamp": 1791794429
         },
         {
             "symbol": "RVN_USDT",
@@ -304,6 +305,22 @@
             "status": "OPEN",
             "open_time": "1405/07/20",
             "open_timestamp": 1791793843,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "ZEST_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.959785522788202,
+            "low": 0.17904,
+            "high": 0.23268,
+            "entry": 0.183817,
+            "tp": 0.21139,
+            "stop": 0.158083,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791794429,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
