@@ -864,6 +864,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "UAI_USDT",
+            "category_id": "20_30",
+            "growth": 28.414239482200642,
+            "low": 0.309,
+            "high": 0.3968,
+            "entry": 0.341248,
+            "tp": 0.317361,
+            "stop": 0.389023,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791827137,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
