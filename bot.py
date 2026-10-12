@@ -5,7 +5,6 @@ import pandas as pd
 import jdatetime
 from datetime import datetime, timedelta
 import warnings
-import re
 
 warnings.filterwarnings('ignore')
 
@@ -64,28 +63,9 @@ CATEGORIES = {
         "stop_rise": 0.25,
         "trade_type": "short"
     },
-    "fixed_50": {
-        "name_fa": "مثبت 50 (ورود آنی)",
-        "entry_channel": "-1004290922830",
-        "report_channel": "-1003781040656",
-        "entry_drop": 0.00,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
-        "trade_type": "short",
-        "is_fixed": True,
-        "fixed_growth_target": 0.50
-    },
-    "fixed_100": {
-        "name_fa": "مثبت 100 (ورود آنی)",
-        "entry_channel": "-1004290922830",
-        "report_channel": "-1004458729980",
-        "entry_drop": 0.00,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
-        "trade_type": "short",
-        "is_fixed": True,
-        "fixed_growth_target": 1.00
-    },
+    # فیلترهای ورود آنی غیرفعال شدند:
+    # "fixed_50": { ... },
+    # "fixed_100": { ... },
     "long_20_30": {
         "name_fa": "+20 الی 30 ٪ (خرید)",
         "entry_channel": "-1004310315552",
@@ -95,11 +75,20 @@ CATEGORIES = {
         "stop_drop": 0.14,
         "trade_type": "long"
     },
-    "long_30_100": {
-        "name_fa": "+30 الی 100 ٪ (خرید)",
+    "long_40_70": {
+        "name_fa": "+40 الی 70 ٪ (خرید)",
         "entry_channel": "-1004310315552",
         "report_channel": "-1004379515603",
-        "entry_drop": 0.30,
+        "entry_drop": 0.35,
+        "tp_rise": 0.15,
+        "stop_drop": 0.14,
+        "trade_type": "long"
+    },
+    "long_70_100": {
+        "name_fa": "+70 الی 100 ٪ (خرید)",
+        "entry_channel": "-1004310315552",
+        "report_channel": "-1004379515603",
+        "entry_drop": 0.45,
         "tp_rise": 0.15,
         "stop_drop": 0.14,
         "trade_type": "long"
@@ -107,8 +96,8 @@ CATEGORIES = {
 }
 
 TRADES_FILE = "trades.json"
-BASE_URL = 'https://api.ourbit.com/api/v3/klines'
-ORDERBOOK_URL = 'https://api.ourbit.com/api/v3/ticker/24hr'
+BASE_URL = 'https://futures.ourbit.com/api/v1/contract/kline'
+ORDERBOOK_URL = 'https://futures.ourbit.com/api/v1/contract/ticker'
 
 iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
 shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
@@ -120,7 +109,10 @@ def load_data():
     if os.path.exists(TRADES_FILE):
         try:
             with open(TRADES_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
+                data['trades'] = trades
+                return data
         except Exception:
             pass
     return {"last_report_date": "", "trades": []}
@@ -154,7 +146,7 @@ def send_telegram_document(token, chat_ids, file_path, caption):
             pass
 
 def clean_symbol(symbol):
-    s = symbol.replace('USDT', '')
+    s = symbol.replace('_USDT', '').replace('USDT', '')
     if s == '' or s == 'BTC':
         return 'BTC'
     return s
@@ -173,36 +165,38 @@ def format_volume(val):
 
 def get_market_overview():
     try:
-        response = requests.get(ORDERBOOK_URL, timeout=20)
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(ORDERBOOK_URL, headers=headers, timeout=20)
         data = response.json()
         valid_map = {}
-        if isinstance(data, list):
-            for ticker in data:
+        items = data.get('data', [])
+        if isinstance(items, list):
+            for ticker in items:
                 sym = ticker.get('symbol', '')
-                if sym.endswith('USDT') and '~' not in sym:
-                    name_clean = sym.replace("USDT", "").lower()
-                    if not re.search(r'\d+(yes|no)', name_clean) and not name_clean.endswith("yes") and not name_clean.endswith("no"):
-                        valid_map[sym] = ticker
+                if sym.endswith('_USDT'):
+                    valid_map[sym] = ticker
         return valid_map
     except Exception:
         pass
     return {}
 
 def get_candles(symbol, resolution=60, num_candles=24):
-    interval = '60m' if resolution == 60 else '1m'
-    params = {'symbol': symbol, 'interval': interval, 'limit': num_candles}
+    url = f"{BASE_URL}/{symbol}?interval=Min60"
     try:
-        response = requests.get(BASE_URL, params=params, timeout=15)
-        data = response.json()
-        if isinstance(data, list) and len(data) > 0:
-            df = pd.DataFrame(data, columns=['time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume'])
-            df['time'] = pd.to_datetime(df['time'], unit='ms')
-            df['open'] = df['open'].astype(float)
-            df['high'] = df['high'].astype(float)
-            df['low'] = df['low'].astype(float)
-            df['close'] = df['close'].astype(float)
-            df['volume'] = df['quote_asset_volume'].astype(float)
-            return df.sort_values('time', ascending=True).reset_index(drop=True)
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=15)
+        res = response.json()
+        if res.get('success') and 'data' in res:
+            data = res['data']
+            df = pd.DataFrame(data)
+            if len(df) > 0:
+                df = df.tail(num_candles).reset_index(drop=True)
+                df['open'] = df['open'].astype(float)
+                df['high'] = df['high'].astype(float)
+                df['low'] = df['low'].astype(float)
+                df['close'] = df['close'].astype(float)
+                df['volume'] = df['amount'].astype(float)
+                return df
     except Exception:
         pass
     return None
@@ -215,37 +209,41 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
     pnl = ((exit_price - entry) / entry) * 100 * leverage
     return round(pnl, 2)
 
-def generate_entry_message(symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
+def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
+    type_str = "ورود معامله فروش" if trade_type == 'short' else "ورود معامله خرید"
     return (
-        f"{daily_count} نام: {name}\n"
+        f"{daily_count} {type_str}\n"
+        f"نام: {name}\n"
         f"دسته بندی رشد: {cat_name}\n"
         f"میزان رشد: +{growth:.2f}%\n"
         f"درصد منفی: -{neg_percent} ٪\n"
-        f"low: {low} usdt\n"
-        f"hi: {high} usdt\n"
         f"Entri: {entry}\n"
         f"tp: {tp} usdt\n"
         f"stop: {stop}\n"
         f"حجم: {vol}\n"
+        f"low: {low} usdt\n"
+        f"hi: {high} usdt\n"
         f"تاریخ: {date_str}"
     )
 
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count, trade_type):
     name = clean_symbol(symbol).lower()
-    msg = f"{daily_count} نام: {name}\n"
-    msg += f"{exit_type}\n"
+    trade_name = "فروش" if trade_type == 'short' else "خرید"
+    status_fa = f"خروج معامله {trade_name} ({exit_type})"
+    msg = f"{daily_count} {status_fa}\n"
+    msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name}\n"
     msg += f"میزان رشد: +{growth:.2f}%\n"
     msg += f"درصد منفی: -{neg_percent} ٪\n"
-    msg += f"low: {low} usdt\n"
-    msg += f"hi: {high} usdt\n"
     msg += f"Entri: {entry}\n"
     if exit_type == "tp":
         msg += f"tp: {tp} usdt\n"
     else:
         msg += f"stop: {stop}\n"
     msg += f"حجم: {vol}\n"
+    msg += f"low: {low} usdt\n"
+    msg += f"hi: {high} usdt\n"
     msg += f"تاریخ: {date_str}"
     return msg
 
@@ -258,20 +256,16 @@ def get_valid_categories(growth):
         cats.append("30_40")
     elif 40 < growth <= 50: 
         cats.append("40_50")
-    elif 50 < growth <= 100: 
+    elif 50 < growth < 100: 
         cats.append("50_100")
-    elif growth > 100: 
+    elif growth >= 100: 
         cats.append("100_plus")
         
-    if 30 < growth <= 100:
-        cats.append("long_30_100")
+    if 40 < growth <= 70:
+        cats.append("long_40_70")
+    elif 70 < growth <= 100:
+        cats.append("long_70_100")
     
-    if growth >= 50:
-        cats.append("fixed_50")
-        
-    if growth >= 100:
-        cats.append("fixed_100")
-        
     return cats
 
 def process_markets(app_data):
@@ -288,8 +282,8 @@ def process_markets(app_data):
         # Fast pre-filter: skip coins with <18% 24h change unless they already have an open trade
         if symbol not in open_symbols:
             try:
-                t_high = float(ticker.get('highPrice', 0))
-                t_low = float(ticker.get('lowPrice', 0))
+                t_high = float(ticker.get('high24Price', 0))
+                t_low = float(ticker.get('lower24Price', 0))
                 if t_low <= 0 or (((t_high - t_low) / t_low) * 100) < 18.0:
                     continue
             except Exception:
@@ -354,7 +348,6 @@ def process_markets(app_data):
                     t for t in trades 
                     if t.get('close_time') == today_str 
                     and t.get('status') in ['tp', 'stop']
-                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == trade_type
                 ])
                 
                 msg_main = generate_exit_message(
@@ -372,11 +365,28 @@ def process_markets(app_data):
                 send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
                 send_telegram_message(EXIT_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
 
+        # Check 24h Cooldown and Existing Trades
+        cat_cooldowns = {}
         for cat_id in valid_cats:
+            can_open = True
+            for t in trades:
+                if t['symbol'] == symbol and t.get('category_id', '20_30') == cat_id:
+                    if t['status'] == 'OPEN':
+                        can_open = False
+                        break
+                    else:
+                        trade_ts = t.get('open_timestamp', 0)
+                        if (current_ts - trade_ts) < (24 * 3600) or t.get('open_time') == today_str:
+                            can_open = False
+                            break
+            cat_cooldowns[cat_id] = can_open
+
+        for cat_id in valid_cats:
+            if not cat_cooldowns.get(cat_id, False):
+                continue
+
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
-            
-            existing = [t for t in trades if t['symbol'] == symbol and t.get('category_id') == cat_id and t['status'] == 'OPEN']
             
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
@@ -384,19 +394,19 @@ def process_markets(app_data):
                 entry_price = round(low_24h * target_ratio, 6)
                 tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
                 stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
-                should_enter = (current_close >= entry_price) and not existing
+                should_enter = (current_close >= entry_price)
             else:
                 entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
                     entry_price = round(high_24h * (1 - entry_drop), 6)
                     tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
                     stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
-                    should_enter = (current_close <= entry_price) and not existing
+                    should_enter = (current_close <= entry_price)
                 else: # long
                     entry_price = round(high_24h * (1 - entry_drop), 6)
                     tp_price = round(entry_price * (1 + cat_info['tp_rise']), 6)
                     stop_price = round(entry_price * (1 - cat_info['stop_drop']), 6)
-                    should_enter = (current_close <= entry_price) and not existing
+                    should_enter = (current_close <= entry_price)
                 
             if should_enter:
                 new_trade = {
@@ -426,12 +436,12 @@ def process_markets(app_data):
                 ])
                 
                 msg_main = generate_entry_message(
-                    symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
+                    trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
                     entry_price, tp_price, stop_price, vol_str, current_date_str, global_entry_count
                 )
                 
                 msg_cat = generate_entry_message(
-                    symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
+                    trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
                     entry_price, tp_price, stop_price, vol_str, current_date_str, cat_entry_count
                 )
                 
@@ -542,42 +552,14 @@ def generate_and_send_daily_report(app_data):
         send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
         return
 
-    df_excel = pd.DataFrame(all_excel_data)
-    status_order = {'tp': 1, 'stop': 2, 'opening': 3}
-    df_excel['order'] = df_excel['وضعیت عرض'].map(status_order)
-    df_excel = df_excel.sort_values(['دسته', 'order']).reset_index(drop=True)
-    df_excel['شماره'] = range(1, len(df_excel) + 1)
-    
-    cols = ['شماره', 'دسته', 'وضعیت عرض', 'نام', 'کمترین قیمت', 'بیشترین قیمت', 'قیمت باز شدن معامله', 'قیمت بسته شدن']
-    df_excel = df_excel[cols]
-    
-    file_name = f"گزارش_{shamsi_date.replace(' ', '-')}_{iran_time.strftime('%H-%M')}.xlsx"
-    
-    with pd.ExcelWriter(file_name, engine='openpyxl') as writer:
-        df_excel.to_excel(writer, index=False, startrow=8)
-        ws = writer.sheets['Sheet1']
-        ws['A1'] = f"تعداد تمامی معاملات : {total_all_transactions}"
-        ws['A8'] = "شماره"; ws['B8'] = "دسته"; ws['C8'] = "وضعیت"; ws['D8'] = "نام"
-        ws['E8'] = "کمترین قیمت"; ws['F8'] = "بیشترین قیمت"
-        ws['G8'] = "قیمت باز شدن معامله"; ws['H8'] = "قیمت بسته شدن"
-
-        chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN]
-        for c in CATEGORIES.values():
-            chats.append(c['report_channel'])
-        chats = list(set(chats))
-        
-        send_telegram_document(REPORT_BOT_TOKEN, chats, file_name, f"گزارش معاملات - {current_date_str}")
-        
-        try:
-            os.remove(file_name)
-        except:
-            pass
+    # ارسال فایل اکسل طبق درخواست غیرفعال شد
+    return
 
 if __name__ == '__main__':
     app_data = load_data()
     app_data = process_markets(app_data)
     
-    if iran_time.hour == 20 and iran_time.minute < 15:
+    if iran_time.hour >= 20:
         if app_data.get('last_report_date') != today_str:
             generate_and_send_daily_report(app_data)
             app_data['last_report_date'] = today_str
