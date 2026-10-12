@@ -1096,6 +1096,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "GRASS_USDT",
+            "category_id": "20_30",
+            "growth": 20.667661826570768,
+            "low": 0.7369,
+            "high": 0.8892,
+            "entry": 0.764712,
+            "tp": 0.711182,
+            "stop": 0.871772,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791836434,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "METIS_USDT",
+            "category_id": "20_30",
+            "growth": 20.458310325786876,
+            "low": 3.622,
+            "high": 4.363,
+            "entry": 3.75218,
+            "tp": 3.489527,
+            "stop": 4.277485,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791836434,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
