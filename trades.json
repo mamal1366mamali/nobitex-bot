@@ -906,12 +906,13 @@
             "entry": 0.062462,
             "tp": 0.05809,
             "stop": 0.071207,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791827727,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.05809,
+            "pnl": 49.0,
+            "close_timestamp": 1791856232
         },
         {
             "symbol": "US_USDT",
