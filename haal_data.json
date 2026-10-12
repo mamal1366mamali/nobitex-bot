@@ -1,11 +1,4 @@
 {
     "last_update_id": 645610669,
-    "alerts": [
-        {
-            "symbol": "zest",
-            "tp": 0.186098,
-            "stop": 0.22812,
-            "chat_id": 114669886
-        }
-    ]
+    "alerts": []
 }
