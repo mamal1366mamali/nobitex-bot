@@ -10,12 +10,13 @@
             "entry": 0.15555,
             "tp": 0.132217,
             "stop": 0.177327,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.132217,
+            "pnl": 105.0,
+            "close_timestamp": 1791784842
         },
         {
             "symbol": "US_USDT",
@@ -26,12 +27,13 @@
             "entry": 0.019078,
             "tp": 0.016216,
             "stop": 0.021749,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.016216,
+            "pnl": 105.01,
+            "close_timestamp": 1791784842
         },
         {
             "symbol": "CKB_USDT",
@@ -90,12 +92,13 @@
             "entry": 0.009288,
             "tp": 0.008638,
             "stop": 0.010588,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.008638,
+            "pnl": 48.99,
+            "close_timestamp": 1791784842
         },
         {
             "symbol": "ZZZ_USDT",
@@ -109,6 +112,22 @@
             "status": "OPEN",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "US_USDT",
+            "category_id": "long_70_100",
+            "growth": 96.59280021021284,
+            "low": 0.011417,
+            "high": 0.022445,
+            "entry": 0.012345,
+            "tp": 0.014197,
+            "stop": 0.010617,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791784842,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
