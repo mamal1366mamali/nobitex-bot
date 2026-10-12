@@ -879,12 +879,13 @@
             "entry": 0.341248,
             "tp": 0.317361,
             "stop": 0.389023,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791827137,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.317361,
+            "pnl": 49.0,
+            "close_timestamp": 1791835524
         },
         {
             "symbol": "CFX_USDT",
@@ -1079,6 +1080,22 @@
             "close_price": 0.091122,
             "pnl": 105.0,
             "close_timestamp": 1791834335
+        },
+        {
+            "symbol": "4STOCK_USDT",
+            "category_id": "20_30",
+            "growth": 20.042643923240934,
+            "low": 0.00469,
+            "high": 0.00563,
+            "entry": 0.004842,
+            "tp": 0.004503,
+            "stop": 0.00552,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791835524,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
