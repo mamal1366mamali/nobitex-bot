@@ -1466,6 +1466,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "ZRO_USDT",
+            "category_id": "20_30",
+            "growth": 20.162972304408967,
+            "low": 2.0617,
+            "high": 2.4774,
+            "entry": 2.130564,
+            "tp": 1.981425,
+            "stop": 2.428843,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791859232,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
