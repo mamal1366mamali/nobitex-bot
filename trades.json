@@ -842,12 +842,13 @@
             "entry": 0.117536,
             "tp": 0.109308,
             "stop": 0.133991,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791826248,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.109308,
+            "pnl": 49.0,
+            "close_timestamp": 1791827727
         },
         {
             "symbol": "SECZ_USDT",
@@ -877,6 +878,22 @@
             "status": "OPEN",
             "open_time": "1405/07/20",
             "open_timestamp": 1791827137,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "CFX_USDT",
+            "category_id": "20_30",
+            "growth": 20.089285714285715,
+            "low": 0.06048,
+            "high": 0.07263,
+            "entry": 0.062462,
+            "tp": 0.05809,
+            "stop": 0.071207,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791827727,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
