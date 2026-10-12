@@ -1169,12 +1169,13 @@
             "entry": 0.082465,
             "tp": 0.076692,
             "stop": 0.09401,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791836729,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.076692,
+            "pnl": 49.0,
+            "close_timestamp": 1791858924
         },
         {
             "symbol": "SECZ_USDT",
@@ -1446,6 +1447,22 @@
             "status": "OPEN",
             "open_time": "1405/07/21",
             "open_timestamp": 1791857432,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "KAIA_USDT",
+            "category_id": "20_30",
+            "growth": 20.07542147293699,
+            "low": 0.04508,
+            "high": 0.05413,
+            "entry": 0.046552,
+            "tp": 0.043293,
+            "stop": 0.053069,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791858924,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
