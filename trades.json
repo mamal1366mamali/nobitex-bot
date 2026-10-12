@@ -145,12 +145,13 @@
             "entry": 0.00918,
             "tp": 0.007803,
             "stop": 0.010465,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791787233,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.010465,
+            "pnl": -97.98,
+            "close_timestamp": 1791843033
         },
         {
             "symbol": "ZEST_USDT",
