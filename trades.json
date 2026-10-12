@@ -1213,6 +1213,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "W_USDT",
+            "category_id": "long_40_70",
+            "growth": 60.573422330097095,
+            "low": 0.019776,
+            "high": 0.031755,
+            "entry": 0.020641,
+            "tp": 0.023737,
+            "stop": 0.017751,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791850233,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
