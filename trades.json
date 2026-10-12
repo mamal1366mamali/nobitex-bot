@@ -44,12 +44,13 @@
             "entry": 0.001844,
             "tp": 0.001567,
             "stop": 0.002102,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.001567,
+            "pnl": 105.15,
+            "close_timestamp": 1791852033
         },
         {
             "symbol": "ERA_USDT",
@@ -375,12 +376,13 @@
             "entry": 0.001844,
             "tp": 0.001567,
             "stop": 0.002102,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791797442,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.001567,
+            "pnl": 105.15,
+            "close_timestamp": 1791852033
         },
         {
             "symbol": "BOME_USDT",
@@ -720,12 +722,13 @@
             "entry": 0.001844,
             "tp": 0.001567,
             "stop": 0.002102,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791822646,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.001567,
+            "pnl": 105.15,
+            "close_timestamp": 1791852033
         },
         {
             "symbol": "STRK_USDT",
