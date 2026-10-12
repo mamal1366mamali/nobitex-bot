@@ -488,6 +488,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "LUMIA_USDT",
+            "category_id": "40_50",
+            "growth": 48.08318264014467,
+            "low": 0.1106,
+            "high": 0.16378,
+            "entry": 0.139213,
+            "tp": 0.118331,
+            "stop": 0.158703,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791811845,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
