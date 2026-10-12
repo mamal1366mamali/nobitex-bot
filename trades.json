@@ -946,6 +946,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "CHIP_USDT",
+            "category_id": "20_30",
+            "growth": 20.780770542107057,
+            "low": 0.05866,
+            "high": 0.07085,
+            "entry": 0.060931,
+            "tp": 0.056666,
+            "stop": 0.069461,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791828932,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "AIINU_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.154195765436206,
+            "low": 0.09021,
+            "high": 0.11651,
+            "entry": 0.092043,
+            "tp": 0.105849,
+            "stop": 0.079157,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791828932,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
