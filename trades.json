@@ -211,6 +211,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "STRK_USDT",
+            "category_id": "20_30",
+            "growth": 20.034262872370814,
+            "low": 0.10507,
+            "high": 0.12612,
+            "entry": 0.108463,
+            "tp": 0.100871,
+            "stop": 0.123648,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791790831,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "JCT_USDT",
+            "category_id": "20_30",
+            "growth": 23.46880366342301,
+            "low": 0.001747,
+            "high": 0.002157,
+            "entry": 0.001855,
+            "tp": 0.001725,
+            "stop": 0.002115,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791790831,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
