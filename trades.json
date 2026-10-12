@@ -127,12 +127,13 @@
             "entry": 0.012345,
             "tp": 0.014197,
             "stop": 0.010617,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784842,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.010617,
+            "pnl": -97.98,
+            "close_timestamp": 1791840648
         },
         {
             "symbol": "ZZZ_USDT",
