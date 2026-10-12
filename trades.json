@@ -1233,6 +1233,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "STONK_USDT",
+            "category_id": "20_30",
+            "growth": 20.953493465722424,
+            "low": 0.13697,
+            "high": 0.16567,
+            "entry": 0.142476,
+            "tp": 0.132503,
+            "stop": 0.162423,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791853834,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
