@@ -324,6 +324,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "OGN_USDT",
+            "category_id": "20_30",
+            "growth": 21.421616358325213,
+            "low": 0.03081,
+            "high": 0.03741,
+            "entry": 0.032173,
+            "tp": 0.029921,
+            "stop": 0.036677,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791795333,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
