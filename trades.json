@@ -536,12 +536,13 @@
             "entry": 0.026992,
             "tp": 0.022943,
             "stop": 0.030771,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791815731,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.022943,
+            "pnl": 105.01,
+            "close_timestamp": 1791837049
         },
         {
             "symbol": "RED_USDT",
