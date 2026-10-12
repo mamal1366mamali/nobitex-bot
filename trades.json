@@ -1012,6 +1012,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "AIINU_USDT",
+            "category_id": "30_40",
+            "growth": 30.26610017889087,
+            "low": 0.08944,
+            "high": 0.11651,
+            "entry": 0.099033,
+            "tp": 0.084178,
+            "stop": 0.112898,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791830736,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
