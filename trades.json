@@ -1251,12 +1251,13 @@
             "entry": 0.142476,
             "tp": 0.132503,
             "stop": 0.162423,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791853834,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.132503,
+            "pnl": 49.0,
+            "close_timestamp": 1791860731
         },
         {
             "symbol": "DOS_USDT",
@@ -1300,12 +1301,13 @@
             "entry": 0.142846,
             "tp": 0.132847,
             "stop": 0.162844,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791854134,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.132847,
+            "pnl": 49.0,
+            "close_timestamp": 1791860731
         },
         {
             "symbol": "BASED_USDT",
