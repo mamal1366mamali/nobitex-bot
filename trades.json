@@ -60,12 +60,13 @@
             "entry": 0.076884,
             "tp": 0.071502,
             "stop": 0.087648,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791784527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.071502,
+            "pnl": 49.0,
+            "close_timestamp": 1791795931
         },
         {
             "symbol": "XDP_USDT",
@@ -337,6 +338,22 @@
             "status": "OPEN",
             "open_time": "1405/07/20",
             "open_timestamp": 1791795333,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "ZEST_USDT",
+            "category_id": "30_40",
+            "growth": 32.12947189097103,
+            "low": 0.1761,
+            "high": 0.23268,
+            "entry": 0.197778,
+            "tp": 0.168111,
+            "stop": 0.225467,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791795931,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
