@@ -799,6 +799,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "PONS_USDT",
+            "category_id": "20_30",
+            "growth": 20.07822685788787,
+            "low": 0.3068,
+            "high": 0.3684,
+            "entry": 0.316824,
+            "tp": 0.294646,
+            "stop": 0.361179,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791825931,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "SNXX_USDT",
+            "category_id": "20_30",
+            "growth": 20.74198988195616,
+            "low": 11.86,
+            "high": 14.32,
+            "entry": 12.3152,
+            "tp": 11.453136,
+            "stop": 14.039328,
+            "status": "OPEN",
+            "open_time": "1405/07/20",
+            "open_timestamp": 1791825931,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
