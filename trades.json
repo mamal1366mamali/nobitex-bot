@@ -517,12 +517,13 @@
             "entry": 0.002194,
             "tp": 0.001865,
             "stop": 0.002501,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791812130,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/20",
+            "close_price": 0.002501,
+            "pnl": -97.95,
+            "close_timestamp": 1791819328
         },
         {
             "symbol": "W_USDT",
