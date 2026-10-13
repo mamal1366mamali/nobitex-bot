@@ -1077,12 +1077,13 @@
             "entry": 0.170366,
             "tp": 0.15844,
             "stop": 0.194217,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791833449,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.15844,
+            "pnl": 49.0,
+            "close_timestamp": 1791864635
         },
         {
             "symbol": "STRK_USDT",
@@ -1568,12 +1569,13 @@
             "entry": 0.17986,
             "tp": 0.16727,
             "stop": 0.20504,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791861030,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.16727,
+            "pnl": 49.0,
+            "close_timestamp": 1791864635
         },
         {
             "symbol": "STONK_USDT",
