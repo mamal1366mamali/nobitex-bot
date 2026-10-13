@@ -3038,6 +3038,24 @@
             "pnl": 0.0,
             "cat_entry_num": 60,
             "global_entry_num": 92
+        },
+        {
+            "symbol": "LUMIA_USDT",
+            "category_id": "20_30",
+            "growth": 22.741753160004123,
+            "low": 0.09731,
+            "high": 0.11944,
+            "entry": 0.102718,
+            "tp": 0.095014,
+            "stop": 0.117099,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791916529,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 61,
+            "global_entry_num": 93
         }
     ]
 }
