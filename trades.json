@@ -496,12 +496,13 @@
             "entry": 0.145684,
             "tp": 0.135486,
             "stop": 0.16608,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791809135,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.16608,
+            "pnl": -98.0,
+            "close_timestamp": 1791873635
         },
         {
             "symbol": "LUMIA_USDT",
