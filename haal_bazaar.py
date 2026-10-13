@@ -168,27 +168,27 @@ def main():
                 continue
             
             sorted_by_growth = sorted(stats_data.items(), key=lambda x: x[1].get("growth", 0), reverse=True)
-            top_10 = sorted_by_growth[:10]
+            top_20 = sorted_by_growth[:20]
             
             top_lines = []
-            for i, (sym, item) in enumerate(top_10, 1):
+            for sym, item in top_20:
                 g = int(round(item.get("growth", 0)))
                 c = int(round(item.get("dayChange", 0)))
                 c_sign = "+" if c > 0 else ""
-                top_lines.append(f"{i} {sym} +{g} % درصد تابلو {c_sign}{c}٪")
+                top_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c}٪")
             top_msg = "\n".join(top_lines)
             
             sorted_by_drop = sorted(stats_data.items(), key=lambda x: x[1].get("dayChange", 0))
             bottom_10 = sorted_by_drop[:10]
             
             bottom_lines = []
-            for i, (sym, item) in enumerate(bottom_10, 1):
+            for sym, item in bottom_10:
                 g = int(round(item.get("growth", 0)))
                 c = int(round(item.get("dayChange", 0)))
                 c_sign = "+" if c > 0 else ""
-                bottom_lines.append(f"{i} {sym} +{g} % درصد تابلو {c_sign}{c}٪")
+                bottom_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c}٪")
             bottom_msg = "\n".join(bottom_lines)
-            
+
             msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
             send_message(chat_id, msg, keyboard)
             
