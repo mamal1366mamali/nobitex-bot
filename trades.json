@@ -2503,6 +2503,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "CSOPSAMSUNG2L_USDT",
+            "category_id": "long_20_30",
+            "growth": 27.450980392156865,
+            "low": 7.14,
+            "high": 9.1,
+            "entry": 7.189,
+            "tp": 8.26735,
+            "stop": 6.18254,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791868833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
