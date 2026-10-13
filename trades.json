@@ -1690,12 +1690,13 @@
             "entry": 15.351,
             "tp": 14.27643,
             "stop": 17.50014,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862528,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 14.27643,
+            "pnl": 49.0,
+            "close_timestamp": 1791867034
         },
         {
             "symbol": "CYBER_USDT",
