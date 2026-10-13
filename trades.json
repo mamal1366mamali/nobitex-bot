@@ -1382,12 +1382,13 @@
             "entry": 1.073968,
             "tp": 0.99879,
             "stop": 1.224324,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791854438,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.99879,
+            "pnl": 49.0,
+            "close_timestamp": 1791900935
         },
         {
             "symbol": "UP_USDT",
@@ -1985,12 +1986,13 @@
             "entry": 0.14082,
             "tp": 0.119697,
             "stop": 0.160535,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865234,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.119697,
+            "pnl": 105.0,
+            "close_timestamp": 1791900935
         },
         {
             "symbol": "USELESS_USDT",
