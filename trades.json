@@ -2654,6 +2654,24 @@
             "pnl": 0.0,
             "cat_entry_num": 50,
             "global_entry_num": 72
+        },
+        {
+            "symbol": "MAGIC_USDT",
+            "category_id": "20_30",
+            "growth": 24.258595048552188,
+            "low": 0.11431,
+            "high": 0.14204,
+            "entry": 0.122154,
+            "tp": 0.112992,
+            "stop": 0.139256,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791888927,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 51,
+            "global_entry_num": 73
         }
     ]
 }
