@@ -2415,12 +2415,13 @@
             "entry": 3.65586,
             "tp": 3.39995,
             "stop": 4.16768,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 3.39995,
+            "pnl": 49.0,
+            "close_timestamp": 1791867640
         },
         {
             "symbol": "SKUU_USDT",
