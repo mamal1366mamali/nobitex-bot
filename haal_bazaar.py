@@ -12,8 +12,8 @@ BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN", "")
 ALERT_CHANNEL = "-1004462898426"
 DATA_FILE = "haal_data.json"
 
-# Ourbit API
-OURBIT_TICKER_URL = "https://api.ourbit.com/api/v3/ticker/24hr"
+# Ourbit API (Futures)
+OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
 
 def send_message(chat_id, text, reply_markup=None):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -45,26 +45,34 @@ def get_market_data():
         headers = {"User-Agent": "Mozilla/5.0"}
         r = requests.get(OURBIT_TICKER_URL, headers=headers, timeout=15)
         if r.status_code == 200:
-            tickers = r.json()
+            res_json = r.json()
+            tickers = res_json.get("data", []) if isinstance(res_json, dict) else res_json
             if isinstance(tickers, list):
                 for item in tickers:
                     symbol_raw = item.get("symbol", "")
                     symbol = symbol_raw.upper()
-                    if not symbol.endswith("USDT") or symbol_raw.startswith("~~"):
+                    if not symbol.endswith("_USDT") and not symbol.endswith("USDT"):
                         continue
-                    sym = symbol.replace("USDT", "").lower()
+                    if symbol_raw.startswith("~~"):
+                        continue
+                    sym = symbol.replace("_USDT", "").replace("USDT", "").lower()
                     if re.match(r'^\d+(yes|no)$', sym):
                         continue
                     
                     try:
                         last_price = float(item.get("lastPrice", 0))
-                        day_change = float(item.get("priceChangePercent", 0)) * 100
-                        high_price = float(item.get("highPrice", 0))
-                        low_price = float(item.get("lowPrice", 0))
+                        day_change = float(item.get("riseFallRate", 0)) * 100
+                        high_price = float(item.get("high24Price", 0))
+                        low_price = float(item.get("lower24Price", 0))
+                        
+                        growth = 0
+                        if low_price > 0:
+                            growth = ((high_price - low_price) / low_price) * 100
                         
                         prices[sym] = last_price
                         stats_data[sym] = {
                             "dayChange": day_change,
+                            "growth": growth,
                             "dayHigh": high_price,
                             "dayLow": low_price,
                             "lastPrice": last_price
@@ -72,7 +80,7 @@ def get_market_data():
                     except:
                         pass
     except Exception as e:
-        print(f"Error fetching market data from Ourbit: {e}")
+        print(f"Error fetching market data from Ourbit Futures: {e}")
     return prices, stats_data
 
 def main():
@@ -159,16 +167,27 @@ def main():
                 send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
                 continue
             
-            changes = []
-            for sym, item in stats_data.items():
-                changes.append((sym, item.get("dayChange", 0)))
+            sorted_by_growth = sorted(stats_data.items(), key=lambda x: x[1].get("growth", 0), reverse=True)
+            top_10 = sorted_by_growth[:10]
             
-            changes.sort(key=lambda x: x[1], reverse=True)
-            top_10 = changes[:10]
-            bottom_10 = changes[-10:][::-1]
+            top_lines = []
+            for i, (sym, item) in enumerate(top_10, 1):
+                g = int(round(item.get("growth", 0)))
+                c = int(round(item.get("dayChange", 0)))
+                c_sign = "+" if c > 0 else ""
+                top_lines.append(f"{i} {sym} +{g} % درصد تابلو {c_sign}{c}٪")
+            top_msg = "\n".join(top_lines)
             
-            top_msg = "\n".join([f"{sym.upper()} +{int(round(c))}%" if c > 0 else f"{sym.upper()} {int(round(c))}%" for sym, c in top_10])
-            bottom_msg = "\n".join([f"{sym.upper()} +{int(round(c))}%" if c > 0 else f"{sym.upper()} {int(round(c))}%" for sym, c in bottom_10])
+            sorted_by_drop = sorted(stats_data.items(), key=lambda x: x[1].get("dayChange", 0))
+            bottom_10 = sorted_by_drop[:10]
+            
+            bottom_lines = []
+            for i, (sym, item) in enumerate(bottom_10, 1):
+                g = int(round(item.get("growth", 0)))
+                c = int(round(item.get("dayChange", 0)))
+                c_sign = "+" if c > 0 else ""
+                bottom_lines.append(f"{i} {sym} +{g} % درصد تابلو {c_sign}{c}٪")
+            bottom_msg = "\n".join(bottom_lines)
             
             msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
             send_message(chat_id, msg, keyboard)
@@ -188,11 +207,11 @@ def main():
                     msg += f"هشدار {i}:\nنام ارز {a['symbol'].upper()}\nقیمت tp {a['tp']}\nقیمت stop {a['stop']}\n\n"
                 send_message(chat_id, msg, keyboard)
 
-        elif text.startswith("هشدار") or "قیمت tp و بعد قیمت stop" in message.get("reply_to_message", {}).get("text", ""):
-            parts = text.replace("هشدار", "").strip().split()
+        elif text.startswith("هشدار") or "قیمت tp و بعد قیمت stop" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("هشدار", "").replace(",", " ").strip().split()) == 3 and any(char.isdigit() for char in text)):
+            parts = text.replace("هشدار", "").replace(",", " ").strip().split()
             if len(parts) == 3:
                 try:
-                    sym = parts[0].lower()
+                    sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
                     tp = float(parts[1])
                     stop = float(parts[2])
                     
@@ -213,12 +232,19 @@ def main():
             if sym in stats_data:
                 info = stats_data[sym]
                 day_change = round(info["dayChange"], 2)
+                growth = round(info.get("growth", 0), 2)
                 day_low = info["dayLow"]
                 day_high = info["dayHigh"]
                 price_now = info["lastPrice"]
                 
                 sign = "+" if day_change > 0 else ""
-                msg = f"نام {sym.upper()}\nقیمت {price_now} usdt\nدرصد تابلو {sign}{day_change}%\nکمترین قیمت {day_low} usdt\nبیشترین قیمت {day_high} usdt"
+                msg = (
+                    f"نام {sym}\n"
+                    f"میزان رشد +{growth} % درصد تابلو {sign}{day_change}%\n"
+                    f"قیمت {price_now} usdt\n"
+                    f"کمترین قیمت {day_low} usdt\n"
+                    f"بیشترین قیمت {day_high} usdt"
+                )
                 send_message(chat_id, msg, keyboard)
             else:
                 send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
