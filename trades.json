@@ -2739,14 +2739,33 @@
             "entry": 0.04737,
             "tp": 0.035528,
             "stop": 0.059213,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791893434,
+            "close_time": "1405/07/21",
+            "close_price": 0.035528,
+            "pnl": 174.99,
+            "cat_entry_num": 2,
+            "global_entry_num": 77,
+            "close_timestamp": 1791893731
+        },
+        {
+            "symbol": "BILL_USDT",
+            "category_id": "20_30",
+            "growth": 21.675977653631296,
+            "low": 0.00895,
+            "high": 0.01089,
+            "entry": 0.009365,
+            "tp": 0.008663,
+            "stop": 0.010676,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791893731,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
-            "cat_entry_num": 2,
-            "global_entry_num": 77
+            "cat_entry_num": 53,
+            "global_entry_num": 78
         }
     ]
 }
