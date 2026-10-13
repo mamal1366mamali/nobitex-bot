@@ -2883,6 +2883,24 @@
             "pnl": 0.0,
             "cat_entry_num": 56,
             "global_entry_num": 84
+        },
+        {
+            "symbol": "PLAY_USDT",
+            "category_id": "20_30",
+            "growth": 20.149625935162106,
+            "low": 0.02005,
+            "high": 0.02409,
+            "entry": 0.020717,
+            "tp": 0.019163,
+            "stop": 0.023617,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791904833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 57,
+            "global_entry_num": 85
         }
     ]
 }
