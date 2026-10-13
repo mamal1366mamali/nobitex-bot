@@ -1,4 +1,17 @@
 {
-    "last_update_id": 645610677,
-    "alerts": []
+    "last_update_id": 645610684,
+    "alerts": [
+        {
+            "symbol": "gps",
+            "tp": 0.009599,
+            "stop": 0.007178,
+            "chat_id": 114669886
+        },
+        {
+            "symbol": "gps",
+            "tp": 0.009599,
+            "stop": 0.007178,
+            "chat_id": 114669886
+        }
+    ]
 }
