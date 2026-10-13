@@ -1660,12 +1660,13 @@
             "entry": 0.141185,
             "tp": 0.120007,
             "stop": 0.160951,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862528,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.120007,
+            "pnl": 105.0,
+            "close_timestamp": 1791894647
         },
         {
             "symbol": "TAG_USDT",
@@ -2225,12 +2226,13 @@
             "entry": 0.141185,
             "tp": 0.120007,
             "stop": 0.160951,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.120007,
+            "pnl": 105.0,
+            "close_timestamp": 1791894647
         },
         {
             "symbol": "EIGEN_USDT",
@@ -2766,6 +2768,24 @@
             "pnl": 0.0,
             "cat_entry_num": 53,
             "global_entry_num": 78
+        },
+        {
+            "symbol": "AIINU_USDT",
+            "category_id": "20_30",
+            "growth": 26.326276463262772,
+            "low": 0.0803,
+            "high": 0.10144,
+            "entry": 0.087238,
+            "tp": 0.080695,
+            "stop": 0.099451,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791894647,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 54,
+            "global_entry_num": 79
         }
     ]
 }
