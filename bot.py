@@ -233,7 +233,10 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
     name = clean_symbol(symbol).lower()
     trade_name = "فروش" if trade_type == 'short' else "خرید"
     status_fa = f"خروج {trade_name} {exit_type}"
-    msg = f"{daily_count} {status_fa}\n"
+    if daily_count:
+        msg = f"{daily_count} {status_fa}\n"
+    else:
+        msg = f"{status_fa}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name}\n"
     msg += f"میزان رشد: +{growth:.2f}%\n"
@@ -373,18 +376,24 @@ def process_markets(app_data):
                 
                 neg_pct = int(cat_info['entry_drop'] * 100)
                 
-                cat_exit_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('close_time') == today_str and t.get('status') in ['tp', 'stop']])
+                # تعداد خروجی‌های امروز در کانال اصلی (ترتیب شمارش ترتیبی از ۱ به بالا بدون ۱ اضافه):
                 global_exit_count = len([
                     t for t in trades 
                     if t.get('close_time') == today_str 
                     and t.get('status') in ['tp', 'stop']
                 ])
+                exit_label_global = f"{global_exit_count}"
                 
-                entry_num_cat = trade.get('cat_entry_num', cat_exit_count)
-                entry_num_global = trade.get('global_entry_num', global_exit_count)
+                # شماره ورود این معامله در دسته بندی + عدد ۱ برای کانال دسته بندی:
+                entry_num_cat = trade.get('cat_entry_num')
+                if not entry_num_cat:
+                    same_day_trades = [t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == trade.get('open_time')]
+                    try:
+                        entry_num_cat = same_day_trades.index(trade) + 1
+                    except ValueError:
+                        entry_num_cat = 1
                 
                 exit_label_cat = f"{entry_num_cat} 1"
-                exit_label_global = f"{entry_num_global} 1"
                 
                 msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
@@ -502,7 +511,7 @@ def process_markets(app_data):
 def generate_and_send_daily_report(app_data):
     trades = app_data.get('trades', [])
     
-    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'past_tp': 0, 'past_stop': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': [], 'excel': []} for cat in CATEGORIES.keys()}
+    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': [], 'excel': []} for cat in CATEGORIES.keys()}
     all_excel_data = []
 
     for t in trades:
@@ -540,20 +549,12 @@ def generate_and_send_daily_report(app_data):
                 stats['closed_pnl'] += t['pnl']
                 pnl_str = f"+{t['pnl']}%" if t['pnl'] > 0 else f"{t['pnl']}%"
                 
-                if t['open_time'] == today_str:
-                    if t['status'] == 'tp':
-                        stats['tp'] += 1
-                        stats['strings'].append(f"{name} tp {pnl_str}")
-                    else:
-                        stats['stop'] += 1
-                        stats['strings'].append(f"{name} stop {pnl_str}")
+                if t['status'] == 'tp':
+                    stats['tp'] += 1
+                    stats['strings'].append(f"{name} tp {pnl_str}")
                 else:
-                    if t['status'] == 'tp':
-                        stats['past_tp'] += 1
-                        stats['strings'].append(f"{name} : opening and cloce tp {pnl_str}")
-                    else:
-                        stats['past_stop'] += 1
-                        stats['strings'].append(f"{name} : opening and cloce stop {pnl_str}")
+                    stats['stop'] += 1
+                    stats['strings'].append(f"{name} stop {pnl_str}")
             
             row = {'دسته': CATEGORIES[cat_id]['name_fa'], 'وضعیت عرض': t['status'], 'نام': name, 'کمترین قیمت': t['low'], 'بیشترین قیمت': t['high'], 'قیمت باز شدن معامله': t['entry'], 'قیمت بسته شدن': t['close_price']}
             stats['excel'].append(row)
@@ -561,7 +562,7 @@ def generate_and_send_daily_report(app_data):
 
     total_all_transactions = 0
     for cat_id, stats in cat_stats.items():
-        total = stats['tp'] + stats['stop'] + stats['opening'] + stats['past_tp'] + stats['past_stop']
+        total = stats['tp'] + stats['stop'] + stats['opening']
         total_all_transactions += total
         
         if total == 0:
@@ -576,7 +577,6 @@ def generate_and_send_daily_report(app_data):
         msg += f"2 1 تعداد tp : {stats['tp']}\n"
         msg += f"2 2 تعداد stop : {stats['stop']}\n"
         msg += f"2 3 تعداد opening : {stats['opening']}\n"
-        msg += f"2 4 تعداد opening and cloce {stats['past_tp'] + stats['past_stop']} tp {stats['past_tp']} stop {stats['past_stop']}\n"
         msg += f"3 میزان سود یا ضرر تمامی معاملات بسته شده : {closed_pnl_str}\n"
         msg += f"4 میزان سود یا ضرر تمامی معاملات باز {open_pnl_str}\n"
         msg += "5 نام عرض معاملات بسته و باز همراه سود یا ضرر\n"
