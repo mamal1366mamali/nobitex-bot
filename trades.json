@@ -3048,14 +3048,15 @@
             "entry": 0.102718,
             "tp": 0.095014,
             "stop": 0.117099,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791916529,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.095014,
+            "pnl": 52.5,
             "cat_entry_num": 61,
-            "global_entry_num": 93
+            "global_entry_num": 93,
+            "close_timestamp": 1791916965
         },
         {
             "symbol": "AVA_USDT",
