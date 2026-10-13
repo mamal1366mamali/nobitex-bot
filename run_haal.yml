@@ -1,0 +1,43 @@
+name: Run Ourbit Haal Bazaar Bot
+
+on:
+  repository_dispatch:
+    types: [run-ourbit-haal]
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas jdatetime
+
+      - name: Run bot
+        env:
+          HAAL_BOT_TOKEN: ${{ secrets.HAAL_BOT_TOKEN }}
+        run: python haal_bazaar.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add haal_data.json || true
+          if [ -n "$(git status --porcelain haal_data.json)" ]; then
+            git commit -m "Auto-update haal_data.json by Bot"
+            git pull --rebase || true
+            git push || true
+          fi
