@@ -247,12 +247,13 @@
             "entry": 0.001855,
             "tp": 0.001725,
             "stop": 0.002115,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791790831,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.001725,
+            "pnl": 49.06,
+            "close_timestamp": 1791866433
         },
         {
             "symbol": "MAGIC_USDT",
@@ -930,12 +931,13 @@
             "entry": 0.011416,
             "tp": 0.013128,
             "stop": 0.009818,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791828635,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.009818,
+            "pnl": -97.99,
+            "close_timestamp": 1791866433
         },
         {
             "symbol": "PONS_USDT",
