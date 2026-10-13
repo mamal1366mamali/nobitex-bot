@@ -3135,6 +3135,24 @@
             "pnl": 0.0,
             "cat_entry_num": 6,
             "global_entry_num": 97
+        },
+        {
+            "symbol": "BLUR_USDT",
+            "category_id": "long_40_70",
+            "growth": 59.28196147110334,
+            "low": 0.01142,
+            "high": 0.01819,
+            "entry": 0.011824,
+            "tp": 0.013598,
+            "stop": 0.010169,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791919850,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 2,
+            "global_entry_num": 16
         }
     ]
 }
