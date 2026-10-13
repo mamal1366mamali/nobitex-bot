@@ -2682,14 +2682,33 @@
             "entry": 0.066822,
             "tp": 0.06181,
             "stop": 0.076177,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791891323,
+            "close_time": "1405/07/21",
+            "close_price": 0.06181,
+            "pnl": 52.5,
+            "cat_entry_num": 52,
+            "global_entry_num": 74,
+            "close_timestamp": 1791891933
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "30_40",
+            "growth": 35.83916083916085,
+            "low": 0.0572,
+            "high": 0.0777,
+            "entry": 0.066045,
+            "tp": 0.056138,
+            "stop": 0.075291,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791891933,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
-            "cat_entry_num": 52,
-            "global_entry_num": 74
+            "cat_entry_num": 16,
+            "global_entry_num": 75
         }
     ]
 }
