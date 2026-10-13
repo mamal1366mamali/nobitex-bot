@@ -1256,12 +1256,13 @@
             "entry": 0.020641,
             "tp": 0.023737,
             "stop": 0.017751,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791850233,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.017751,
+            "pnl": -98.01,
+            "close_timestamp": 1791918642
         },
         {
             "symbol": "STONK_USDT",
@@ -3014,14 +3015,15 @@
             "entry": 0.020776,
             "tp": 0.01766,
             "stop": 0.023685,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791912652,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.01766,
+            "pnl": 104.99,
             "cat_entry_num": 19,
-            "global_entry_num": 91
+            "global_entry_num": 91,
+            "close_timestamp": 1791918642
         },
         {
             "symbol": "RSR_USDT",
