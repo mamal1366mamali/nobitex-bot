@@ -2602,6 +2602,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "UP_USDT",
+            "category_id": "long_20_30",
+            "growth": 26.967741935483875,
+            "low": 0.155,
+            "high": 0.1968,
+            "entry": 0.155472,
+            "tp": 0.178793,
+            "stop": 0.133706,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791878132,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
