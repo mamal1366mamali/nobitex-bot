@@ -3097,6 +3097,24 @@
             "pnl": 0.0,
             "cat_entry_num": 62,
             "global_entry_num": 95
+        },
+        {
+            "symbol": "S_USDT",
+            "category_id": "30_40",
+            "growth": 35.16443137975381,
+            "low": 0.05443,
+            "high": 0.07357,
+            "entry": 0.062534,
+            "tp": 0.053154,
+            "stop": 0.071289,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791918930,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 21,
+            "global_entry_num": 96
         }
     ]
 }
