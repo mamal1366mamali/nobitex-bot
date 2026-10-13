@@ -2672,6 +2672,24 @@
             "pnl": 0.0,
             "cat_entry_num": 51,
             "global_entry_num": 73
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "20_30",
+            "growth": 22.169811320754718,
+            "low": 0.0636,
+            "high": 0.0777,
+            "entry": 0.066822,
+            "tp": 0.06181,
+            "stop": 0.076177,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791891323,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 52,
+            "global_entry_num": 74
         }
     ]
 }
