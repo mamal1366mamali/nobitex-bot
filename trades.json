@@ -2939,6 +2939,24 @@
             "pnl": 0.0,
             "cat_entry_num": 58,
             "global_entry_num": 87
+        },
+        {
+            "symbol": "ARX_USDT",
+            "category_id": "20_30",
+            "growth": 21.37079608343977,
+            "low": 0.2349,
+            "high": 0.2851,
+            "entry": 0.245186,
+            "tp": 0.226797,
+            "stop": 0.279512,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791907834,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 59,
+            "global_entry_num": 88
         }
     ]
 }
