@@ -1001,12 +1001,13 @@
             "entry": 0.092043,
             "tp": 0.105849,
             "stop": 0.079157,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791828932,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.079157,
+            "pnl": -98.0,
+            "close_timestamp": 1791918044
         },
         {
             "symbol": "BOME_USDT",
@@ -3076,6 +3077,24 @@
             "pnl": 0.0,
             "cat_entry_num": 20,
             "global_entry_num": 94
+        },
+        {
+            "symbol": "AIN_USDT",
+            "category_id": "20_30",
+            "growth": 24.610964807277945,
+            "low": 0.04177,
+            "high": 0.05205,
+            "entry": 0.044763,
+            "tp": 0.041406,
+            "stop": 0.05103,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791918044,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 62,
+            "global_entry_num": 95
         }
     ]
 }
