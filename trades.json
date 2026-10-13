@@ -1686,12 +1686,13 @@
             "entry": 0.000646,
             "tp": 0.000601,
             "stop": 0.000736,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862528,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.000601,
+            "pnl": 48.76,
+            "close_timestamp": 1791919529
         },
         {
             "symbol": "KORU_USDT",
@@ -3071,14 +3072,15 @@
             "entry": 0.25789,
             "tp": 0.219206,
             "stop": 0.293995,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791916844,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.219206,
+            "pnl": 105.0,
             "cat_entry_num": 20,
-            "global_entry_num": 94
+            "global_entry_num": 94,
+            "close_timestamp": 1791919529
         },
         {
             "symbol": "AIN_USDT",
@@ -3115,6 +3117,24 @@
             "pnl": 0.0,
             "cat_entry_num": 21,
             "global_entry_num": 96
+        },
+        {
+            "symbol": "AVA_USDT",
+            "category_id": "40_50",
+            "growth": 43.04573314474304,
+            "low": 0.2121,
+            "high": 0.3034,
+            "entry": 0.25789,
+            "tp": 0.219206,
+            "stop": 0.293995,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791919529,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 6,
+            "global_entry_num": 97
         }
     ]
 }
