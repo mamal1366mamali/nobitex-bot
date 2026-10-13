@@ -463,12 +463,13 @@
             "entry": 0.058582,
             "tp": 0.049795,
             "stop": 0.066783,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791807333,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.066783,
+            "pnl": -97.99,
+            "close_timestamp": 1791909052
         },
         {
             "symbol": "CTK_USDT",
@@ -680,12 +681,13 @@
             "entry": 0.058582,
             "tp": 0.049795,
             "stop": 0.066783,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791822646,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.066783,
+            "pnl": -97.99,
+            "close_timestamp": 1791909052
         },
         {
             "symbol": "LUMIA_USDT",
