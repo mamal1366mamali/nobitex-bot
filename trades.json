@@ -3226,6 +3226,24 @@
             "pnl": 0.0,
             "cat_entry_num": 8,
             "global_entry_num": 101
+        },
+        {
+            "symbol": "CTK_USDT",
+            "category_id": "20_30",
+            "growth": 21.263877028181035,
+            "low": 0.1171,
+            "high": 0.142,
+            "entry": 0.12212,
+            "tp": 0.112961,
+            "stop": 0.139217,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791927051,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 63,
+            "global_entry_num": 102
         }
     ]
 }
