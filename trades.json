@@ -2865,6 +2865,24 @@
             "cat_entry_num": 3,
             "global_entry_num": 83,
             "close_timestamp": 1791902130
+        },
+        {
+            "symbol": "M_USDT",
+            "category_id": "20_30",
+            "growth": 21.97416279944814,
+            "low": 0.7973,
+            "high": 0.9725,
+            "entry": 0.83635,
+            "tp": 0.773624,
+            "stop": 0.953439,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791903034,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 56,
+            "global_entry_num": 84
         }
     ]
 }
