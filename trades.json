@@ -2961,6 +2961,24 @@
             "pnl": 0.0,
             "cat_entry_num": 59,
             "global_entry_num": 88
+        },
+        {
+            "symbol": "BILL_USDT",
+            "category_id": "30_40",
+            "growth": 30.263157894736857,
+            "low": 0.00836,
+            "high": 0.01089,
+            "entry": 0.009257,
+            "tp": 0.007868,
+            "stop": 0.010553,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791909335,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 18,
+            "global_entry_num": 89
         }
     ]
 }
