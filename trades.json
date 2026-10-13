@@ -2720,14 +2720,15 @@
             "entry": 0.066045,
             "tp": 0.056138,
             "stop": 0.075291,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791892527,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.056138,
+            "pnl": 105.0,
             "cat_entry_num": 5,
-            "global_entry_num": 76
+            "global_entry_num": 76,
+            "close_timestamp": 1791892841
         }
     ]
 }
