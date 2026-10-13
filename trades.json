@@ -1166,12 +1166,13 @@
             "entry": 0.051316,
             "tp": 0.047724,
             "stop": 0.0585,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791836729,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.047724,
+            "pnl": 49.0,
+            "close_timestamp": 1791901526
         },
         {
             "symbol": "NIL_USDT",
@@ -2826,6 +2827,24 @@
             "pnl": 0.0,
             "cat_entry_num": 55,
             "global_entry_num": 81
+        },
+        {
+            "symbol": "BTR_USDT",
+            "category_id": "30_40",
+            "growth": 39.35077066791221,
+            "low": 0.04282,
+            "high": 0.05967,
+            "entry": 0.05072,
+            "tp": 0.043112,
+            "stop": 0.057821,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791901526,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 17,
+            "global_entry_num": 82
         }
     ]
 }
