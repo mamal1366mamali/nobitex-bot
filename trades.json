@@ -2435,12 +2435,13 @@
             "entry": 20.5884,
             "tp": 19.147212,
             "stop": 23.470776,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865851,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 19.147212,
+            "pnl": 49.0,
+            "close_timestamp": 1791878437
         },
         {
             "symbol": "KORU_USDT",
@@ -2615,6 +2616,22 @@
             "status": "OPEN",
             "open_time": "1405/07/21",
             "open_timestamp": 1791878132,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "CSOPSKHYNIX2L_USDT",
+            "category_id": "30_40",
+            "growth": 30.06134969325155,
+            "low": 3.26,
+            "high": 4.24,
+            "entry": 3.604,
+            "tp": 3.0634,
+            "stop": 4.10856,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791878437,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
