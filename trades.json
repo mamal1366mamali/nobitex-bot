@@ -2937,14 +2937,15 @@
             "entry": 0.043654,
             "tp": 0.04038,
             "stop": 0.049766,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791905445,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.049766,
+            "pnl": -98.01,
             "cat_entry_num": 58,
-            "global_entry_num": 87
+            "global_entry_num": 87,
+            "close_timestamp": 1791913841
         },
         {
             "symbol": "ARX_USDT",
