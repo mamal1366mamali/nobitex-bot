@@ -8,8 +8,8 @@ BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN", "")
 CHANNEL_ID = "-1003961062602"
 DATA_FILE = "ourbit_data.json"
 
-API_URL = "https://api.ourbit.com/api/v3/ticker/24hr"
-KLINES_URL = "https://api.ourbit.com/api/v3/klines"
+API_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
+KLINES_URL = "https://futures.ourbit.com/api/v1/contract/kline"
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -56,7 +56,8 @@ def main():
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(API_URL, headers=headers, timeout=15)
-        tickers = response.json()
+        res_json = response.json()
+        tickers = res_json.get("data", []) if isinstance(res_json, dict) else res_json
     except Exception as e:
         print(f"Error fetching data: {e}")
         return
@@ -66,20 +67,22 @@ def main():
         try:
             symbol_raw = ticker.get("symbol", "")
             symbol = symbol_raw.upper()
-            if not symbol.endswith("USDT") or "~" in symbol_raw:
+            if not symbol.endswith("_USDT") and not symbol.endswith("USDT"):
+                continue
+            if symbol_raw.startswith("~~"):
                 continue
             
             import re
-            name = symbol.replace("USDT", "").lower()
+            name = symbol.replace("_USDT", "").replace("USDT", "").lower()
             
             # Skip prediction tokens like 10964yes or 10964no
             if re.search(r'\d+(yes|no)', name) or name.endswith("yes") or name.endswith("no"):
                 continue
                 
             current_price = float(ticker.get("lastPrice", 0))
-            low_price = float(ticker.get("lowPrice", 0))
-            high_price = float(ticker.get("highPrice", 0))
-            day_change = float(ticker.get("priceChangePercent", 0)) * 100
+            low_price = float(ticker.get("lower24Price", 0))
+            high_price = float(ticker.get("high24Price", 0))
+            day_change = float(ticker.get("riseFallRate", 0)) * 100
             
             if name not in data.get("history", {}):
                 if "history" not in data:
@@ -107,16 +110,14 @@ def main():
                             curr_4h_vol = 0
                             prev_4h_vol = 0
                             try:
-                                k_resp = requests.get(f"{KLINES_URL}?symbol={symbol_raw}&interval=15m&limit=32", timeout=10)
-                                k_data = k_resp.json()
-                                if len(k_data) > 0:
-                                    # the last 16 are current rolling 4h
-                                    curr_list = k_data[-16:]
-                                    # the up to 16 before that are previous rolling 4h
-                                    prev_list = k_data[:-16] if len(k_data) > 16 else []
-                                    
-                                    curr_4h_vol = sum([float(k[7]) for k in curr_list])
-                                    prev_4h_vol = sum([float(k[7]) for k in prev_list])
+                                k_url = f"{KLINES_URL}/{symbol_raw}?interval=Min15"
+                                k_resp = requests.get(k_url, headers=headers, timeout=10)
+                                k_res = k_resp.json()
+                                if k_res.get("success") and "data" in k_res:
+                                    amounts = k_res["data"].get("amount", [])
+                                    if len(amounts) >= 16:
+                                        curr_4h_vol = sum([float(v) for v in amounts[-16:]])
+                                        prev_4h_vol = sum([float(v) for v in amounts[-32:-16]]) if len(amounts) >= 32 else 0
                             except:
                                 pass
                             
