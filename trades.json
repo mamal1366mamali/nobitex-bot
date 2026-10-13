@@ -2437,6 +2437,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "KORU_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.64357864357864,
+            "low": 13.86,
+            "high": 17.83,
+            "entry": 14.0857,
+            "tp": 16.198555,
+            "stop": 12.113702,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791867330,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "RAM_USDT",
+            "category_id": "20_30",
+            "growth": 20.743639921722103,
+            "low": 10.22,
+            "high": 12.34,
+            "entry": 10.6124,
+            "tp": 9.869532,
+            "stop": 12.098136,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791867330,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
