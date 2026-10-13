@@ -33,6 +33,7 @@ jobs:
           BUY_BOT_TOKEN: ${{ secrets.BUY_BOT_TOKEN }}
           EXIT_BOT_TOKEN: ${{ secrets.EXIT_BOT_TOKEN }}
           REPORT_BOT_TOKEN: ${{ secrets.REPORT_BOT_TOKEN }}
+          WEEKLY_REPORT_BOT_TOKEN: ${{ secrets.WEEKLY_REPORT_BOT_TOKEN }}
         run: python bot.py
 
       - name: Commit and save trades data
