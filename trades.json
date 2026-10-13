@@ -693,12 +693,13 @@
             "entry": 0.121949,
             "tp": 0.103657,
             "stop": 0.139022,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791822646,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.103657,
+            "pnl": 105.0,
+            "close_timestamp": 1791862246
         },
         {
             "symbol": "US_USDT",
@@ -760,12 +761,13 @@
             "entry": 0.049045,
             "tp": 0.041688,
             "stop": 0.055911,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791823536,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.041688,
+            "pnl": 105.0,
+            "close_timestamp": 1791862246
         },
         {
             "symbol": "STRK_USDT",
@@ -1056,12 +1058,13 @@
             "entry": 0.049045,
             "tp": 0.041688,
             "stop": 0.055911,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791833449,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/21",
+            "close_price": 0.041688,
+            "pnl": 105.0,
+            "close_timestamp": 1791862246
         },
         {
             "symbol": "IO_USDT",
@@ -1596,6 +1599,38 @@
             "status": "OPEN",
             "open_time": "1405/07/21",
             "open_timestamp": 1791861329,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "CKB_USDT",
+            "category_id": "20_30",
+            "growth": 27.845528455284548,
+            "low": 0.001476,
+            "high": 0.001887,
+            "entry": 0.001623,
+            "tp": 0.001509,
+            "stop": 0.00185,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791862246,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "CKB_USDT",
+            "category_id": "long_20_30",
+            "growth": 27.845528455284548,
+            "low": 0.001476,
+            "high": 0.001887,
+            "entry": 0.001491,
+            "tp": 0.001715,
+            "stop": 0.001282,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791862246,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
