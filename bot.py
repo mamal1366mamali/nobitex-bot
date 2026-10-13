@@ -11,11 +11,13 @@ warnings.filterwarnings('ignore')
 SELL_BOT_TOKEN = os.environ.get("SELL_BOT_TOKEN", "")
 BUY_BOT_TOKEN = os.environ.get("BUY_BOT_TOKEN", "")
 EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN", "")
-REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN", "")
+REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN", "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E")
+WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN", "8820733728:AAEM4e3UlWM7YekuFcFwsPXBd-GWsgievHE")
 
 PERSONAL_ID = "114669886"
 CHANNEL_EXIT_MAIN = "-1004415777827"
 CHANNEL_REPORT_MAIN = "-1004304608564"
+CHANNEL_WEEKLY_REPORT = "-1004462143665"
 
 CATEGORIES = {
     "20_30": {
@@ -23,7 +25,7 @@ CATEGORIES = {
         "entry_channel": "-1004290922830",
         "report_channel": "-1003914385862",
         "entry_drop": 0.14,
-        "tp_drop": 0.07,
+        "tp_drop": 0.075,
         "stop_rise": 0.14,
         "trade_type": "short"
     },
@@ -70,7 +72,7 @@ CATEGORIES = {
         "name_fa": "+20 الی 30 ٪ (خرید)",
         "entry_channel": "-1004310315552",
         "report_channel": "-1003820960180",
-        "entry_drop": 0.21,
+        "entry_drop": 0.22,
         "tp_rise": 0.15,
         "stop_drop": 0.14,
         "trade_type": "long"
@@ -211,7 +213,7 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
 
 def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
     name = clean_symbol(symbol).lower()
-    type_str = "ورود معامله فروش" if trade_type == 'short' else "ورود معامله خرید"
+    type_str = "فروش" if trade_type == 'short' else "خرید"
     return (
         f"{daily_count} {type_str}\n"
         f"نام: {name}\n"
@@ -230,7 +232,7 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count, trade_type):
     name = clean_symbol(symbol).lower()
     trade_name = "فروش" if trade_type == 'short' else "خرید"
-    status_fa = f"خروج معامله {trade_name} ({exit_type})"
+    status_fa = f"خروج {trade_name} {exit_type}"
     msg = f"{daily_count} {status_fa}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name}\n"
@@ -268,9 +270,37 @@ def get_valid_categories(growth):
     
     return cats
 
+def get_overall_market_trend(market_overview):
+    up_count = 0
+    down_count = 0
+    for ticker in market_overview.values():
+        try:
+            rate = float(ticker.get('riseFallRate', 0))
+            if rate > 0:
+                up_count += 1
+            elif rate < 0:
+                down_count += 1
+        except Exception:
+            pass
+            
+    total = up_count + down_count
+    if total == 0:
+        return "ranging"
+        
+    up_pct = (up_count / total) * 100
+    down_pct = (down_count / total) * 100
+    
+    if up_pct >= 60.0:
+        return "bullish"   # صعودی
+    elif down_pct >= 60.0:
+        return "bearish"   # نزولی
+    else:
+        return "ranging"   # رنج
+
 def process_markets(app_data):
     trades = app_data.get('trades', [])
     market_overview = get_market_overview()
+    market_trend = get_overall_market_trend(market_overview)
     symbols = list(market_overview.keys())
     
     current_ts = iran_time.timestamp()
@@ -350,16 +380,22 @@ def process_markets(app_data):
                     and t.get('status') in ['tp', 'stop']
                 ])
                 
+                entry_num_cat = trade.get('cat_entry_num', cat_exit_count)
+                entry_num_global = trade.get('global_entry_num', global_exit_count)
+                
+                exit_label_cat = f"{entry_num_cat} 1"
+                exit_label_global = f"{entry_num_global} 1"
+                
                 msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, current_date_str, global_exit_count, trade_type
+                    vol_str, current_date_str, exit_label_global, trade_type
                 )
                 
                 msg_cat = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, current_date_str, cat_exit_count, trade_type
+                    vol_str, current_date_str, exit_label_cat, trade_type
                 )
                 
                 send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
@@ -387,6 +423,14 @@ def process_markets(app_data):
 
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
+            
+            # فیلتر روند بازار:
+            # ۱. معامله شورت در بازار نزولی و رنج مجاز است (در بازار صعودی ممنوع)
+            # ۲. معامله لانگ در بازار صعودی و رنج مجاز است (در بازار نزولی ممنوع)
+            if trade_type == 'short' and market_trend == 'bullish':
+                continue
+            if trade_type == 'long' and market_trend == 'bearish':
+                continue
             
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
@@ -434,6 +478,8 @@ def process_markets(app_data):
                     if t.get('open_time') == today_str 
                     and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == trade_type
                 ])
+                new_trade['cat_entry_num'] = cat_entry_count
+                new_trade['global_entry_num'] = global_entry_count
                 
                 msg_main = generate_entry_message(
                     trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
@@ -525,7 +571,7 @@ def generate_and_send_daily_report(app_data):
         closed_pnl_str = f"+{stats['closed_pnl']:.0f} ٪" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.0f} ٪"
         open_pnl_str = f"+{stats['open_pnl']:.0f} ٪" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.0f} ٪"
 
-        msg = f"1 میزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
+        msg = f"گزارش روز\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
         msg += f"2 تعداد معاملات : {total}\n"
         msg += f"2 1 تعداد tp : {stats['tp']}\n"
         msg += f"2 2 تعداد stop : {stats['stop']}\n"
@@ -544,7 +590,7 @@ def generate_and_send_daily_report(app_data):
         send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
 
     if total_all_transactions == 0:
-        msg = f"تعداد معاملات 0\nتاریخ {current_date_str}"
+        msg = f"گزارش روز\nتعداد معاملات 0\nتاریخ {current_date_str}"
         chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN]
         for c in CATEGORIES.values():
             chats.append(c['report_channel'])
@@ -555,13 +601,103 @@ def generate_and_send_daily_report(app_data):
     # ارسال فایل اکسل طبق درخواست غیرفعال شد
     return
 
+def generate_and_send_weekly_report(app_data):
+    trades = app_data.get('trades', [])
+    current_ts = iran_time.timestamp()
+    seven_days_ago_ts = current_ts - (7 * 86400)
+    
+    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': []} for cat in CATEGORIES.keys()}
+
+    for t in trades:
+        cat_id = t.get('category_id', '20_30')
+        if cat_id not in cat_stats:
+            cat_id = '20_30'
+            
+        name = clean_symbol(t['symbol']).lower()
+        stats = cat_stats[cat_id]
+        
+        if t['status'] == 'OPEN':
+            stats['opening'] += 1
+            df = get_candles(t['symbol'], resolution=60, num_candles=1)
+            current_close = float(df['close'].iloc[-1]) if df is not None else t['entry']
+            
+            cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
+            trade_type = cat_info.get('trade_type', 'short')
+            
+            if trade_type == 'short':
+                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=7)
+            else:
+                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=7)
+                
+            stats['open_pnl'] += live_pnl
+            pnl_str = f"+{live_pnl}%" if live_pnl > 0 else f"{live_pnl}%"
+            stats['strings'].append(f"{name} : opening {pnl_str}")
+            
+        elif t['status'] in ['tp', 'stop']:
+            close_ts = t.get('close_timestamp', 0)
+            if close_ts >= seven_days_ago_ts:
+                stats['closed_pnl'] += t['pnl']
+                pnl_str = f"+{t['pnl']}%" if t['pnl'] > 0 else f"{t['pnl']}%"
+                
+                if t['status'] == 'tp':
+                    stats['tp'] += 1
+                    stats['strings'].append(f"{name} tp {pnl_str}")
+                else:
+                    stats['stop'] += 1
+                    stats['strings'].append(f"{name} stop {pnl_str}")
+
+    total_all_transactions = 0
+    for cat_id, stats in cat_stats.items():
+        total = stats['tp'] + stats['stop'] + stats['opening']
+        total_all_transactions += total
+        
+        if total == 0:
+            continue
+            
+        cat_info = CATEGORIES[cat_id]
+        closed_pnl_str = f"+{stats['closed_pnl']:.0f} ٪" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.0f} ٪"
+        open_pnl_str = f"+{stats['open_pnl']:.0f} ٪" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.0f} ٪"
+
+        msg = f"گزارش هفتگی\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
+        msg += f"2 تعداد معاملات هفته : {total}\n"
+        msg += f"2 1 تعداد tp : {stats['tp']}\n"
+        msg += f"2 2 تعداد stop : {stats['stop']}\n"
+        msg += f"2 3 تعداد opening : {stats['opening']}\n"
+        msg += f"3 میزان سود یا ضرر تمامی معاملات بسته شده هفته : {closed_pnl_str}\n"
+        msg += f"4 میزان سود یا ضرر تمامی معاملات باز {open_pnl_str}\n"
+        msg += "5 نام عرض معاملات بسته و باز همراه سود یا ضرر\n"
+        
+        for i, s in enumerate(stats['strings']):
+            msg += f"{i+1} {s}\n"
+            
+        msg += f"\n6 تاریخ\n{current_date_str}"
+
+        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, cat_info['report_channel']]
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
+
+    if total_all_transactions == 0:
+        msg = f"گزارش هفتگی\nتعداد معاملات هفته 0\nتاریخ {current_date_str}"
+        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT]
+        for c in CATEGORIES.values():
+            chats.append(c['report_channel'])
+        chats = list(set(chats))
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
+
 if __name__ == '__main__':
     app_data = load_data()
     app_data = process_markets(app_data)
     
     if iran_time.hour >= 20:
+        # گزارش روزانه هر شب ساعت ۲۰:۰۰
         if app_data.get('last_report_date') != today_str:
             generate_and_send_daily_report(app_data)
             app_data['last_report_date'] = today_str
+            
+        # گزارش هفتگی جمعه‌ها ساعت ۲۰:۰۰
+        j_now = jdatetime.datetime.fromgregorian(datetime=iran_time)
+        if j_now.weekday() == 6:
+            if app_data.get('last_weekly_report_date') != today_str:
+                generate_and_send_weekly_report(app_data)
+                app_data['last_weekly_report_date'] = today_str
 
     save_data(app_data)
