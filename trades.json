@@ -2552,6 +2552,22 @@
             "close_price": 0.0138,
             "pnl": 104.99,
             "close_timestamp": 1791870336
+        },
+        {
+            "symbol": "SAFE_USDT",
+            "category_id": "20_30",
+            "growth": 22.358701254080053,
+            "low": 0.11642,
+            "high": 0.14245,
+            "entry": 0.122507,
+            "tp": 0.113932,
+            "stop": 0.139658,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791871835,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
