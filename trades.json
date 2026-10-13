@@ -2729,6 +2729,24 @@
             "cat_entry_num": 5,
             "global_entry_num": 76,
             "close_timestamp": 1791892841
+        },
+        {
+            "symbol": "ARC_USDT",
+            "category_id": "100_plus",
+            "growth": 100.38071065989847,
+            "low": 0.03152,
+            "high": 0.06316,
+            "entry": 0.04737,
+            "tp": 0.035528,
+            "stop": 0.059213,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791893434,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 2,
+            "global_entry_num": 77
         }
     ]
 }
