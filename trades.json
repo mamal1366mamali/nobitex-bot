@@ -2764,14 +2764,15 @@
             "entry": 0.009365,
             "tp": 0.008663,
             "stop": 0.010676,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791893731,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.008663,
+            "pnl": 52.47,
             "cat_entry_num": 53,
-            "global_entry_num": 78
+            "global_entry_num": 78,
+            "close_timestamp": 1791901849
         },
         {
             "symbol": "AIINU_USDT",
@@ -2845,6 +2846,24 @@
             "pnl": 0.0,
             "cat_entry_num": 17,
             "global_entry_num": 82
+        },
+        {
+            "symbol": "W_USDT",
+            "category_id": "40_50",
+            "growth": 45.06189671156678,
+            "low": 0.018337,
+            "high": 0.0266,
+            "entry": 0.02261,
+            "tp": 0.019218,
+            "stop": 0.025775,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791901849,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 3,
+            "global_entry_num": 83
         }
     ]
 }
