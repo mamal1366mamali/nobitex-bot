@@ -1799,6 +1799,22 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "4STOCK_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.861111111111114,
+            "low": 0.00432,
+            "high": 0.00561,
+            "entry": 0.004432,
+            "tp": 0.005097,
+            "stop": 0.003812,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791864042,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
