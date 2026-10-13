@@ -1767,6 +1767,38 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "LAB_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.877229800629596,
+            "low": 0.04765,
+            "high": 0.06141,
+            "entry": 0.048514,
+            "tp": 0.055791,
+            "stop": 0.041722,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791863435,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
+        },
+        {
+            "symbol": "BASED_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.57419230025151,
+            "low": 0.05169,
+            "high": 0.06646,
+            "entry": 0.052503,
+            "tp": 0.060378,
+            "stop": 0.045153,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791863435,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0
         }
     ]
 }
