@@ -2636,6 +2636,24 @@
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0
+        },
+        {
+            "symbol": "BOME_USDT",
+            "category_id": "20_30",
+            "growth": 29.280064351789786,
+            "low": 0.0007459,
+            "high": 0.0009643,
+            "entry": 0.000829,
+            "tp": 0.000767,
+            "stop": 0.000945,
+            "status": "OPEN",
+            "open_time": "1405/07/21",
+            "open_timestamp": 1791887443,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 50,
+            "global_entry_num": 72
         }
     ]
 }
