@@ -2911,14 +2911,15 @@
             "entry": 0.15011,
             "tp": 0.127593,
             "stop": 0.171125,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791905445,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/21",
+            "close_price": 0.127593,
+            "pnl": 105.0,
             "cat_entry_num": 4,
-            "global_entry_num": 86
+            "global_entry_num": 86,
+            "close_timestamp": 1791905729
         },
         {
             "symbol": "ZCAT_USDT",
