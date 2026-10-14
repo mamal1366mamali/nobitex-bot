@@ -3515,6 +3515,24 @@
             "pnl": 0.0,
             "cat_entry_num": 2,
             "global_entry_num": 11
+        },
+        {
+            "symbol": "LONGXIA_USDT",
+            "category_id": "20_30",
+            "growth": 22.78481012658228,
+            "low": 0.0395,
+            "high": 0.0485,
+            "entry": 0.04171,
+            "tp": 0.038582,
+            "stop": 0.047549,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791981332,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 5,
+            "global_entry_num": 12
         }
     ]
 }
