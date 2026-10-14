@@ -3830,6 +3830,25 @@
             "cat_entry_num": 12,
             "global_entry_num": 24,
             "close_timestamp": 1792001439
+        },
+        {
+            "symbol": "ZCAT_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.39310636498203,
+            "low": 0.04729,
+            "high": 0.06119,
+            "entry": 0.047728,
+            "tp": 0.051308,
+            "stop": 0.041046,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792003235,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 6
         }
     ]
 }
