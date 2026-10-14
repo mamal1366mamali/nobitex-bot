@@ -2922,14 +2922,15 @@
             "entry": 0.020717,
             "tp": 0.019163,
             "stop": 0.023617,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791904833,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.019163,
+            "pnl": 52.51,
             "cat_entry_num": 57,
-            "global_entry_num": 85
+            "global_entry_num": 85,
+            "close_timestamp": 1791986128
         },
         {
             "symbol": "CTK_USDT",
@@ -3514,14 +3515,15 @@
             "entry": 0.018148,
             "tp": 0.015426,
             "stop": 0.020689,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791981053,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.015426,
+            "pnl": 104.99,
             "cat_entry_num": 2,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "close_timestamp": 1791986128
         },
         {
             "symbol": "LONGXIA_USDT",
@@ -3598,6 +3600,25 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 5
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "20_30",
+            "growth": 22.707423580786024,
+            "low": 0.0458,
+            "high": 0.0562,
+            "entry": 0.048332,
+            "tp": 0.044707,
+            "stop": 0.055098,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791986128,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 14
         }
     ]
 }
