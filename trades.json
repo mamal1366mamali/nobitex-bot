@@ -3380,14 +3380,15 @@
             "entry": 0.008703,
             "tp": 0.00805,
             "stop": 0.009921,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791969929,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.00805,
+            "pnl": 52.52,
             "cat_entry_num": 3,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "close_timestamp": 1791982231
         },
         {
             "symbol": "1000RATS_USDT",
