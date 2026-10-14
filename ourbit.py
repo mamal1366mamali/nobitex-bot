@@ -137,12 +137,12 @@ def main():
                             msg = (
                                 f"{data['daily_count']}\n"
                                 f"نام: {name}\n"
-                                f"درصد رشد (۴ ساعته): +{growth:.2f}%\n"
-                                f"درصد تابلو: {sign}{day_change:.2f}%\n"
-                                f"قیمت: {current_price} usdt\n"
+                                f"درصد رشد (۴ ساعته): +{growth:.2f} %\n"
+                                f"درصد تابلو: {sign}{day_change:.2f} %\n"
                                 f"حجم ۴ ساعت فعلی {format_volume(curr_4h_vol)} usdt\n"
                                 f"حجم ۴ ساعت گذشته {format_volume(prev_4h_vol)} usdt\n"
                                 f"تحلیل {vol_status}\n"
+                                f"قیمت: {current_price} usdt\n"
                                 f"کمترین قیمت: {low_price} usdt\n"
                                 f"بیشترین قیمت: {high_price} usdt"
                             )
