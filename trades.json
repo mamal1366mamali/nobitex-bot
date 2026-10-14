@@ -3175,14 +3175,15 @@
             "entry": 0.011824,
             "tp": 0.013598,
             "stop": 0.010169,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791919850,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.010169,
+            "pnl": -97.98,
             "cat_entry_num": 2,
-            "global_entry_num": 16
+            "global_entry_num": 16,
+            "close_timestamp": 1791999932
         },
         {
             "symbol": "S_USDT",
