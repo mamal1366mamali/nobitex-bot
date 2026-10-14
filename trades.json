@@ -3461,6 +3461,24 @@
             "pnl": 0.0,
             "cat_entry_num": 1,
             "global_entry_num": 8
+        },
+        {
+            "symbol": "EPIC_USDT",
+            "category_id": "20_30",
+            "growth": 23.81209503239741,
+            "low": 0.3704,
+            "high": 0.4586,
+            "entry": 0.394396,
+            "tp": 0.364816,
+            "stop": 0.449611,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791980133,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 4,
+            "global_entry_num": 9
         }
     ]
 }
