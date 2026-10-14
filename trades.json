@@ -3913,15 +3913,16 @@
             "entry": 0.080376,
             "tp": 0.074348,
             "stop": 0.091629,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1792005034,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.074348,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 13,
-            "global_entry_num": 26
+            "global_entry_num": 26,
+            "close_timestamp": 1792029925
         },
         {
             "symbol": "EPIC_USDT",
@@ -4150,6 +4151,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 4
+        },
+        {
+            "symbol": "PENG_USDT",
+            "category_id": "20_30",
+            "growth": 20.561746298275068,
+            "low": 65.51,
+            "high": 78.98,
+            "entry": 67.9228,
+            "tp": 62.82859,
+            "stop": 77.431992,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792029925,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 5
         }
     ]
 }
