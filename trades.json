@@ -4211,6 +4211,25 @@
             "leverage": 7,
             "cat_entry_num": 7,
             "global_entry_num": 7
+        },
+        {
+            "symbol": "INTW_USDT",
+            "category_id": "20_30",
+            "growth": 20.010261672652653,
+            "low": 19.49,
+            "high": 23.39,
+            "entry": 20.1154,
+            "tp": 18.606745,
+            "stop": 22.931556,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792034135,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 8,
+            "global_entry_num": 8
         }
     ]
 }
