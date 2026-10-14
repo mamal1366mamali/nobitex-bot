@@ -3698,6 +3698,44 @@
             "leverage": 7,
             "cat_entry_num": 9,
             "global_entry_num": 18
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "50_100",
+            "growth": 50.87748253287121,
+            "low": 1.8177,
+            "high": 2.7425,
+            "entry": 2.331125,
+            "tp": 1.981456,
+            "stop": 2.657483,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791994837,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 19
+        },
+        {
+            "symbol": "PLAY_USDT",
+            "category_id": "20_30",
+            "growth": 20.098039215686267,
+            "low": 0.01836,
+            "high": 0.02205,
+            "entry": 0.018963,
+            "tp": 0.017541,
+            "stop": 0.021618,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791994837,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 10,
+            "global_entry_num": 20
         }
     ]
 }
