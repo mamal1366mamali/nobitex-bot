@@ -3531,14 +3531,15 @@
             "entry": 0.04171,
             "tp": 0.038582,
             "stop": 0.047549,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791981332,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.038582,
+            "pnl": 52.5,
             "cat_entry_num": 5,
-            "global_entry_num": 12
+            "global_entry_num": 12,
+            "close_timestamp": 1791984927
         },
         {
             "symbol": "EPIC_USDT",
