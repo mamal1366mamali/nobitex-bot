@@ -2045,12 +2045,13 @@
             "entry": 0.096096,
             "tp": 0.089369,
             "stop": 0.109549,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865234,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.089369,
+            "pnl": 49.0,
+            "close_timestamp": 1792001130
         },
         {
             "symbol": "MET_USDT",
@@ -3624,15 +3625,16 @@
             "entry": 0.048332,
             "tp": 0.044707,
             "stop": 0.055098,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/22",
             "open_timestamp": 1791986128,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.055098,
+            "pnl": -97.99,
             "leverage": 7,
             "cat_entry_num": 6,
-            "global_entry_num": 14
+            "global_entry_num": 14,
+            "close_timestamp": 1792001130
         },
         {
             "symbol": "CNPY_USDT",
