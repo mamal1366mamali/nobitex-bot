@@ -2617,12 +2617,13 @@
             "entry": 0.122507,
             "tp": 0.113932,
             "stop": 0.139658,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791871835,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.113932,
+            "pnl": 49.0,
+            "close_timestamp": 1792034726
         },
         {
             "symbol": "CT_USDT",
@@ -4106,15 +4107,16 @@
             "entry": 112.4708,
             "tp": 104.03549,
             "stop": 128.216712,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792028433,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 104.03549,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 2
+            "global_entry_num": 2,
+            "close_timestamp": 1792034726
         },
         {
             "symbol": "SNXX_USDT",
@@ -4230,6 +4232,44 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 8
+        },
+        {
+            "symbol": "WAL_USDT",
+            "category_id": "50_100",
+            "growth": 76.56576200417537,
+            "low": 0.03832,
+            "high": 0.06766,
+            "entry": 0.057511,
+            "tp": 0.048884,
+            "stop": 0.065563,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792034726,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 9
+        },
+        {
+            "symbol": "SAFE_USDT",
+            "category_id": "20_30",
+            "growth": 22.24473614659501,
+            "low": 0.11351,
+            "high": 0.13876,
+            "entry": 0.119334,
+            "tp": 0.110384,
+            "stop": 0.136041,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792034726,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 10
         }
     ]
 }
