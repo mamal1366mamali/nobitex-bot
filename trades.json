@@ -3679,6 +3679,25 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 17
+        },
+        {
+            "symbol": "MUBARAK_USDT",
+            "category_id": "20_30",
+            "growth": 28.179551122194503,
+            "low": 0.05614,
+            "high": 0.07196,
+            "entry": 0.061886,
+            "tp": 0.057245,
+            "stop": 0.07055,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791994540,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 18
         }
     ]
 }
