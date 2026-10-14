@@ -2680,14 +2680,15 @@
             "entry": 0.000829,
             "tp": 0.000767,
             "stop": 0.000945,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791887443,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.000767,
+            "pnl": 52.35,
             "cat_entry_num": 50,
-            "global_entry_num": 72
+            "global_entry_num": 72,
+            "close_timestamp": 1791993928
         },
         {
             "symbol": "MAGIC_USDT",
