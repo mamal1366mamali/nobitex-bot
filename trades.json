@@ -4031,6 +4031,25 @@
             "leverage": 7,
             "cat_entry_num": 18,
             "global_entry_num": 31
+        },
+        {
+            "symbol": "SOPH_USDT",
+            "category_id": "20_30",
+            "growth": 22.647824470063227,
+            "low": 0.002689,
+            "high": 0.003298,
+            "entry": 0.002836,
+            "tp": 0.002623,
+            "stop": 0.003233,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792017634,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 19,
+            "global_entry_num": 32
         }
     ]
 }
