@@ -801,12 +801,13 @@
             "entry": 0.10302,
             "tp": 0.087567,
             "stop": 0.117443,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791824128,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.087567,
+            "pnl": 105.0,
+            "close_timestamp": 1791949236
         },
         {
             "symbol": "SECZ_USDT",
