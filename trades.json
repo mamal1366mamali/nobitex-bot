@@ -886,12 +886,13 @@
             "entry": 12.2687,
             "tp": 14.109005,
             "stop": 10.551082,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/20",
             "open_timestamp": 1791826837,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 10.551082,
+            "pnl": -98.0,
+            "close_timestamp": 1791999327
         },
         {
             "symbol": "UAI_USDT",
@@ -1428,12 +1429,13 @@
             "entry": 0.005187,
             "tp": 0.004824,
             "stop": 0.005913,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791856530,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.004824,
+            "pnl": 48.99,
+            "close_timestamp": 1791999327
         },
         {
             "symbol": "ARX_USDT",
@@ -3774,15 +3776,35 @@
             "entry": 0.38981,
             "tp": 0.331338,
             "stop": 0.444383,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791999050,
+            "close_time": "1405/07/22",
+            "close_price": 0.331338,
+            "pnl": 105.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 22,
+            "close_timestamp": 1791999327
+        },
+        {
+            "symbol": "CRWV_USDT",
+            "category_id": "20_30",
+            "growth": 20.377415918429463,
+            "low": 65.71,
+            "high": 79.1,
+            "entry": 68.026,
+            "tp": 62.92405,
+            "stop": 77.54964,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791999327,
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 3,
-            "global_entry_num": 22
+            "cat_entry_num": 11,
+            "global_entry_num": 23
         }
     ]
 }
