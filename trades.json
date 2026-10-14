@@ -1751,12 +1751,13 @@
             "entry": 0.075753,
             "tp": 0.087116,
             "stop": 0.065148,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862834,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.087116,
+            "pnl": 105.0,
+            "close_timestamp": 1792020329
         },
         {
             "symbol": "PHA_USDT",
