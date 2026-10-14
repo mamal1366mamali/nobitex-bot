@@ -1948,12 +1948,13 @@
             "entry": 0.30617,
             "tp": 0.260244,
             "stop": 0.349034,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791864933,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.349034,
+            "pnl": -98.0,
+            "close_timestamp": 1792004732
         },
         {
             "symbol": "GPS_USDT",
@@ -3859,15 +3860,16 @@
             "entry": 0.38981,
             "tp": 0.331338,
             "stop": 0.444383,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1792004438,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.331338,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 25
+            "global_entry_num": 25,
+            "close_timestamp": 1792004732
         }
     ]
 }
