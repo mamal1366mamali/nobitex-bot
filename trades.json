@@ -3562,15 +3562,16 @@
             "entry": 0.38981,
             "tp": 0.331338,
             "stop": 0.444383,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791983736,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.331338,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 3,
-            "global_entry_num": 13
+            "global_entry_num": 13,
+            "close_timestamp": 1791999050
         },
         {
             "symbol": "LONGXIA_USDT",
@@ -3581,15 +3582,16 @@
             "entry": 0.03783,
             "tp": 0.040667,
             "stop": 0.032534,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/22",
             "open_timestamp": 1791985833,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.032534,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "close_timestamp": 1791999050
         },
         {
             "symbol": "AIN_USDT",
@@ -3762,6 +3764,25 @@
             "leverage": 7,
             "cat_entry_num": 5,
             "global_entry_num": 21
+        },
+        {
+            "symbol": "EPIC_USDT",
+            "category_id": "40_50",
+            "growth": 41.849675224249935,
+            "low": 0.3233,
+            "high": 0.4586,
+            "entry": 0.38981,
+            "tp": 0.331338,
+            "stop": 0.444383,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791999050,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 22
         }
     ]
 }
