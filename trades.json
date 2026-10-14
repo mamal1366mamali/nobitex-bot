@@ -3890,15 +3890,16 @@
             "entry": 0.254982,
             "tp": 0.274106,
             "stop": 0.219285,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1792005034,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.274106,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 7
+            "global_entry_num": 7,
+            "close_timestamp": 1792019730
         },
         {
             "symbol": "CAP_USDT",
@@ -4051,6 +4052,25 @@
             "leverage": 7,
             "cat_entry_num": 19,
             "global_entry_num": 32
+        },
+        {
+            "symbol": "CNPY_USDT",
+            "category_id": "30_40",
+            "growth": 31.179775280898888,
+            "low": 0.2492,
+            "high": 0.3269,
+            "entry": 0.277865,
+            "tp": 0.236185,
+            "stop": 0.316766,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792019730,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 33
         }
     ]
 }
