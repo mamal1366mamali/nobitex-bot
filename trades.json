@@ -4131,6 +4131,25 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "SKUU_USDT",
+            "category_id": "20_30",
+            "growth": 20.33799533799533,
+            "low": 17.16,
+            "high": 20.65,
+            "entry": 17.759,
+            "tp": 16.427075,
+            "stop": 20.24526,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792028731,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 4
         }
     ]
 }
