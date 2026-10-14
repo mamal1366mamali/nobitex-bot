@@ -1869,12 +1869,13 @@
             "entry": 2.165996,
             "tp": 2.014376,
             "stop": 2.469235,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791864329,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 2.014376,
+            "pnl": 49.0,
+            "close_timestamp": 1791969333
         },
         {
             "symbol": "CFG_USDT",
@@ -2690,14 +2691,15 @@
             "entry": 0.122154,
             "tp": 0.112992,
             "stop": 0.139256,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791888927,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.112992,
+            "pnl": 52.5,
             "cat_entry_num": 51,
-            "global_entry_num": 73
+            "global_entry_num": 73,
+            "close_timestamp": 1791969333
         },
         {
             "symbol": "APR_USDT",
