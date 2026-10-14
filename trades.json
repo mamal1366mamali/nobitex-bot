@@ -1544,12 +1544,13 @@
             "entry": 0.212738,
             "tp": 0.197846,
             "stop": 0.242521,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791860435,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.197846,
+            "pnl": 49.0,
+            "close_timestamp": 1791996634
         },
         {
             "symbol": "ARX_USDT",
@@ -1860,12 +1861,13 @@
             "entry": 3.432948,
             "tp": 3.192642,
             "stop": 3.913561,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791864329,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 3.192642,
+            "pnl": 49.0,
+            "close_timestamp": 1791996634
         },
         {
             "symbol": "RAY_USDT",
