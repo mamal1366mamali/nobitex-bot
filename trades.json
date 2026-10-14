@@ -3321,14 +3321,15 @@
             "entry": 0.037384,
             "tp": 0.03458,
             "stop": 0.042618,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791969929,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.03458,
+            "pnl": 52.5,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 1,
+            "close_timestamp": 1791970247
         },
         {
             "symbol": "W_USDT",
@@ -3393,14 +3394,15 @@
             "entry": 0.021369,
             "tp": 0.018164,
             "stop": 0.024361,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791969929,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.018164,
+            "pnl": 104.99,
             "cat_entry_num": 2,
-            "global_entry_num": 5
+            "global_entry_num": 5,
+            "close_timestamp": 1791970247
         },
         {
             "symbol": "AIINU_USDT",
