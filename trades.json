@@ -3815,15 +3815,16 @@
             "entry": 68.026,
             "tp": 62.92405,
             "stop": 77.54964,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791999327,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 62.92405,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 11,
-            "global_entry_num": 23
+            "global_entry_num": 23,
+            "close_timestamp": 1792032330
         },
         {
             "symbol": "ZCAT_USDT",
