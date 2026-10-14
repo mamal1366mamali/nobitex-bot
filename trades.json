@@ -1726,12 +1726,13 @@
             "entry": 0.359996,
             "tp": 0.334796,
             "stop": 0.410395,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862834,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.334796,
+            "pnl": 49.0,
+            "close_timestamp": 1791993637
         },
         {
             "symbol": "NIL_USDT",
@@ -3658,6 +3659,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 16
+        },
+        {
+            "symbol": "AIO_USDT",
+            "category_id": "20_30",
+            "growth": 22.356495468277952,
+            "low": 0.02979,
+            "high": 0.03645,
+            "entry": 0.031347,
+            "tp": 0.028996,
+            "stop": 0.035736,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791993637,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 8,
+            "global_entry_num": 17
         }
     ]
 }
