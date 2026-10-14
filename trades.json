@@ -3689,15 +3689,16 @@
             "entry": 0.061886,
             "tp": 0.057245,
             "stop": 0.07055,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791994540,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.057245,
+            "pnl": 52.49,
             "leverage": 7,
             "cat_entry_num": 9,
-            "global_entry_num": 18
+            "global_entry_num": 18,
+            "close_timestamp": 1791995454
         },
         {
             "symbol": "BTW_USDT",
