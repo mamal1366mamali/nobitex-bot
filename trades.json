@@ -1509,12 +1509,13 @@
             "entry": 2.130564,
             "tp": 1.981425,
             "stop": 2.428843,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791859232,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 1.981425,
+            "pnl": 49.0,
+            "close_timestamp": 1791982838
         },
         {
             "symbol": "BLUR_USDT",
@@ -1822,12 +1823,13 @@
             "entry": 0.052503,
             "tp": 0.060378,
             "stop": 0.045153,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791863435,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.045153,
+            "pnl": -97.99,
+            "close_timestamp": 1791982838
         },
         {
             "symbol": "4STOCK_USDT",
