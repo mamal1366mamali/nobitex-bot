@@ -3479,6 +3479,42 @@
             "pnl": 0.0,
             "cat_entry_num": 4,
             "global_entry_num": 9
+        },
+        {
+            "symbol": "ARC_USDT",
+            "category_id": "40_50",
+            "growth": 48.14181973515593,
+            "low": 0.02341,
+            "high": 0.03468,
+            "entry": 0.029478,
+            "tp": 0.025056,
+            "stop": 0.033605,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791981053,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 2,
+            "global_entry_num": 10
+        },
+        {
+            "symbol": "1000RATS_USDT",
+            "category_id": "30_40",
+            "growth": 35.297845373891015,
+            "low": 0.01578,
+            "high": 0.02135,
+            "entry": 0.018148,
+            "tp": 0.015426,
+            "stop": 0.020689,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791981053,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 2,
+            "global_entry_num": 11
         }
     ]
 }
