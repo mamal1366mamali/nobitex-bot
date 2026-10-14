@@ -3458,14 +3458,15 @@
             "entry": 0.060605,
             "tp": 0.051514,
             "stop": 0.06909,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791975332,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.051514,
+            "pnl": 105.0,
             "cat_entry_num": 1,
-            "global_entry_num": 8
+            "global_entry_num": 8,
+            "close_timestamp": 1791985833
         },
         {
             "symbol": "EPIC_USDT",
@@ -3559,6 +3560,44 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 13
+        },
+        {
+            "symbol": "LONGXIA_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.886526707414312,
+            "low": 0.03763,
+            "high": 0.0485,
+            "entry": 0.03783,
+            "tp": 0.040667,
+            "stop": 0.032534,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791985833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 4
+        },
+        {
+            "symbol": "AIN_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.32840236686391,
+            "low": 0.04056,
+            "high": 0.05205,
+            "entry": 0.040599,
+            "tp": 0.043644,
+            "stop": 0.034915,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791985833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 5
         }
     ]
 }
