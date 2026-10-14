@@ -3849,6 +3849,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 6
+        },
+        {
+            "symbol": "EPIC_USDT",
+            "category_id": "50_100",
+            "growth": 50.90490292859493,
+            "low": 0.3039,
+            "high": 0.4586,
+            "entry": 0.38981,
+            "tp": 0.331338,
+            "stop": 0.444383,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792004438,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 25
         }
     ]
 }
