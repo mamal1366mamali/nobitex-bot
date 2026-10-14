@@ -21,79 +21,87 @@ CHANNEL_WEEKLY_REPORT = "-1004462143665"
 
 CATEGORIES = {
     "20_30": {
-        "name_fa": "+20 الی 30 ٪",
+        "name_fa": "+20 الی 30 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003914385862",
         "entry_drop": 0.14,
         "tp_drop": 0.075,
         "stop_rise": 0.14,
-        "trade_type": "short"
+        "trade_type": "short",
+        "leverage": 7
     },
     "30_40": {
-        "name_fa": "+30 الی 40 ٪",
+        "name_fa": "+30 الی 40 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003733086854",
         "entry_drop": 0.15,
         "tp_drop": 0.15,
         "stop_rise": 0.14,
-        "trade_type": "short"
+        "trade_type": "short",
+        "leverage": 7
     },
     "40_50": {
-        "name_fa": "+40 الی 50 ٪",
+        "name_fa": "+40 الی 50 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003945753248",
         "entry_drop": 0.15,
         "tp_drop": 0.15,
         "stop_rise": 0.14,
-        "trade_type": "short"
+        "trade_type": "short",
+        "leverage": 7
     },
     "50_100": {
-        "name_fa": "+50 الی 100 ٪",
+        "name_fa": "+50 الی 100 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004452909288",
         "entry_drop": 0.15,
         "tp_drop": 0.15,
         "stop_rise": 0.14,
-        "trade_type": "short"
+        "trade_type": "short",
+        "leverage": 7
     },
     "100_plus": {
-        "name_fa": "+100 ٪ به بالا",
+        "name_fa": "+100 % به بالا",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004458729980",
         "entry_drop": 0.25,
         "tp_drop": 0.25,
         "stop_rise": 0.25,
-        "trade_type": "short"
+        "trade_type": "short",
+        "leverage": 4
     },
     # فیلترهای ورود آنی غیرفعال شدند:
     # "fixed_50": { ... },
     # "fixed_100": { ... },
     "long_20_30": {
-        "name_fa": "+20 الی 30 ٪ (خرید)",
+        "name_fa": "+20 الی 30 % (خرید)",
         "entry_channel": "-1004310315552",
         "report_channel": "-1003820960180",
         "entry_drop": 0.22,
-        "tp_rise": 0.15,
+        "tp_rise": 0.075,
         "stop_drop": 0.14,
-        "trade_type": "long"
+        "trade_type": "long",
+        "leverage": 7
     },
     "long_40_70": {
-        "name_fa": "+40 الی 70 ٪ (خرید)",
+        "name_fa": "+40 الی 70 % (خرید)",
         "entry_channel": "-1004310315552",
         "report_channel": "-1004379515603",
         "entry_drop": 0.35,
         "tp_rise": 0.15,
         "stop_drop": 0.14,
-        "trade_type": "long"
+        "trade_type": "long",
+        "leverage": 7
     },
     "long_70_100": {
-        "name_fa": "+70 الی 100 ٪ (خرید)",
+        "name_fa": "+70 الی 100 % (خرید)",
         "entry_channel": "-1004310315552",
         "report_channel": "-1004379515603",
-        "entry_drop": 0.45,
+        "entry_drop": 0.50,
         "tp_rise": 0.15,
         "stop_drop": 0.14,
-        "trade_type": "long"
+        "trade_type": "long",
+        "leverage": 7
     }
 }
 
@@ -218,8 +226,8 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         f"{daily_count} {type_str}\n"
         f"نام: {name}\n"
         f"دسته بندی رشد: {cat_name}\n"
-        f"میزان رشد: +{growth:.2f}%\n"
-        f"درصد منفی: -{neg_percent} ٪\n"
+        f"میزان رشد: +{growth:.2f} %\n"
+        f"درصد منفی: -{neg_percent} %\n"
         f"Entri: {entry}\n"
         f"tp: {tp} usdt\n"
         f"stop: {stop}\n"
@@ -232,15 +240,15 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count, trade_type):
     name = clean_symbol(symbol).lower()
     trade_name = "فروش" if trade_type == 'short' else "خرید"
-    status_fa = f"خروج {trade_name} {exit_type}"
+    status_fa = f"{trade_name} {exit_type}"
     if daily_count:
         msg = f"{daily_count} {status_fa}\n"
     else:
         msg = f"{status_fa}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name}\n"
-    msg += f"میزان رشد: +{growth:.2f}%\n"
-    msg += f"درصد منفی: -{neg_percent} ٪\n"
+    msg += f"میزان رشد: +{growth:.2f} %\n"
+    msg += f"درصد منفی: -{neg_percent} %\n"
     msg += f"Entri: {entry}\n"
     if exit_type == "tp":
         msg += f"tp: {tp} usdt\n"
@@ -299,6 +307,35 @@ def get_overall_market_trend(market_overview):
         return "bearish"   # نزولی
     else:
         return "ranging"   # رنج
+
+def get_market_summary_string(market_overview=None):
+    if not market_overview:
+        market_overview = get_market_overview()
+    up_count = 0
+    down_count = 0
+    for ticker in market_overview.values():
+        try:
+            rate = float(ticker.get('riseFallRate', 0))
+            if rate > 0:
+                up_count += 1
+            elif rate < 0:
+                down_count += 1
+        except Exception:
+            pass
+            
+    total = up_count + down_count
+    if total == 0:
+        return "حال بازار رنج\nتعداد ارزهای مثبت 0\nتعداد ارزهای منفی 0\n\n"
+        
+    up_pct = int(round((up_count / total) * 100))
+    down_pct = int(round((down_count / total) * 100))
+    
+    if up_pct >= 60:
+        return f"حال بازار صعودی +{up_pct} %\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
+    elif down_pct >= 60:
+        return f"حال بازار نزولی -{down_pct} %\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
+    else:
+        return f"حال بازار رنج\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
 
 def process_markets(app_data):
     trades = app_data.get('trades', [])
@@ -368,13 +405,14 @@ def process_markets(app_data):
                 trade['close_timestamp'] = int(current_ts)
                 trade['close_price'] = exit_price
                 
+                trade_lev = trade.get('leverage') or cat_info.get('leverage', 7)
                 if trade_type == 'short':
-                    pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=7)
+                    pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=trade_lev)
                 else:
-                    pnl = calculate_long_pnl(trade['entry'], exit_price, leverage=7)
+                    pnl = calculate_long_pnl(trade['entry'], exit_price, leverage=trade_lev)
                 trade['pnl'] = pnl
                 
-                neg_pct = int(cat_info['entry_drop'] * 100)
+                neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
                 
                 # تعداد خروجی‌های امروز در کانال اصلی (ترتیب شمارش ترتیبی از ۱ به بالا بدون ۱ اضافه):
                 global_exit_count = len([
@@ -410,18 +448,37 @@ def process_markets(app_data):
                 send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
                 send_telegram_message(EXIT_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
 
-        # Check 24h Cooldown and Existing Trades
+        # بررسی کول‌داون و معاملات قبلی:
+        # ۱. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، ورود آن در تمام دسته‌ها تا یک روز مسدود می‌شود
+        symbol_has_stop_cooldown = False
+        for t in trades:
+            if t['symbol'] == symbol and t.get('status') == 'stop':
+                trade_stop_ts = t.get('close_timestamp', t.get('open_timestamp', 0))
+                if (current_ts - trade_stop_ts) < (24 * 3600) or t.get('close_time') == today_str:
+                    symbol_has_stop_cooldown = True
+                    break
+
         cat_cooldowns = {}
         for cat_id in valid_cats:
+            if symbol_has_stop_cooldown:
+                cat_cooldowns[cat_id] = False
+                continue
+
             can_open = True
             for t in trades:
-                if t['symbol'] == symbol and t.get('category_id', '20_30') == cat_id:
-                    if t['status'] == 'OPEN':
-                        can_open = False
-                        break
+                if t['symbol'] == symbol:
+                    if t.get('category_id', '20_30') == cat_id:
+                        if t['status'] == 'OPEN':
+                            can_open = False
+                            break
+                        else:
+                            trade_ts = t.get('open_timestamp', 0)
+                            if (current_ts - trade_ts) < (24 * 3600) or t.get('open_time') == today_str:
+                                can_open = False
+                                break
                     else:
-                        trade_ts = t.get('open_timestamp', 0)
-                        if (current_ts - trade_ts) < (24 * 3600) or t.get('open_time') == today_str:
+                        # در صورتی که معامله باز (OPEN) در دسته دیگر دارد، همزمان ورود جدید باز نشود
+                        if t['status'] == 'OPEN':
                             can_open = False
                             break
             cat_cooldowns[cat_id] = can_open
@@ -433,13 +490,11 @@ def process_markets(app_data):
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
             
-            # فیلتر روند بازار:
-            # ۱. معامله شورت در بازار نزولی و رنج مجاز است (در بازار صعودی ممنوع)
-            # ۲. معامله لانگ در بازار صعودی و رنج مجاز است (در بازار نزولی ممنوع)
-            if trade_type == 'short' and market_trend == 'bullish':
-                continue
-            if trade_type == 'long' and market_trend == 'bearish':
-                continue
+            # فیلتر روند بازار برداشته شد (تمامی معاملات در هر بازاری مجاز هستند):
+            # if trade_type == 'short' and market_trend == 'bullish':
+            #     continue
+            # if trade_type == 'long' and market_trend == 'bearish':
+            #     continue
             
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
@@ -476,11 +531,12 @@ def process_markets(app_data):
                     'open_timestamp': int(current_ts),
                     'close_time': '',
                     'close_price': 0.0,
-                    'pnl': 0.0
+                    'pnl': 0.0,
+                    'leverage': cat_info.get('leverage', 7)
                 }
                 trades.append(new_trade)
                 
-                neg_pct = int(cat_info['entry_drop'] * 100)
+                neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
                 cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == today_str])
                 global_entry_count = len([
                     t for t in trades 
@@ -530,14 +586,15 @@ def generate_and_send_daily_report(app_data):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
+            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
             if trade_type == 'short':
-                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=7)
+                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
             else:
-                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=7)
+                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=t_lev)
                 
             stats['open_pnl'] += live_pnl
             
-            pnl_str = f"+{live_pnl}%" if live_pnl > 0 else f"{live_pnl}%"
+            pnl_str = f"+{live_pnl:.2f} %" if live_pnl > 0 else f"{live_pnl:.2f} %"
             stats['strings'].append(f"{name} : opening {pnl_str}")
             
             row = {'دسته': CATEGORIES[cat_id]['name_fa'], 'وضعیت عرض': 'opening', 'نام': name, 'کمترین قیمت': t['low'], 'بیشترین قیمت': t['high'], 'قیمت باز شدن معامله': t['entry'], 'قیمت بسته شدن': current_close}
@@ -547,7 +604,7 @@ def generate_and_send_daily_report(app_data):
         elif t['status'] in ['tp', 'stop']:
             if t['close_time'] == today_str:
                 stats['closed_pnl'] += t['pnl']
-                pnl_str = f"+{t['pnl']}%" if t['pnl'] > 0 else f"{t['pnl']}%"
+                pnl_str = f"+{t['pnl']:.2f} %" if t['pnl'] > 0 else f"{t['pnl']:.2f} %"
                 
                 if t['status'] == 'tp':
                     stats['tp'] += 1
@@ -569,8 +626,8 @@ def generate_and_send_daily_report(app_data):
             continue
             
         cat_info = CATEGORIES[cat_id]
-        closed_pnl_str = f"+{stats['closed_pnl']:.0f} ٪" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.0f} ٪"
-        open_pnl_str = f"+{stats['open_pnl']:.0f} ٪" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.0f} ٪"
+        closed_pnl_str = f"+{stats['closed_pnl']:.2f} %" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.2f} %"
+        open_pnl_str = f"+{stats['open_pnl']:.2f} %" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.2f} %"
 
         msg = f"گزارش روز\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
         msg += f"2 تعداد معاملات : {total}\n"
@@ -624,20 +681,21 @@ def generate_and_send_weekly_report(app_data):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
+            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
             if trade_type == 'short':
-                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=7)
+                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
             else:
-                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=7)
+                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=t_lev)
                 
             stats['open_pnl'] += live_pnl
-            pnl_str = f"+{live_pnl}%" if live_pnl > 0 else f"{live_pnl}%"
+            pnl_str = f"+{live_pnl:.2f} %" if live_pnl > 0 else f"{live_pnl:.2f} %"
             stats['strings'].append(f"{name} : opening {pnl_str}")
             
         elif t['status'] in ['tp', 'stop']:
             close_ts = t.get('close_timestamp', 0)
             if close_ts >= seven_days_ago_ts:
                 stats['closed_pnl'] += t['pnl']
-                pnl_str = f"+{t['pnl']}%" if t['pnl'] > 0 else f"{t['pnl']}%"
+                pnl_str = f"+{t['pnl']:.2f} %" if t['pnl'] > 0 else f"{t['pnl']:.2f} %"
                 
                 if t['status'] == 'tp':
                     stats['tp'] += 1
@@ -655,8 +713,8 @@ def generate_and_send_weekly_report(app_data):
             continue
             
         cat_info = CATEGORIES[cat_id]
-        closed_pnl_str = f"+{stats['closed_pnl']:.0f} ٪" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.0f} ٪"
-        open_pnl_str = f"+{stats['open_pnl']:.0f} ٪" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.0f} ٪"
+        closed_pnl_str = f"+{stats['closed_pnl']:.2f} %" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.2f} %"
+        open_pnl_str = f"+{stats['open_pnl']:.2f} %" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.2f} %"
 
         msg = f"گزارش هفتگی\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
         msg += f"2 تعداد معاملات هفته : {total}\n"
