@@ -3268,6 +3268,24 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "close_timestamp": 1791946238
+        },
+        {
+            "symbol": "1000RATS_USDT",
+            "category_id": "long_40_70",
+            "growth": 56.052141527001865,
+            "low": 0.01611,
+            "high": 0.02514,
+            "entry": 0.016341,
+            "tp": 0.018792,
+            "stop": 0.014053,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791953726,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "cat_entry_num": 1,
+            "global_entry_num": 2
         }
     ]
 }
