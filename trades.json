@@ -4073,6 +4073,25 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 33
+        },
+        {
+            "symbol": "RKLB_USDT",
+            "category_id": "20_30",
+            "growth": 20.363164721141366,
+            "low": 53.97,
+            "high": 64.96,
+            "entry": 55.8656,
+            "tp": 51.67568,
+            "stop": 63.686784,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792023330,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
         }
     ]
 }
