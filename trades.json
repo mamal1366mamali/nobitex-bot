@@ -265,12 +265,13 @@
             "entry": 0.124517,
             "tp": 0.105839,
             "stop": 0.141949,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791791431,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.105839,
+            "pnl": 105.0,
+            "close_timestamp": 1792017327
         },
         {
             "symbol": "AIINU_USDT",
@@ -298,12 +299,13 @@
             "entry": 0.124517,
             "tp": 0.105839,
             "stop": 0.141949,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791793843,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.105839,
+            "pnl": 105.0,
+            "close_timestamp": 1792017327
         },
         {
             "symbol": "US_USDT",
@@ -3991,6 +3993,44 @@
             "leverage": 7,
             "cat_entry_num": 16,
             "global_entry_num": 29
+        },
+        {
+            "symbol": "MAGIC_USDT",
+            "category_id": "20_30",
+            "growth": 20.297545721595764,
+            "low": 0.10553,
+            "high": 0.12695,
+            "entry": 0.109177,
+            "tp": 0.100989,
+            "stop": 0.124462,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792017327,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 17,
+            "global_entry_num": 30
+        },
+        {
+            "symbol": "ZAMA_USDT",
+            "category_id": "20_30",
+            "growth": 20.327868852459012,
+            "low": 0.0671,
+            "high": 0.08074,
+            "entry": 0.069436,
+            "tp": 0.064228,
+            "stop": 0.079157,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792017327,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 18,
+            "global_entry_num": 31
         }
     ]
 }
