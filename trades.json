@@ -3056,14 +3056,15 @@
             "entry": 0.002121,
             "tp": 0.001962,
             "stop": 0.002418,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791912652,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.001962,
+            "pnl": 52.48,
             "cat_entry_num": 60,
-            "global_entry_num": 92
+            "global_entry_num": 92,
+            "close_timestamp": 1791995729
         },
         {
             "symbol": "LUMIA_USDT",
