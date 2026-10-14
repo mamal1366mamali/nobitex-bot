@@ -3141,14 +3141,15 @@
             "entry": 0.25789,
             "tp": 0.219206,
             "stop": 0.293995,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791919529,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.293995,
+            "pnl": -98.0,
             "cat_entry_num": 6,
-            "global_entry_num": 97
+            "global_entry_num": 97,
+            "close_timestamp": 1791972638
         },
         {
             "symbol": "BLUR_USDT",
