@@ -4093,6 +4093,44 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1
+        },
+        {
+            "symbol": "SOXL_USDT",
+            "category_id": "20_30",
+            "growth": 20.95819459859415,
+            "low": 108.12,
+            "high": 130.78,
+            "entry": 112.4708,
+            "tp": 104.03549,
+            "stop": 128.216712,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792028433,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 2
+        },
+        {
+            "symbol": "SNXX_USDT",
+            "category_id": "20_30",
+            "growth": 21.119842829076624,
+            "low": 10.18,
+            "high": 12.33,
+            "entry": 10.6038,
+            "tp": 9.808515,
+            "stop": 12.088332,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792028433,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 3
         }
     ]
 }
