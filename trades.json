@@ -1798,12 +1798,13 @@
             "entry": 2.8208,
             "tp": 2.623344,
             "stop": 3.215712,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791862834,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 2.623344,
+            "pnl": 49.0,
+            "close_timestamp": 1792007739
         },
         {
             "symbol": "LAB_USDT",
@@ -1998,12 +1999,13 @@
             "entry": 0.024673,
             "tp": 0.022946,
             "stop": 0.028127,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791864933,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.022946,
+            "pnl": 49.0,
+            "close_timestamp": 1792007739
         },
         {
             "symbol": "STONK_USDT",
