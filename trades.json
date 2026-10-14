@@ -3619,6 +3619,25 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 14
+        },
+        {
+            "symbol": "CNPY_USDT",
+            "category_id": "20_30",
+            "growth": 25.00956022944551,
+            "low": 0.2615,
+            "high": 0.3269,
+            "entry": 0.281134,
+            "tp": 0.260049,
+            "stop": 0.320493,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1791986727,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 7,
+            "global_entry_num": 15
         }
     ]
 }
