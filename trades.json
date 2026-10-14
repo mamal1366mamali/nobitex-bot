@@ -3143,14 +3143,15 @@
             "entry": 0.062534,
             "tp": 0.053154,
             "stop": 0.071289,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791918930,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.053154,
+            "pnl": 105.0,
             "cat_entry_num": 21,
-            "global_entry_num": 96
+            "global_entry_num": 96,
+            "close_timestamp": 1792011037
         },
         {
             "symbol": "AVA_USDT",
@@ -3199,14 +3200,15 @@
             "entry": 0.062534,
             "tp": 0.053154,
             "stop": 0.071289,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791926432,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/22",
+            "close_price": 0.053154,
+            "pnl": 105.0,
             "cat_entry_num": 7,
-            "global_entry_num": 98
+            "global_entry_num": 98,
+            "close_timestamp": 1792011037
         },
         {
             "symbol": "LUMIA_USDT",
