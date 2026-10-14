@@ -3971,6 +3971,25 @@
             "leverage": 7,
             "cat_entry_num": 15,
             "global_entry_num": 28
+        },
+        {
+            "symbol": "GRASS_USDT",
+            "category_id": "20_30",
+            "growth": 20.086358547897017,
+            "low": 0.6253,
+            "high": 0.7509,
+            "entry": 0.645774,
+            "tp": 0.597341,
+            "stop": 0.736182,
+            "status": "OPEN",
+            "open_time": "1405/07/22",
+            "open_timestamp": 1792014035,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 16,
+            "global_entry_num": 29
         }
     ]
 }
