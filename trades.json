@@ -2606,12 +2606,13 @@
             "entry": 0.349605,
             "tp": 0.297164,
             "stop": 0.39855,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791874843,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/22",
+            "close_price": 0.39855,
+            "pnl": -98.0,
+            "close_timestamp": 1791963930
         },
         {
             "symbol": "RSR_USDT",
