@@ -4270,6 +4270,25 @@
             "leverage": 7,
             "cat_entry_num": 9,
             "global_entry_num": 10
+        },
+        {
+            "symbol": "CYPH_USDT",
+            "category_id": "20_30",
+            "growth": 23.146251536255633,
+            "low": 2.441,
+            "high": 3.006,
+            "entry": 2.58516,
+            "tp": 2.391273,
+            "stop": 2.947082,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792035051,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 10,
+            "global_entry_num": 11
         }
     ]
 }
