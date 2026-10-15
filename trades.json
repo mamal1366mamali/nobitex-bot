@@ -4607,15 +4607,16 @@
             "entry": 0.003582,
             "tp": 0.003313,
             "stop": 0.004083,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/23",
             "open_timestamp": 1792043732,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.004083,
+            "pnl": -97.91,
             "leverage": 7,
             "cat_entry_num": 19,
-            "global_entry_num": 25
+            "global_entry_num": 25,
+            "close_timestamp": 1792097431
         },
         {
             "symbol": "HAJIMI_USDT",
