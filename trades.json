@@ -5563,6 +5563,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 69
+        },
+        {
+            "symbol": "NXPC_USDT",
+            "category_id": "50_100",
+            "growth": 60.4713444027852,
+            "low": 0.1867,
+            "high": 0.2996,
+            "entry": 0.25466,
+            "tp": 0.216461,
+            "stop": 0.290312,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792096528,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 70
         }
     ]
 }
