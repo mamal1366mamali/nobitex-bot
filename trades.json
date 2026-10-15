@@ -1499,12 +1499,13 @@
             "entry": 0.046552,
             "tp": 0.043293,
             "stop": 0.053069,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791858924,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.043293,
+            "pnl": 49.01,
+            "close_timestamp": 1792038032
         },
         {
             "symbol": "ZRO_USDT",
@@ -2567,12 +2568,13 @@
             "entry": 7.189,
             "tp": 8.26735,
             "stop": 6.18254,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791868833,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 6.18254,
+            "pnl": -98.0,
+            "close_timestamp": 1792038032
         },
         {
             "symbol": "US_USDT",
