@@ -5077,6 +5077,25 @@
             "leverage": 7,
             "cat_entry_num": 38,
             "global_entry_num": 47
+        },
+        {
+            "symbol": "AVA_USDT",
+            "category_id": "30_40",
+            "growth": 37.19512195121952,
+            "low": 0.246,
+            "high": 0.3375,
+            "entry": 0.286875,
+            "tp": 0.243844,
+            "stop": 0.327038,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792059041,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 48
         }
     ]
 }
