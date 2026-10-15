@@ -568,12 +568,13 @@
             "entry": 0.159358,
             "tp": 0.148203,
             "stop": 0.181668,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791815731,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.148203,
+            "pnl": 49.0,
+            "close_timestamp": 1792074930
         },
         {
             "symbol": "ZEST_USDT",
@@ -5257,6 +5258,25 @@
             "leverage": 7,
             "cat_entry_num": 44,
             "global_entry_num": 55
+        },
+        {
+            "symbol": "AAOI_USDT",
+            "category_id": "20_30",
+            "growth": 20.249413507840483,
+            "low": 80.99,
+            "high": 97.39,
+            "entry": 83.7554,
+            "tp": 77.473745,
+            "stop": 95.481156,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792074930,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 45,
+            "global_entry_num": 56
         }
     ]
 }
