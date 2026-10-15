@@ -4865,6 +4865,25 @@
             "leverage": 7,
             "cat_entry_num": 30,
             "global_entry_num": 39
+        },
+        {
+            "symbol": "CT_USDT",
+            "category_id": "20_30",
+            "growth": 20.507331378299114,
+            "low": 0.341,
+            "high": 0.41093,
+            "entry": 0.3534,
+            "tp": 0.326895,
+            "stop": 0.402876,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792050333,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 31,
+            "global_entry_num": 40
         }
     ]
 }
