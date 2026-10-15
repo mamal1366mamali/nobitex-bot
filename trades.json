@@ -5135,6 +5135,25 @@
             "leverage": 7,
             "cat_entry_num": 39,
             "global_entry_num": 49
+        },
+        {
+            "symbol": "DOS_USDT",
+            "category_id": "20_30",
+            "growth": 20.392390011890623,
+            "low": 0.1682,
+            "high": 0.2025,
+            "entry": 0.17415,
+            "tp": 0.161089,
+            "stop": 0.198531,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792060833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 40,
+            "global_entry_num": 50
         }
     ]
 }
