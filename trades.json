@@ -5498,15 +5498,16 @@
             "entry": 0.029378,
             "tp": 0.024971,
             "stop": 0.033491,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/23",
             "open_timestamp": 1792088733,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.033491,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 11,
-            "global_entry_num": 66
+            "global_entry_num": 66,
+            "close_timestamp": 1792097728
         },
         {
             "symbol": "CASHCAT_USDT",
