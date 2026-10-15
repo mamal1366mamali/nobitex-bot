@@ -5319,6 +5319,25 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 6
+        },
+        {
+            "symbol": "GOAT_USDT",
+            "category_id": "50_100",
+            "growth": 76.7058823529412,
+            "low": 0.01275,
+            "high": 0.02253,
+            "entry": 0.019151,
+            "tp": 0.016278,
+            "stop": 0.021832,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792079437,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 58
         }
     ]
 }
