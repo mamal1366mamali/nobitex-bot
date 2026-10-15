@@ -5319,15 +5319,16 @@
             "entry": 0.102554,
             "tp": 0.110246,
             "stop": 0.088196,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792077035,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.110246,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 6,
-            "global_entry_num": 6
+            "global_entry_num": 6,
+            "close_timestamp": 1792088733
         },
         {
             "symbol": "GOAT_USDT",
@@ -5481,6 +5482,44 @@
             "leverage": 7,
             "cat_entry_num": 49,
             "global_entry_num": 65
+        },
+        {
+            "symbol": "AKE_USDT",
+            "category_id": "30_40",
+            "growth": 36.81960334111874,
+            "low": 0.025261,
+            "high": 0.034562,
+            "entry": 0.029378,
+            "tp": 0.024971,
+            "stop": 0.033491,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792088733,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 11,
+            "global_entry_num": 66
+        },
+        {
+            "symbol": "CASHCAT_USDT",
+            "category_id": "30_40",
+            "growth": 31.178289933153756,
+            "low": 0.10023,
+            "high": 0.13148,
+            "entry": 0.111758,
+            "tp": 0.094994,
+            "stop": 0.127404,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792088733,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 12,
+            "global_entry_num": 67
         }
     ]
 }
