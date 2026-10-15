@@ -4680,15 +4680,16 @@
             "entry": 0.096862,
             "tp": 0.089597,
             "stop": 0.110423,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792043732,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.089597,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 22,
-            "global_entry_num": 29
+            "global_entry_num": 29,
+            "close_timestamp": 1792085131
         },
         {
             "symbol": "VELVET_USDT",
@@ -5403,6 +5404,25 @@
             "leverage": 7,
             "cat_entry_num": 47,
             "global_entry_num": 61
+        },
+        {
+            "symbol": "IREN_USDT",
+            "category_id": "20_30",
+            "growth": 20.044626255113425,
+            "low": 26.89,
+            "high": 32.28,
+            "entry": 27.7608,
+            "tp": 25.67874,
+            "stop": 31.647312,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792085131,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 48,
+            "global_entry_num": 62
         }
     ]
 }
