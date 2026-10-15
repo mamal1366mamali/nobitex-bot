@@ -5523,6 +5523,25 @@
             "leverage": 7,
             "cat_entry_num": 12,
             "global_entry_num": 67
+        },
+        {
+            "symbol": "GENIUS_USDT",
+            "category_id": "20_30",
+            "growth": 24.926144756277697,
+            "low": 0.2708,
+            "high": 0.3383,
+            "entry": 0.290938,
+            "tp": 0.269118,
+            "stop": 0.331669,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792091737,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 50,
+            "global_entry_num": 68
         }
     ]
 }
