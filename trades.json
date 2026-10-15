@@ -5194,6 +5194,25 @@
             "leverage": 7,
             "cat_entry_num": 42,
             "global_entry_num": 52
+        },
+        {
+            "symbol": "AXL_USDT",
+            "category_id": "20_30",
+            "growth": 20.029895366218252,
+            "low": 0.05352,
+            "high": 0.06424,
+            "entry": 0.055246,
+            "tp": 0.051103,
+            "stop": 0.06298,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792070132,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 43,
+            "global_entry_num": 53
         }
     ]
 }
