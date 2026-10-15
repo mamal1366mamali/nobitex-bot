@@ -5384,6 +5384,25 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 60
+        },
+        {
+            "symbol": "BILL_USDT",
+            "category_id": "20_30",
+            "growth": 22.316384180790944,
+            "low": 0.00708,
+            "high": 0.00866,
+            "entry": 0.007448,
+            "tp": 0.006889,
+            "stop": 0.008491,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792084833,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 47,
+            "global_entry_num": 61
         }
     ]
 }
