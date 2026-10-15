@@ -5423,6 +5423,25 @@
             "leverage": 7,
             "cat_entry_num": 48,
             "global_entry_num": 62
+        },
+        {
+            "symbol": "LONGXIA_USDT",
+            "category_id": "30_40",
+            "growth": 31.53355830521185,
+            "low": 0.02667,
+            "high": 0.03508,
+            "entry": 0.029818,
+            "tp": 0.025345,
+            "stop": 0.033993,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792085727,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 63
         }
     ]
 }
