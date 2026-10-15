@@ -1,5 +1,5 @@
 {
-    "last_update_id": 645610724,
+    "last_update_id": 645610728,
     "alerts": [
         {
             "symbol": "gps",
@@ -24,6 +24,20 @@
             "tag": "",
             "tp": 0.1576,
             "stop": 0.1943,
+            "chat_id": 114669886
+        },
+        {
+            "symbol": "cashcat",
+            "tag": "فروش",
+            "tp": 0.1045,
+            "stop": 0.1289,
+            "chat_id": 114669886
+        },
+        {
+            "symbol": "ace",
+            "tag": "فروش",
+            "tp": 0.1577,
+            "stop": 0.1944,
             "chat_id": 114669886
         }
     ],
