@@ -4363,15 +4363,16 @@
             "entry": 905.2962,
             "tp": 837.398985,
             "stop": 1032.037668,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792039233,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 837.398985,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 11,
-            "global_entry_num": 13
+            "global_entry_num": 13,
+            "close_timestamp": 1792074650
         },
         {
             "symbol": "HK0992_USDT",
