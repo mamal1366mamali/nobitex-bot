@@ -5155,6 +5155,25 @@
             "leverage": 7,
             "cat_entry_num": 40,
             "global_entry_num": 50
+        },
+        {
+            "symbol": "AEON_USDT",
+            "category_id": "20_30",
+            "growth": 20.700958144225925,
+            "low": 0.03966,
+            "high": 0.04787,
+            "entry": 0.041168,
+            "tp": 0.03808,
+            "stop": 0.046932,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792064768,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 41,
+            "global_entry_num": 51
         }
     ]
 }
