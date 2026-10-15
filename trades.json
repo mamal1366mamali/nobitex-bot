@@ -5588,6 +5588,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 70
+        },
+        {
+            "symbol": "PARTI_USDT",
+            "category_id": "20_30",
+            "growth": 23.963434541299367,
+            "low": 0.03063,
+            "high": 0.03797,
+            "entry": 0.032654,
+            "tp": 0.030205,
+            "stop": 0.037226,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792103733,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 51,
+            "global_entry_num": 71
         }
     ]
 }
