@@ -4350,6 +4350,25 @@
             "leverage": 7,
             "cat_entry_num": 11,
             "global_entry_num": 13
+        },
+        {
+            "symbol": "HK0992_USDT",
+            "category_id": "20_30",
+            "growth": 20.014743826022865,
+            "low": 27.13,
+            "high": 32.56,
+            "entry": 28.0016,
+            "tp": 25.90148,
+            "stop": 31.921824,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792041636,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 12,
+            "global_entry_num": 14
         }
     ]
 }
