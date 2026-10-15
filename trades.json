@@ -5442,6 +5442,25 @@
             "leverage": 7,
             "cat_entry_num": 9,
             "global_entry_num": 63
+        },
+        {
+            "symbol": "BLUR_USDT",
+            "category_id": "30_40",
+            "growth": 36.082474226804116,
+            "low": 0.0097,
+            "high": 0.0132,
+            "entry": 0.01122,
+            "tp": 0.009537,
+            "stop": 0.012791,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792086935,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 10,
+            "global_entry_num": 64
         }
     ]
 }
