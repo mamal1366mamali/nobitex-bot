@@ -4765,6 +4765,25 @@
             "cat_entry_num": 2,
             "global_entry_num": 34,
             "close_timestamp": 1792046733
+        },
+        {
+            "symbol": "ACU_USDT",
+            "category_id": "20_30",
+            "growth": 21.252204585537925,
+            "low": 0.09072,
+            "high": 0.11,
+            "entry": 0.0946,
+            "tp": 0.087505,
+            "stop": 0.107844,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792047331,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 26,
+            "global_entry_num": 35
         }
     ]
 }
