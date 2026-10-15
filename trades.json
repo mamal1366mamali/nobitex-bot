@@ -4210,15 +4210,16 @@
             "entry": 34.357,
             "tp": 31.780225,
             "stop": 39.16698,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792030534,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 31.780225,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 6,
-            "global_entry_num": 6
+            "global_entry_num": 6,
+            "close_timestamp": 1792083645
         },
         {
             "symbol": "RAM_USDT",
@@ -4249,15 +4250,16 @@
             "entry": 20.1154,
             "tp": 18.606745,
             "stop": 22.931556,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792034135,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 18.606745,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 8,
-            "global_entry_num": 8
+            "global_entry_num": 8,
+            "close_timestamp": 1792083645
         },
         {
             "symbol": "WAL_USDT",
