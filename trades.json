@@ -5580,15 +5580,16 @@
             "entry": 0.25466,
             "tp": 0.216461,
             "stop": 0.290312,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792096528,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 0.216461,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 4,
-            "global_entry_num": 70
+            "global_entry_num": 70,
+            "close_timestamp": 1792119929
         },
         {
             "symbol": "PARTI_USDT",
