@@ -4808,6 +4808,25 @@
             "leverage": 7,
             "cat_entry_num": 27,
             "global_entry_num": 36
+        },
+        {
+            "symbol": "PRL_USDT",
+            "category_id": "20_30",
+            "growth": 20.112485939257603,
+            "low": 1.778,
+            "high": 2.1356,
+            "entry": 1.836616,
+            "tp": 1.69887,
+            "stop": 2.093742,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792049449,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 28,
+            "global_entry_num": 37
         }
     ]
 }
