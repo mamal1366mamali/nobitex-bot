@@ -5262,15 +5262,16 @@
             "entry": 0.07709,
             "tp": 0.071308,
             "stop": 0.087883,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/23",
             "open_timestamp": 1792074324,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.087883,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 44,
-            "global_entry_num": 55
+            "global_entry_num": 55,
+            "close_timestamp": 1792091429
         },
         {
             "symbol": "AAOI_USDT",
