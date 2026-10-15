@@ -4067,15 +4067,16 @@
             "entry": 0.002836,
             "tp": 0.002623,
             "stop": 0.003233,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1792017634,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.002623,
+            "pnl": 52.57,
             "leverage": 7,
             "cat_entry_num": 19,
-            "global_entry_num": 32
+            "global_entry_num": 32,
+            "close_timestamp": 1792060252
         },
         {
             "symbol": "CNPY_USDT",
@@ -5096,6 +5097,25 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 48
+        },
+        {
+            "symbol": "SOPH_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.59265175718849,
+            "low": 0.002504,
+            "high": 0.003245,
+            "entry": 0.002531,
+            "tp": 0.002721,
+            "stop": 0.002177,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792060252,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 5
         }
     ]
 }
