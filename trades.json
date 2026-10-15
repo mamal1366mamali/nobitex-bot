@@ -4370,6 +4370,25 @@
             "leverage": 7,
             "cat_entry_num": 12,
             "global_entry_num": 14
+        },
+        {
+            "symbol": "RHEA_USDT",
+            "category_id": "20_30",
+            "growth": 20.54030874785593,
+            "low": 0.06996,
+            "high": 0.08433,
+            "entry": 0.072524,
+            "tp": 0.067085,
+            "stop": 0.082677,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792042834,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 13,
+            "global_entry_num": 15
         }
     ]
 }
