@@ -1449,12 +1449,13 @@
             "entry": 0.256276,
             "tp": 0.294717,
             "stop": 0.220397,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/21",
             "open_timestamp": 1791857128,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.220397,
+            "pnl": -98.0,
+            "close_timestamp": 1792048535
         },
         {
             "symbol": "STRK_USDT",
@@ -3773,15 +3774,16 @@
             "entry": 0.018963,
             "tp": 0.017541,
             "stop": 0.021618,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/22",
             "open_timestamp": 1791994837,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.017541,
+            "pnl": 52.49,
             "leverage": 7,
             "cat_entry_num": 10,
-            "global_entry_num": 20
+            "global_entry_num": 20,
+            "close_timestamp": 1792048535
         },
         {
             "symbol": "MUBARAK_USDT",
@@ -4451,15 +4453,16 @@
             "entry": 0.007875,
             "tp": 0.006694,
             "stop": 0.008978,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792043732,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.006694,
+            "pnl": 104.98,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 18
+            "global_entry_num": 18,
+            "close_timestamp": 1792048535
         },
         {
             "symbol": "AIINU_USDT",
