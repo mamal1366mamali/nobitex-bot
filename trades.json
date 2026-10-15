@@ -4820,15 +4820,16 @@
             "entry": 1.836616,
             "tp": 1.69887,
             "stop": 2.093742,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792049449,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 1.69887,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 28,
-            "global_entry_num": 37
+            "global_entry_num": 37,
+            "close_timestamp": 1792063233
         },
         {
             "symbol": "KMNO_USDT",
