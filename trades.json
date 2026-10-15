@@ -4265,15 +4265,16 @@
             "entry": 0.119334,
             "tp": 0.110384,
             "stop": 0.136041,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792034726,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.110384,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 9,
-            "global_entry_num": 10
+            "global_entry_num": 10,
+            "close_timestamp": 1792042241
         },
         {
             "symbol": "CYPH_USDT",
