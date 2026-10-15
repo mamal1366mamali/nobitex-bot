@@ -5300,6 +5300,25 @@
             "cat_entry_num": 3,
             "global_entry_num": 57,
             "close_timestamp": 1792075832
+        },
+        {
+            "symbol": "CASHCAT_USDT",
+            "category_id": "long_20_30",
+            "growth": 29.434928135459742,
+            "low": 0.10158,
+            "high": 0.13148,
+            "entry": 0.102554,
+            "tp": 0.110246,
+            "stop": 0.088196,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792077035,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 6
         }
     ]
 }
