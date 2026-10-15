@@ -4953,15 +4953,16 @@
             "entry": 0.02061,
             "tp": 0.019064,
             "stop": 0.023495,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792055432,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.019064,
+            "pnl": 52.51,
             "leverage": 7,
             "cat_entry_num": 34,
-            "global_entry_num": 43
+            "global_entry_num": 43,
+            "close_timestamp": 1792057534
         },
         {
             "symbol": "CASHCAT_USDT",
@@ -5038,6 +5039,25 @@
             "leverage": 7,
             "cat_entry_num": 37,
             "global_entry_num": 46
+        },
+        {
+            "symbol": "TRUTH_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.68495945873382,
+            "low": 0.018623,
+            "high": 0.023965,
+            "entry": 0.018693,
+            "tp": 0.020095,
+            "stop": 0.016076,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792057534,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 4
         }
     ]
 }
