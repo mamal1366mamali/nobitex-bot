@@ -2936,14 +2936,15 @@
             "entry": 0.83635,
             "tp": 0.773624,
             "stop": 0.953439,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791903034,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.773624,
+            "pnl": 52.5,
             "cat_entry_num": 56,
-            "global_entry_num": 84
+            "global_entry_num": 84,
+            "close_timestamp": 1792069833
         },
         {
             "symbol": "PLAY_USDT",
