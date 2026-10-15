@@ -4000,15 +4000,16 @@
             "entry": 0.176928,
             "tp": 0.163658,
             "stop": 0.201698,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/22",
             "open_timestamp": 1792011342,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.201698,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 15,
-            "global_entry_num": 28
+            "global_entry_num": 28,
+            "close_timestamp": 1792103135
         },
         {
             "symbol": "GRASS_USDT",
