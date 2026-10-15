@@ -4314,15 +4314,16 @@
             "entry": 2.58516,
             "tp": 2.391273,
             "stop": 2.947082,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/23",
             "open_timestamp": 1792035051,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 2.947082,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 10,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "close_timestamp": 1792100737
         },
         {
             "symbol": "SKUU_USDT",
