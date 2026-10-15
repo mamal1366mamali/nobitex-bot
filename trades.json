@@ -4942,6 +4942,25 @@
             "leverage": 7,
             "cat_entry_num": 33,
             "global_entry_num": 42
+        },
+        {
+            "symbol": "TRUTH_USDT",
+            "category_id": "20_30",
+            "growth": 24.26756546538761,
+            "low": 0.019285,
+            "high": 0.023965,
+            "entry": 0.02061,
+            "tp": 0.019064,
+            "stop": 0.023495,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792055432,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 34,
+            "global_entry_num": 43
         }
     ]
 }
