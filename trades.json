@@ -4579,15 +4579,16 @@
             "entry": 0.048728,
             "tp": 0.045073,
             "stop": 0.05555,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792043732,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.045073,
+            "pnl": 52.51,
             "leverage": 7,
             "cat_entry_num": 18,
-            "global_entry_num": 24
+            "global_entry_num": 24,
+            "close_timestamp": 1792076128
         },
         {
             "symbol": "IOTX_USDT",
