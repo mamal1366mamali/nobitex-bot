@@ -2075,12 +2075,13 @@
             "entry": 0.379346,
             "tp": 0.352792,
             "stop": 0.432454,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/21",
             "open_timestamp": 1791865234,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.352792,
+            "pnl": 49.0,
+            "close_timestamp": 1792074034
         },
         {
             "symbol": "ZK_USDT",
@@ -4979,15 +4980,16 @@
             "entry": 0.113073,
             "tp": 0.104593,
             "stop": 0.128903,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792055733,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.104593,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 35,
-            "global_entry_num": 44
+            "global_entry_num": 44,
+            "close_timestamp": 1792074034
         },
         {
             "symbol": "CHIP_USDT",
