@@ -4788,6 +4788,25 @@
             "leverage": 7,
             "cat_entry_num": 26,
             "global_entry_num": 35
+        },
+        {
+            "symbol": "JTO_USDT",
+            "category_id": "20_30",
+            "growth": 20.36339463771328,
+            "low": 0.4513,
+            "high": 0.5432,
+            "entry": 0.467152,
+            "tp": 0.432116,
+            "stop": 0.532553,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792048829,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 27,
+            "global_entry_num": 36
         }
     ]
 }
