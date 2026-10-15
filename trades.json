@@ -4827,6 +4827,44 @@
             "leverage": 7,
             "cat_entry_num": 28,
             "global_entry_num": 37
+        },
+        {
+            "symbol": "KMNO_USDT",
+            "category_id": "20_30",
+            "growth": 20.295420974889222,
+            "low": 0.03385,
+            "high": 0.04072,
+            "entry": 0.035019,
+            "tp": 0.032393,
+            "stop": 0.039922,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792049732,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 29,
+            "global_entry_num": 38
+        },
+        {
+            "symbol": "MUU_USDT",
+            "category_id": "20_30",
+            "growth": 20.058019063406547,
+            "low": 24.13,
+            "high": 28.97,
+            "entry": 24.9142,
+            "tp": 23.045635,
+            "stop": 28.402188,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792049732,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 30,
+            "global_entry_num": 39
         }
     ]
 }
