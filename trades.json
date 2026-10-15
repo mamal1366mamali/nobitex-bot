@@ -600,12 +600,13 @@
             "entry": 0.127882,
             "tp": 0.11893,
             "stop": 0.145785,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/20",
             "open_timestamp": 1791817831,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0
+            "close_time": "1405/07/23",
+            "close_price": 0.11893,
+            "pnl": 49.0,
+            "close_timestamp": 1792071329
         },
         {
             "symbol": "CTK_USDT",
