@@ -5137,15 +5137,16 @@
             "entry": 0.151188,
             "tp": 0.139849,
             "stop": 0.172354,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792060534,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 0.139849,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 39,
-            "global_entry_num": 49
+            "global_entry_num": 49,
+            "close_timestamp": 1792080045
         },
         {
             "symbol": "DOS_USDT",
