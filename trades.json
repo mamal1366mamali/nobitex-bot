@@ -5230,15 +5230,16 @@
             "entry": 2.250035,
             "tp": 1.91253,
             "stop": 2.56504,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792072841,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 1.91253,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 7,
-            "global_entry_num": 54
+            "global_entry_num": 54,
+            "close_timestamp": 1792075532
         },
         {
             "symbol": "STRK_USDT",
@@ -5277,6 +5278,25 @@
             "leverage": 7,
             "cat_entry_num": 45,
             "global_entry_num": 56
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "40_50",
+            "growth": 40.058201058201064,
+            "low": 1.89,
+            "high": 2.6471,
+            "entry": 2.250035,
+            "tp": 1.91253,
+            "stop": 2.56504,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792075532,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 57
         }
     ]
 }
