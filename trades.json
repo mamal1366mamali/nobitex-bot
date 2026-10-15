@@ -5544,6 +5544,25 @@
             "leverage": 7,
             "cat_entry_num": 50,
             "global_entry_num": 68
+        },
+        {
+            "symbol": "ANIME_USDT",
+            "category_id": "40_50",
+            "growth": 44.87320837927234,
+            "low": 0.002721,
+            "high": 0.003942,
+            "entry": 0.003351,
+            "tp": 0.002848,
+            "stop": 0.00382,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792096253,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 69
         }
     ]
 }
