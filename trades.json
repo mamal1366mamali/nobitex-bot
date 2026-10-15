@@ -4389,6 +4389,25 @@
             "leverage": 7,
             "cat_entry_num": 13,
             "global_entry_num": 15
+        },
+        {
+            "symbol": "CHIP_USDT",
+            "category_id": "20_30",
+            "growth": 20.30674846625767,
+            "low": 0.0489,
+            "high": 0.05883,
+            "entry": 0.050594,
+            "tp": 0.046799,
+            "stop": 0.057677,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792043133,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 14,
+            "global_entry_num": 16
         }
     ]
 }
