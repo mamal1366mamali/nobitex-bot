@@ -4745,6 +4745,25 @@
             "leverage": 7,
             "cat_entry_num": 25,
             "global_entry_num": 33
+        },
+        {
+            "symbol": "AIINU_USDT",
+            "category_id": "40_50",
+            "growth": 40.99446314189558,
+            "low": 0.09211,
+            "high": 0.12987,
+            "entry": 0.11039,
+            "tp": 0.093831,
+            "stop": 0.125845,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792046432,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 34
         }
     ]
 }
