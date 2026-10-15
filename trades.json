@@ -4904,6 +4904,44 @@
             "cat_entry_num": 32,
             "global_entry_num": 41,
             "close_timestamp": 1792053327
+        },
+        {
+            "symbol": "AIINU_USDT",
+            "category_id": "long_20_30",
+            "growth": 28.932905885046946,
+            "low": 0.08734,
+            "high": 0.11261,
+            "entry": 0.087836,
+            "tp": 0.094424,
+            "stop": 0.075539,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792054235,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 2
+        },
+        {
+            "symbol": "ACE_USDT",
+            "category_id": "20_30",
+            "growth": 20.127272727272718,
+            "low": 0.165,
+            "high": 0.19821,
+            "entry": 0.170461,
+            "tp": 0.157676,
+            "stop": 0.194326,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792054235,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 33,
+            "global_entry_num": 42
         }
     ]
 }
