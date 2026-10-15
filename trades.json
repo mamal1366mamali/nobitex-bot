@@ -5019,6 +5019,25 @@
             "leverage": 7,
             "cat_entry_num": 36,
             "global_entry_num": 45
+        },
+        {
+            "symbol": "KITE_USDT",
+            "category_id": "20_30",
+            "growth": 20.421998135751192,
+            "low": 0.11801,
+            "high": 0.14211,
+            "entry": 0.122215,
+            "tp": 0.113049,
+            "stop": 0.139325,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792056929,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 37,
+            "global_entry_num": 46
         }
     ]
 }
