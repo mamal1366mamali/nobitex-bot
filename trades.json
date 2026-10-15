@@ -5116,6 +5116,25 @@
             "leverage": 7,
             "cat_entry_num": 5,
             "global_entry_num": 5
+        },
+        {
+            "symbol": "MMT_USDT",
+            "category_id": "20_30",
+            "growth": 20.410958904109606,
+            "low": 0.146,
+            "high": 0.1758,
+            "entry": 0.151188,
+            "tp": 0.139849,
+            "stop": 0.172354,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792060534,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 39,
+            "global_entry_num": 49
         }
     ]
 }
