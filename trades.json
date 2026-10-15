@@ -4376,15 +4376,16 @@
             "entry": 28.0016,
             "tp": 25.90148,
             "stop": 31.921824,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792041636,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/23",
+            "close_price": 25.90148,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 12,
-            "global_entry_num": 14
+            "global_entry_num": 14,
+            "close_timestamp": 1792056645
         },
         {
             "symbol": "RHEA_USDT",
@@ -4999,6 +5000,25 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "PUMPFUN_USDT",
+            "category_id": "20_30",
+            "growth": 20.965842167255598,
+            "low": 0.004245,
+            "high": 0.005135,
+            "entry": 0.004416,
+            "tp": 0.004085,
+            "stop": 0.005034,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792056645,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 36,
+            "global_entry_num": 45
         }
     ]
 }
