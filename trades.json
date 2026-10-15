@@ -5058,6 +5058,25 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 4
+        },
+        {
+            "symbol": "USDEX_USDT",
+            "category_id": "20_30",
+            "growth": 20.191387559808625,
+            "low": 10.45,
+            "high": 12.56,
+            "entry": 10.8016,
+            "tp": 9.99148,
+            "stop": 12.313824,
+            "status": "OPEN",
+            "open_time": "1405/07/23",
+            "open_timestamp": 1792058588,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 38,
+            "global_entry_num": 47
         }
     ]
 }
