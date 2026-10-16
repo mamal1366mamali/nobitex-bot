@@ -5238,16 +5238,19 @@
             "entry": 0.026,
             "tp": 0.024,
             "stop": 0.0296,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/25",
             "open_timestamp": 1792204834,
             "open_date_str": "1405 07 25 ساعت 02 : 40 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/25",
+            "close_price": 0.024,
+            "pnl": 53.85,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 26
+            "global_entry_num": 26,
+            "close_timestamp": 1792205137,
+            "close_date_str": "1405 07 25 ساعت 02 : 45 دقیقه",
+            "duration_str": "5 دقیقه"
         }
     ]
 }
