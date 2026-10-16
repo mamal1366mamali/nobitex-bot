@@ -32,15 +32,6 @@
             "tp": 0.1577,
             "stop": 0.1944,
             "chat_id": 114669886
-        },
-        {
-            "symbol": "ace",
-            "tag": "۴",
-            "entry": 30.0,
-            "tp": 0.17,
-            "stop": 0.0,
-            "chat_id": 114669886,
-            "created_at": 1792165535
         }
     ],
     "last_daily_report_date": "1405/07/24"
