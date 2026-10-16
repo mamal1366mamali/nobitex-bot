@@ -5195,16 +5195,19 @@
             "entry": 0.0363,
             "tp": 0.0336,
             "stop": 0.0414,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/25",
             "open_timestamp": 1792204530,
             "open_date_str": "1405 07 25 ساعت 02 : 35 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/25",
+            "close_price": 0.0336,
+            "pnl": 52.07,
             "leverage": 7,
             "cat_entry_num": 4,
-            "global_entry_num": 24
+            "global_entry_num": 24,
+            "close_timestamp": 1792204834,
+            "close_date_str": "1405 07 25 ساعت 02 : 40 دقیقه",
+            "duration_str": "5 دقیقه"
         },
         {
             "symbol": "STBL_USDT",
@@ -5225,6 +5228,26 @@
             "leverage": 7,
             "cat_entry_num": 5,
             "global_entry_num": 25
+        },
+        {
+            "symbol": "STBL_USDT",
+            "category_id": "20_30",
+            "growth": 131.5404475043029,
+            "low": 0.02324,
+            "high": 0.05381,
+            "entry": 0.026,
+            "tp": 0.024,
+            "stop": 0.0296,
+            "status": "OPEN",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792204834,
+            "open_date_str": "1405 07 25 ساعت 02 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 26
         }
     ]
 }
