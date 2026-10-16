@@ -5692,6 +5692,25 @@
             "cat_entry_num": 1,
             "global_entry_num": 4,
             "close_timestamp": 1792128329
+        },
+        {
+            "symbol": "BERA_USDT",
+            "category_id": "20_30",
+            "growth": 20.744680851063826,
+            "low": 0.2068,
+            "high": 0.2497,
+            "entry": 0.214742,
+            "tp": 0.198636,
+            "stop": 0.244806,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792132528,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 5
         }
     ]
 }
