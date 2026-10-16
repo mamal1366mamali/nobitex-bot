@@ -4276,15 +4276,16 @@
             "entry": 0.057511,
             "tp": 0.048884,
             "stop": 0.065563,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/23",
             "open_timestamp": 1792034726,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 0.048884,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 9
+            "global_entry_num": 9,
+            "close_timestamp": 1792127430
         },
         {
             "symbol": "SAFE_USDT",
@@ -5650,6 +5651,25 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "close_timestamp": 1792126836
+        },
+        {
+            "symbol": "WAL_USDT",
+            "category_id": "30_40",
+            "growth": 35.42443064182193,
+            "low": 0.0483,
+            "high": 0.06541,
+            "entry": 0.055598,
+            "tp": 0.047258,
+            "stop": 0.063382,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792127430,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 3
         }
     ]
 }
