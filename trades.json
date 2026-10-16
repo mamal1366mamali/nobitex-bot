@@ -5761,15 +5761,16 @@
             "entry": 0.032045,
             "tp": 0.027238,
             "stop": 0.036531,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/24",
             "open_timestamp": 1792142427,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 0.027238,
+            "pnl": 105.01,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 8
+            "global_entry_num": 8,
+            "close_timestamp": 1792151134
         },
         {
             "symbol": "WAL_USDT",
