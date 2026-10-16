@@ -5809,6 +5809,25 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 10
+        },
+        {
+            "symbol": "VELODROME_USDT",
+            "category_id": "30_40",
+            "growth": 35.00697350069735,
+            "low": 0.03585,
+            "high": 0.0484,
+            "entry": 0.04114,
+            "tp": 0.034969,
+            "stop": 0.0469,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792153531,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 11
         }
     ]
 }
