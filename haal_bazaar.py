@@ -4,6 +4,7 @@ import requests
 import re
 from datetime import datetime, timedelta
 import jdatetime
+import pandas as pd
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -16,6 +17,7 @@ DATA_FILE = "haal_data.json"
 
 # Ourbit API (Futures)
 OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
+OURBIT_KLINE_URL = "https://futures.ourbit.com/api/v1/contract/kline"
 
 def send_message(chat_id, text, reply_markup=None):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -66,6 +68,11 @@ def get_market_data():
                         day_change = float(item.get("riseFallRate", 0)) * 100
                         high_price = float(item.get("high24Price", 0))
                         low_price = float(item.get("lower24Price", 0))
+                        amount_24 = float(item.get("amount24", 0) or 0)
+                        if amount_24 == 0 and "volume24" in item:
+                            vol24 = float(item.get("volume24", 0) or 0)
+                            if vol24 > 0 and last_price > 0:
+                                amount_24 = vol24 * last_price
                         
                         growth = 0
                         if low_price > 0:
@@ -77,13 +84,133 @@ def get_market_data():
                             "growth": growth,
                             "dayHigh": high_price,
                             "dayLow": low_price,
-                            "lastPrice": last_price
+                            "lastPrice": last_price,
+                            "amount24": amount_24
                         }
                     except:
                         pass
     except Exception as e:
         print(f"Error fetching market data from Ourbit Futures: {e}")
     return prices, stats_data
+
+def format_volume(val):
+    if not val:
+        return "0 usdt"
+    try:
+        val = float(val)
+        if val >= 1_000_000_000:
+            return f"{val / 1_000_000_000:.2f}b usdt"
+        elif val >= 1_000_000:
+            return f"{val / 1_000_000:.2f}m usdt"
+        elif val >= 1_000:
+            return f"{val / 1_000:.0f}k usdt"
+        else:
+            return f"{int(val)} usdt"
+    except Exception:
+        return f"{val} usdt"
+
+def fmt_price(val):
+    try:
+        val = float(val)
+        if val == int(val):
+            return str(int(val))
+        return f"{val:.8f}".rstrip('0').rstrip('.')
+    except Exception:
+        return str(val)
+
+def process_chart_request(symbol, timeframe, candle_count_str, target_price_str, code_str):
+    sym = symbol.lower().replace("_usdt", "").replace("usdt", "").strip()
+    
+    tf_map = {
+        '15': ('Min15', '15 دقیقه', 1),
+        '15m': ('Min15', '15 دقیقه', 1),
+        '30': ('Min30', '30 دقیقه', 1),
+        '30m': ('Min30', '30 دقیقه', 1),
+        '1': ('Min60', '1 ساعته', 1),
+        '1h': ('Min60', '1 ساعته', 1),
+        '2': ('Min60', '2 ساعته', 2),
+        '2h': ('Min60', '2 ساعته', 2),
+        '4': ('Hour4', '4 ساعته', 1),
+        '4h': ('Hour4', '4 ساعته', 1),
+    }
+    
+    tf_clean = str(timeframe).lower().strip()
+    if tf_clean not in tf_map:
+        return "تایم فریم نامعتبر است"
+        
+    api_interval, tf_name, mult = tf_map[tf_clean]
+    
+    try:
+        count = int(candle_count_str)
+        if count <= 0 or count > 50:
+            count = 50
+    except ValueError:
+        count = 50
+        
+    code_clean = str(code_str).strip()
+    is_min = (code_clean == '0')
+    
+    pair = f"{sym.upper()}_USDT"
+    url = f"{OURBIT_KLINE_URL}/{pair}?interval={api_interval}"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    try:
+        r = requests.get(url, headers=headers, timeout=12)
+        res = r.json()
+    except Exception:
+        return "خطا در اتصال به سرور"
+        
+    if not res.get("success") or not res.get("data"):
+        return f"ارز {sym} یافت نشد"
+        
+    raw_data = res["data"]
+    try:
+        df = pd.DataFrame(raw_data)
+        if len(df) == 0:
+            return f"داده‌ای برای {sym} یافت نشد"
+    except Exception:
+        return f"خطا در پردازش داده‌ها"
+        
+    df = df.tail(count * mult).reset_index(drop=True)
+    df['open'] = df['open'].astype(float)
+    df['high'] = df['high'].astype(float)
+    df['low'] = df['low'].astype(float)
+    df['close'] = df['close'].astype(float)
+    
+    # تجمیع کندل‌ها برای تایم‌فریم ۲ ساعته
+    if mult == 2:
+        agg_rows = []
+        for i in range(0, len(df), 2):
+            chunk = df.iloc[i:i+2]
+            agg_rows.append({
+                'time': chunk['time'].iloc[0],
+                'open': chunk['open'].iloc[0],
+                'high': chunk['high'].max(),
+                'low': chunk['low'].min(),
+                'close': chunk['close'].iloc[-1]
+            })
+        df = pd.DataFrame(agg_rows)
+        
+    def format_candle_price(p, target_str):
+        if '.' in target_str:
+            dec = len(target_str.split('.')[1])
+            dec = max(2, dec)
+            return f"{p:.{dec}f}"
+        elif p >= 100:
+            return f"{p:.2f}"
+        elif p >= 1:
+            return f"{p:.4f}".rstrip('0').rstrip('.')
+        else:
+            return f"{p:.6f}".rstrip('0').rstrip('.')
+
+    target_str_clean = str(target_price_str).strip()
+    lines = [f"{sym} {target_str_clean}"]
+    
+    price_col = 'low' if is_min else 'high'
+    for _, row in df.iterrows():
+        p = row[price_col]
+        lines.append(format_candle_price(p, target_str_clean))
+        
+    return "\n".join(lines)
 
 def main():
     # Load data
@@ -120,6 +247,7 @@ def main():
             "keyboard": [
                 [{"text": "قیمت لحظه ای 💰"}],
                 [{"text": "حال بازار 📊"}],
+                [{"text": "چارت 📊"}],
                 [{"text": "بیشترین رشد و افت 📈📉"}],
                 [{"text": "هشدار قیمتی 🔔"}],
                 [{"text": "لیست هشدارهای قیمتی 📝"}]
@@ -195,57 +323,175 @@ def main():
             send_message(chat_id, msg, keyboard)
             
         elif text in ["هشدار قیمتی 🔔", "هشدار قیمتی", "هشدار قیمت 🔔"]:
-            msg = "لطفا اول نام ارز، سپس نشانه (مثلا لانگ یا شرت یا رشد ناگهانی)، بعد قیمت tp و بعد قیمت stop را وارد نمایید"
-            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp لانگ 1.5 0.4"}
+            msg = "لطفا نام ارز، قیمت ورود (entri)، قیمت tp و stop را وارد نمایید.\nمی‌توانید هر نوشته‌ای (فروش، لانگ، اهرم ۷، منفی ۷ درصد و...) بین نام ارز و قیمت‌ها بنویسید.\n\nمثال‌ها:\nxrp 1.58 2.51 0.4\nxrp لانگ 1.58 2.51 0.4\nxrp فروش منفی 7 درصد اهرم 7 1.58 2.51 0.4\nbtc معامله شورت اهرم 10 98000 105000 91000"
+            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp 1.58 2.51 0.4"}
             send_message(chat_id, msg, force_reply_markup)
             
         elif text in ["لیست هشدارهای قیمتی 📝", "لیست هشدارها 📝", "لیست"]:
-            my_alerts = [a for a in data.get("alerts", []) if a.get("chat_id") == chat_id]
+            my_alerts = [a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)]
             if not my_alerts:
                 send_message(chat_id, "شما هیچ هشدار فعالی ندارید.", keyboard)
             else:
-                msg = "لیست هشدارهای فعال شما:\n\n"
+                # مرتب‌سازی بر اساس زمان ثبت (جدیدترین در ابتدا)
+                my_alerts = my_alerts[::-1]
+                msg = f"تعداد هشدارهای فعال: {len(my_alerts)}\n\n"
                 for i, a in enumerate(my_alerts, 1):
-                    tag_str = f" ({a['tag']})" if a.get('tag') else ""
-                    msg += f"هشدار {i}:\nنام ارز {a['symbol'].upper()}{tag_str}\nقیمت tp {a['tp']}\nقیمت stop {a['stop']}\n\n"
+                    sym = a['symbol'].lower()
+                    tag = a.get('tag', '')
+                    tag_str = f" ({tag})" if tag and not str(tag).replace('.', '').isdigit() else ""
+                    
+                    close_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
+                    
+                    # Resolve entry price
+                    entry = 0.0
+                    if a.get("entry"):
+                        try:
+                            entry = float(a["entry"])
+                        except:
+                            pass
+                    if entry == 0 and tag and str(tag).replace('.', '').isdigit():
+                        try:
+                            entry = float(tag)
+                        except:
+                            pass
+                    if entry == 0:
+                        entry = close_price if close_price > 0 else float(a.get("tp", 0))
+                        
+                    if close_price == 0:
+                        close_price = entry
+                        
+                    diff_pct = 0.0
+                    if entry > 0 and close_price > 0:
+                        diff_pct = round(((close_price - entry) / entry) * 100, 2)
+                    diff_sign = "+" if diff_pct > 0 else ""
+                    if diff_pct == int(diff_pct):
+                        diff_val_str = str(int(diff_pct))
+                    else:
+                        diff_val_str = f"{diff_pct:.2f}".rstrip('0').rstrip('.')
+                    diff_str = f"{diff_sign}{diff_val_str}%"
+                    
+                    msg += f"{i}- {sym}{tag_str} قیمت {fmt_price(close_price)}usd entri {fmt_price(entry)} tp {fmt_price(a['tp'])} stop {fmt_price(a['stop'])} میزان اختلاف قیمت به entri {diff_str}\n\n"
+                
+                msg += "راهنمای حذف:\n"
+                msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.\n"
+                msg += "مثال:\n"
+                msg += "11 (حذف کل لیست)\n"
+                msg += "1 btc (حذف فقط ارز btc)"
                 send_message(chat_id, msg, keyboard)
 
-        elif text.startswith("هشدار") or "قیمت tp" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("هشدار", "").replace(",", " ").strip().split()) in [3, 4] and any(char.isdigit() for char in text)):
-            parts = text.replace("هشدار", "").replace(",", " ").strip().split()
-            if len(parts) == 4:
-                try:
-                    sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
-                    tag = parts[1]
-                    tp = float(parts[2])
-                    stop = float(parts[3])
-                    
-                    if sym in prices:
-                        if "alerts" not in data:
-                            data["alerts"] = []
-                        data["alerts"].append({"symbol": sym, "tag": tag, "tp": tp, "stop": stop, "chat_id": chat_id})
-                        send_message(chat_id, f"✅ هشدار با موفقیت ثبت شد!\nارز: {sym.upper()}\nنشانه: {tag}\nقیمت فعلی: {prices[sym]}\nتارگت‌های شما: {tp} و {stop}\n\n(هر زمان قیمت به یکی از این دو برسد، در کانال آلارم می‌فرستم)", keyboard)
-                    else:
-                        send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
-                except:
-                    send_message(chat_id, "فرمت قیمت‌ها اشتباه است! لطفا قیمت‌ها را به عدد وارد کنید. مثال:\nxrp لانگ 1.5 0.4", keyboard)
-            elif len(parts) == 3:
-                try:
-                    sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
-                    tp = float(parts[1])
-                    stop = float(parts[2])
-                    tag = ""
-                    
-                    if sym in prices:
-                        if "alerts" not in data:
-                            data["alerts"] = []
-                        data["alerts"].append({"symbol": sym, "tag": tag, "tp": tp, "stop": stop, "chat_id": chat_id})
-                        send_message(chat_id, f"✅ هشدار با موفقیت ثبت شد!\nارز: {sym.upper()}\nقیمت فعلی: {prices[sym]}\nتارگت‌های شما: {tp} و {stop}\n\n(هر زمان قیمت به یکی از این دو برسد، در کانال آلارم می‌فرستم)", keyboard)
-                    else:
-                        send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
-                except:
-                    send_message(chat_id, "فرمت قیمت‌ها اشتباه است! لطفا فقط عدد وارد کنید. مثال:\nxrp لانگ 1.5 0.4", keyboard)
+        elif text == "11" or (text.startswith("حذف") and "11" in text):
+            count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)])
+            if count_deleted > 0:
+                data["alerts"] = [a for a in data.get("alerts", []) if str(a.get("chat_id")) != str(chat_id)]
+                send_message(chat_id, "کل لیست هشدارهای شما با موفقیت حذف شد.", keyboard)
             else:
-                send_message(chat_id, "دستور نامعتبر است! لطفاً به این شکل بفرستید:\nxrp لانگ 1.5 0.4", keyboard)
+                send_message(chat_id, "شما هیچ هشدار فعالی در لیست ندارید.", keyboard)
+
+        elif (text.startswith("1 ") or text.startswith("1-") or (len(text.split()) == 2 and text.split()[0] == "1") or (text.startswith("1") and len(text) > 2 and text[1:].isalpha())):
+            parts = text.replace("-", " ").strip().split()
+            if len(parts) >= 2 and parts[0] == "1":
+                target_sym = parts[1].lower().replace("_usdt", "").replace("usdt", "")
+            elif text.startswith("1") and len(text) > 1:
+                target_sym = text[1:].strip().lower().replace("_usdt", "").replace("usdt", "")
+            else:
+                target_sym = ""
+                
+            if target_sym:
+                count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym])
+                if count_deleted > 0:
+                    data["alerts"] = [a for a in data.get("alerts", []) if not (str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym)]
+                    send_message(chat_id, f"هشدار ارز {target_sym.upper()} با موفقیت حذف شد.", keyboard)
+                else:
+                    send_message(chat_id, f"هشداری برای ارز {target_sym.upper()} در لیست شما پیدا نشد.", keyboard)
+
+        elif text.startswith("هشدار") or "قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("هشدار", "").replace(",", " ").strip().split()) >= 3 and any(char.isdigit() for char in text)):
+            raw = text.replace("هشدار", "").replace(",", " ").strip()
+            parts = raw.split()
+            sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
+            tag = ""
+            entry = 0.0
+            tp = 0.0
+            stop = 0.0
+            valid = False
+
+            # پیدا کردن سه عدد آخر به عنوان entry، tp، stop
+            # همه قطعه‌های بینابینی به عنوان tag ذخیره می‌شوند (بدون محدودیت)
+            numeric_indices = []
+            for i, p in enumerate(parts[1:], start=1):
+                try:
+                    float(p)
+                    numeric_indices.append(i)
+                except ValueError:
+                    pass
+
+            if len(numeric_indices) >= 3:
+                # سه عدد آخر = entry، tp، stop
+                entry_idx, tp_idx, stop_idx = numeric_indices[-3], numeric_indices[-2], numeric_indices[-1]
+                try:
+                    entry = float(parts[entry_idx])
+                    tp = float(parts[tp_idx])
+                    stop = float(parts[stop_idx])
+                    # همه بخش‌های بینابینی (غیر از sym و سه عدد آخر) به عنوان tag
+                    tag_parts = [p for i, p in enumerate(parts[1:], start=1) if i not in (entry_idx, tp_idx, stop_idx)]
+                    tag = " ".join(tag_parts).strip()
+                    valid = True
+                except:
+                    valid = False
+            elif len(numeric_indices) == 2:
+                # بدون entry: entry = قیمت لحظه‌ای
+                tp_idx, stop_idx = numeric_indices[0], numeric_indices[1]
+                try:
+                    entry = float(prices.get(sym, 0))
+                    tp = float(parts[tp_idx])
+                    stop = float(parts[stop_idx])
+                    tag_parts = [p for i, p in enumerate(parts[1:], start=1) if i not in (tp_idx, stop_idx)]
+                    tag = " ".join(tag_parts).strip()
+                    valid = True
+                except:
+                    valid = False
+
+            if valid:
+                if sym in prices:
+                    if "alerts" not in data:
+                        data["alerts"] = []
+                    if entry == 0:
+                        entry = float(prices.get(sym, 0))
+                    data["alerts"].append({
+                        "symbol": sym,
+                        "tag": tag,
+                        "entry": entry,
+                        "tp": tp,
+                        "stop": stop,
+                        "chat_id": chat_id,
+                        "created_at": int(datetime.utcnow().timestamp())
+                    })
+                    tag_line = f"نشانه: {tag}\n" if tag else ""
+                    send_message(chat_id, f"✅ هشدار با موفقیت ثبت شد!\nارز: {sym.upper()}\n{tag_line}قیمت فعلی: {prices[sym]}\nورود (entri): {fmt_price(entry)}\nتارگت‌های شما: tp {fmt_price(tp)} و stop {fmt_price(stop)}\n\n(هر زمان قیمت به یکی از این دو برسد، در کانال آلارم می‌فرستم)", keyboard)
+                else:
+                    send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
+            else:
+                send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.\nمثال:\nxrp 2.51 0.4\nxrp 1.58 2.51 0.4\nxrp فروش منفی 7 درصد اهرم 7 1.58 2.51 0.4", keyboard)
+                
+        elif text in ["چارت 📊", "چارت", "chart"]:
+            guide_msg = (
+                "برای دریافت ابتدا نام عرض سپس تایم فریم که گزینه های 15 و 30 دقیقه و 1 2 4 ساعتی میباشد سپس تایم فریم حد اکثر 50 کندل میباشد و سپس قیمت مورد نظر و سپس برای کمترین قیمت عدد 0 و بیشترین قیمت عدد 9 را وارد نمایید\n\n"
+                "1 نام   : که اول باید نام عرض نوشته شود\n"
+                "2 تایم  فریم : که دقیقه دو گزینه 15 و 30 دقیقه باشد و ساعتی نیز 1 2 4 ساعته باشد\n"
+                "3 تعداد کندل : که حد اکثر 50 تا کندل باشد\n"
+                "4 قیمت مد نظر  : که اینجا از قیمت مورد نظر شروع به خروجی داده که کمترین یا بیشترین قیمت میباشد\n"
+                "5 رمز بیشترین یا کمترین  : که اگر کمترین قیمت باشد عدد 0 و اگر بیشترین قیمت را بخواهیم عدد 9 را وارد کنیم\n\n"
+                "مثال : btc  4 30 1.58 0"
+            )
+            force_reply_markup = {"force_reply": True, "input_field_placeholder": "btc 4 30 1.58 0"}
+            send_message(chat_id, guide_msg, force_reply_markup)
+            
+        elif text.startswith("چارت") or "برای دریافت ابتدا نام" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("چارت", "").replace(",", " ").strip().split()) == 5 and text.replace("چارت", "").replace(",", " ").strip().split()[-1] in ["0", "9"]):
+            parts = text.replace("چارت", "").replace(",", " ").strip().split()
+            if len(parts) == 5:
+                chart_res = process_chart_request(parts[0], parts[1], parts[2], parts[3], parts[4])
+                send_message(chat_id, chart_res, keyboard)
+            else:
+                send_message(chat_id, "فرمت دستور چارت اشتباه است! لطفاً به این شکل بفرستید:\nbtc 4 30 1.58 0", keyboard)
                 
         else:
             sym = text.replace('usdt', '').strip()
@@ -256,14 +502,16 @@ def main():
                 day_low = info["dayLow"]
                 day_high = info["dayHigh"]
                 price_now = info["lastPrice"]
+                vol_str = format_volume(info.get("amount24", 0))
                 
                 sign = "+" if day_change > 0 else ""
                 msg = (
                     f"نام {sym}\n"
-                    f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %\n"
                     f"قیمت {price_now} usdt\n"
+                    f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %\n"
                     f"کمترین قیمت {day_low} usdt\n"
-                    f"بیشترین قیمت {day_high} usdt"
+                    f"بیشترین قیمت {day_high} usdt\n"
+                    f"حجم {vol_str}"
                 )
                 send_message(chat_id, msg, keyboard)
             else:
@@ -312,8 +560,8 @@ def main():
                 trigger_price = alert["stop"]
             
         if triggered:
-            tag_str = f" {alert.get('tag')}" if alert.get("tag") else ""
-            msg_alert = f"نام {sym.upper()}{tag_str} {triggered_type} {trigger_price}"
+            tag_str = f"\n{alert.get('tag')}" if alert.get("tag") else ""
+            msg_alert = f"نام {sym.upper()}{tag_str}\n{triggered_type} {fmt_price(trigger_price)}"
             send_message(ALERT_CHANNEL, msg_alert)
             send_message(alert["chat_id"], f"هشدار فعال شد:\n{msg_alert}")
         else:
