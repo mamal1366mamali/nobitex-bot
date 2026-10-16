@@ -50,8 +50,48 @@ CATEGORIES = {
         "trade_type": "short",
         "leverage": 7
     },
-    "50_100": {
-        "name_fa": "+50 الی 100 %",
+    "50_60": {
+        "name_fa": "+50 الی 60 %",
+        "entry_channel": "-1004290922830",
+        "report_channel": "-1003781040656",
+        "entry_drop": 0.15,
+        "tp_drop": 0.15,
+        "stop_rise": 0.14,
+        "trade_type": "short",
+        "leverage": 7
+    },
+    "60_70": {
+        "name_fa": "+60 الی 70 %",
+        "entry_channel": "-1004290922830",
+        "report_channel": "-1004379515603",
+        "entry_drop": 0.15,
+        "tp_drop": 0.15,
+        "stop_rise": 0.14,
+        "trade_type": "short",
+        "leverage": 7
+    },
+    "70_80": {
+        "name_fa": "+70 الی 80 %",
+        "entry_channel": "-1004290922830",
+        "report_channel": "-1003820960180",
+        "entry_drop": 0.15,
+        "tp_drop": 0.15,
+        "stop_rise": 0.14,
+        "trade_type": "short",
+        "leverage": 7
+    },
+    "80_90": {
+        "name_fa": "+80 الی 90 %",
+        "entry_channel": "-1004290922830",
+        "report_channel": "-1004310315552",
+        "entry_drop": 0.15,
+        "tp_drop": 0.15,
+        "stop_rise": 0.14,
+        "trade_type": "short",
+        "leverage": 7
+    },
+    "90_100": {
+        "name_fa": "+90 الی 100 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004452909288",
         "entry_drop": 0.15,
@@ -66,41 +106,8 @@ CATEGORIES = {
         "report_channel": "-1004458729980",
         "entry_drop": 0.25,
         "tp_drop": 0.25,
-        "stop_rise": 0.25,
+        "stop_rise": 0.14,
         "trade_type": "short",
-        "leverage": 4
-    },
-    # فیلترهای ورود آنی غیرفعال شدند:
-    # "fixed_50": { ... },
-    # "fixed_100": { ... },
-    "long_20_30": {
-        "name_fa": "+20 الی 30 % (خرید)",
-        "entry_channel": "-1004310315552",
-        "report_channel": "-1003820960180",
-        "entry_drop": 0.22,
-        "tp_rise": 0.075,
-        "stop_drop": 0.14,
-        "trade_type": "long",
-        "leverage": 7
-    },
-    "long_40_70": {
-        "name_fa": "+40 الی 70 % (خرید)",
-        "entry_channel": "-1004310315552",
-        "report_channel": "-1004379515603",
-        "entry_drop": 0.35,
-        "tp_rise": 0.15,
-        "stop_drop": 0.14,
-        "trade_type": "long",
-        "leverage": 7
-    },
-    "long_70_100": {
-        "name_fa": "+70 الی 100 % (خرید)",
-        "entry_channel": "-1004310315552",
-        "report_channel": "-1004379515603",
-        "entry_drop": 0.50,
-        "tp_rise": 0.15,
-        "stop_drop": 0.14,
-        "trade_type": "long",
         "leverage": 7
     }
 }
@@ -120,7 +127,7 @@ def load_data():
         try:
             with open(TRADES_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
+                trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT') and t.get('status') != 'OPEN']
                 data['trades'] = trades
                 return data
         except Exception:
@@ -237,7 +244,39 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         f"تاریخ: {date_str}"
     )
 
-def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count, trade_type):
+def calculate_duration_str(start_ts, end_ts):
+    try:
+        total_seconds = max(0, int(end_ts - start_ts))
+    except Exception:
+        total_seconds = 0
+        
+    days = total_seconds // 86400
+    rem_seconds = total_seconds % 86400
+    hours = rem_seconds // 3600
+    minutes = (rem_seconds % 3600) // 60
+    
+    parts = []
+    if days > 0:
+        parts.append(f"{days} روز")
+    if hours > 0:
+        parts.append(f"{hours} ساعت")
+    if minutes > 0:
+        parts.append(f"{minutes} دقیقه")
+        
+    return " و ".join(parts) if parts else "کمتر از ۱ دقیقه"
+
+def format_shamsi_from_timestamp(ts):
+    if not ts:
+        return current_date_str
+    try:
+        dt = datetime.fromtimestamp(ts)
+        s_date = jdatetime.datetime.fromgregorian(datetime=dt).strftime('%Y %m %d')
+        s_time = dt.strftime('%H : %M')
+        return f"{s_date} ساعت {s_time} دقیقه"
+    except Exception:
+        return current_date_str
+
+def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type):
     name = clean_symbol(symbol).lower()
     trade_name = "فروش" if trade_type == 'short' else "خرید"
     status_fa = f"{trade_name} {exit_type}"
@@ -257,28 +296,30 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
     msg += f"حجم: {vol}\n"
     msg += f"low: {low} usdt\n"
     msg += f"hi: {high} usdt\n"
-    msg += f"تاریخ: {date_str}"
+    msg += f"زمان شروع: {start_date_str}\n"
+    msg += f"زمان پایان: {end_date_str}\n"
+    msg += f"زمان سپری شده: {duration_str}"
     return msg
 
 def get_valid_categories(growth):
     cats = []
-    if 20 < growth <= 30: 
-        cats.append("20_30")
-        cats.append("long_20_30")
-    elif 30 < growth <= 40: 
-        cats.append("30_40")
-    elif 40 < growth <= 50: 
-        cats.append("40_50")
-    elif 50 < growth < 100: 
-        cats.append("50_100")
-    elif growth >= 100: 
-        cats.append("100_plus")
-        
-    if 40 < growth <= 70:
-        cats.append("long_40_70")
-    elif 70 < growth <= 100:
-        cats.append("long_70_100")
-    
+    if growth > 100:
+        cats = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+    elif 90 < growth <= 100:
+        cats = ["90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+    elif 80 < growth <= 90:
+        cats = ["80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+    elif 70 < growth <= 80:
+        cats = ["70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+    elif 60 < growth <= 70:
+        cats = ["60_70", "50_60", "40_50", "30_40", "20_30"]
+    elif 50 < growth <= 60:
+        cats = ["50_60", "40_50", "30_40", "20_30"]
+    elif 40 < growth <= 50:
+        cats = ["40_50", "30_40", "20_30"]
+    elif 30 < growth <= 40:
+        cats = ["30_40", "20_30"]
+    # ارزهایی که رشد آنها از صفر تابلو تا مثبت 30 درصد بوده کلاً غیرفعال هستند و هیچی اضافه نمی‌شود
     return cats
 
 def get_overall_market_trend(market_overview):
@@ -403,7 +444,15 @@ def process_markets(app_data):
                 trade['status'] = exit_type
                 trade['close_time'] = today_str
                 trade['close_timestamp'] = int(current_ts)
+                trade['close_date_str'] = current_date_str
                 trade['close_price'] = exit_price
+                
+                start_date_str = trade.get('open_date_str') or format_shamsi_from_timestamp(trade.get('open_timestamp'))
+                end_date_str = current_date_str
+                start_ts = trade.get('open_timestamp', int(current_ts))
+                end_ts = int(current_ts)
+                duration_str = calculate_duration_str(start_ts, end_ts)
+                trade['duration_str'] = duration_str
                 
                 trade_lev = trade.get('leverage') or cat_info.get('leverage', 7)
                 if trade_type == 'short':
@@ -436,13 +485,13 @@ def process_markets(app_data):
                 msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, current_date_str, exit_label_global, trade_type
+                    vol_str, start_date_str, end_date_str, duration_str, exit_label_global, trade_type
                 )
                 
                 msg_cat = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, current_date_str, exit_label_cat, trade_type
+                    vol_str, start_date_str, end_date_str, duration_str, exit_label_cat, trade_type
                 )
                 
                 send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
@@ -506,7 +555,22 @@ def process_markets(app_data):
             else:
                 entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
-                    entry_price = round(high_24h * (1 - entry_drop), 6)
+                    if cat_id == valid_cats[0]:
+                        entry_price = round(high_24h * (1 - entry_drop), 6)
+                    else:
+                        cat_targets = {
+                            "90_100": 2.00,
+                            "80_90": 1.90,
+                            "70_80": 1.80,
+                            "60_70": 1.70,
+                            "50_60": 1.60,
+                            "40_50": 1.50,
+                            "30_40": 1.40,
+                            "20_30": 1.30
+                        }
+                        target_ratio = cat_targets.get(cat_id, 1.30)
+                        entry_price = round(low_24h * target_ratio * (1 - entry_drop), 6)
+
                     tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
                     stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
                     should_enter = (current_close <= entry_price)
@@ -529,6 +593,7 @@ def process_markets(app_data):
                     'status': 'OPEN',
                     'open_time': today_str,
                     'open_timestamp': int(current_ts),
+                    'open_date_str': current_date_str,
                     'close_time': '',
                     'close_price': 0.0,
                     'pnl': 0.0,
@@ -560,6 +625,7 @@ def process_markets(app_data):
                 
                 send_telegram_message(bot_token, [PERSONAL_ID, cat_info['entry_channel']], msg_main)
                 send_telegram_message(bot_token, [cat_info['report_channel']], msg_cat)
+                break
                     
     app_data['trades'] = trades
     return app_data
@@ -745,13 +811,13 @@ if __name__ == '__main__':
     app_data = load_data()
     app_data = process_markets(app_data)
     
-    if iran_time.hour >= 20:
-        # گزارش روزانه هر شب ساعت ۲۰:۰۰
+    if iran_time.hour == 0:
+        # گزارش روزانه هر شب ساعت ۰۰:۰۰ (نیمه‌شب)
         if app_data.get('last_report_date') != today_str:
             generate_and_send_daily_report(app_data)
             app_data['last_report_date'] = today_str
             
-        # گزارش هفتگی جمعه‌ها ساعت ۲۰:۰۰
+        # گزارش هفتگی جمعه‌ها ساعت ۰۰:۰۰ (نیمه‌شب)
         j_now = jdatetime.datetime.fromgregorian(datetime=iran_time)
         if j_now.weekday() == 6:
             if app_data.get('last_weekly_report_date') != today_str:
