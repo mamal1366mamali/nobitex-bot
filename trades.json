@@ -5671,6 +5671,25 @@
             "cat_entry_num": 1,
             "global_entry_num": 3,
             "close_timestamp": 1792127730
+        },
+        {
+            "symbol": "WAL_USDT",
+            "category_id": "40_50",
+            "growth": 41.76419592544429,
+            "low": 0.04614,
+            "high": 0.06541,
+            "entry": 0.055598,
+            "tp": 0.047258,
+            "stop": 0.063382,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792128033,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 4
         }
     ]
 }
