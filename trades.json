@@ -5609,6 +5609,25 @@
             "leverage": 7,
             "cat_entry_num": 51,
             "global_entry_num": 71
+        },
+        {
+            "symbol": "ARC_USDT",
+            "category_id": "20_30",
+            "growth": 29.912536443148706,
+            "low": 0.0343,
+            "high": 0.04456,
+            "entry": 0.038322,
+            "tp": 0.035448,
+            "stop": 0.043687,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792121732,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
         }
     ]
 }
