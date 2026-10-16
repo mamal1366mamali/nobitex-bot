@@ -5848,6 +5848,25 @@
             "cat_entry_num": 3,
             "global_entry_num": 12,
             "close_timestamp": 1792161934
+        },
+        {
+            "symbol": "ZEREBRO_USDT",
+            "category_id": "long_40_70",
+            "growth": 57.954816958241516,
+            "low": 0.037669,
+            "high": 0.0595,
+            "entry": 0.038675,
+            "tp": 0.044476,
+            "stop": 0.03326,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792162839,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
         }
     ]
 }
