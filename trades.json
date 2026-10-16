@@ -5711,6 +5711,25 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 5
+        },
+        {
+            "symbol": "ZCAT_USDT",
+            "category_id": "50_100",
+            "growth": 59.08430232558142,
+            "low": 0.04128,
+            "high": 0.06567,
+            "entry": 0.05582,
+            "tp": 0.047447,
+            "stop": 0.063635,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792133131,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 6
         }
     ]
 }
