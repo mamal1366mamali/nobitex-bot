@@ -1,5 +1,15 @@
 {
-    "last_update_id": 645610784,
-    "alerts": [],
+    "last_update_id": 645610786,
+    "alerts": [
+        {
+            "symbol": "q",
+            "tag": "",
+            "entry": 0.059822,
+            "tp": 0.0521,
+            "stop": 0.0699,
+            "chat_id": 114669886,
+            "created_at": 1792193131
+        }
+    ],
     "last_daily_report_date": "1405/07/24"
 }
