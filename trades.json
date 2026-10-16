@@ -5740,15 +5740,16 @@
             "entry": 1.977312,
             "tp": 1.829014,
             "stop": 2.254136,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/24",
             "open_timestamp": 1792135847,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 1.829014,
+            "pnl": 52.5,
             "leverage": 7,
             "cat_entry_num": 3,
-            "global_entry_num": 7
+            "global_entry_num": 7,
+            "close_timestamp": 1792147838
         },
         {
             "symbol": "SIREN_USDT",
