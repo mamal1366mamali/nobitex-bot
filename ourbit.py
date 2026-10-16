@@ -103,6 +103,10 @@ def main():
                     growth = ((current_price - min_price_4h) / min_price_4h) * 100
                     
                     if growth >= 8.0:
+                        # فیلتر ۱: درصد تابلو نباید بیشتر از مثبت ۲۰٪ باشد
+                        if day_change > 20.0:
+                            continue
+
                         # Check if already alerted today
                         if data.get("alerted", {}).get(name) != today_str:
                             
@@ -120,6 +124,14 @@ def main():
                                         prev_4h_vol = sum([float(v) for v in amounts[-32:-16]]) if len(amounts) >= 32 else 0
                             except:
                                 pass
+
+                            # فیلتر ۲: حجم ۴ ساعت گذشته حداقل ۵۰۰ هزار دلار باشد
+                            if prev_4h_vol < 500_000:
+                                continue
+
+                            # فیلتر ۳: حجم ۴ ساعت فعلی حداقل ۳ برابر ۴ ساعت گذشته باشد
+                            if curr_4h_vol < prev_4h_vol * 3.0:
+                                continue
                             
                             # Fake vs Real logic based on user rules
                             if prev_4h_vol == 0:
