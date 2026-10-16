@@ -1,5 +1,5 @@
 {
-    "last_report_date": "1405/07/23",
+    "last_report_date": "1405/07/25",
     "trades": [
         {
             "symbol": "LUMIA_USDT",
@@ -4697,15 +4697,15 @@
             "tp": 0.042989,
             "stop": 0.057656,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 9
+            "global_entry_num": 1
         },
         {
             "symbol": "SIREN_USDT",
@@ -4717,15 +4717,15 @@
             "tp": 0.027238,
             "stop": 0.036531,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 10
+            "global_entry_num": 2
         },
         {
             "symbol": "STBL_USDT",
@@ -4737,15 +4737,15 @@
             "tp": 0.030836,
             "stop": 0.041357,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 11
+            "global_entry_num": 3
         },
         {
             "symbol": "DNA_USDT",
@@ -4757,15 +4757,15 @@
             "tp": 0.229466,
             "stop": 0.307754,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 12
+            "global_entry_num": 4
         },
         {
             "symbol": "BR_USDT",
@@ -4777,15 +4777,15 @@
             "tp": 0.353736,
             "stop": 0.474422,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 13
+            "global_entry_num": 5
         },
         {
             "symbol": "ZCAT_USDT",
@@ -4797,15 +4797,15 @@
             "tp": 0.046507,
             "stop": 0.062374,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 2,
-            "global_entry_num": 14
+            "cat_entry_num": 1,
+            "global_entry_num": 6
         },
         {
             "symbol": "ZIL_USDT",
@@ -4817,15 +4817,15 @@
             "tp": 0.002496,
             "stop": 0.003347,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 3,
-            "global_entry_num": 15
+            "cat_entry_num": 2,
+            "global_entry_num": 7
         },
         {
             "symbol": "AIINU_USDT",
@@ -4837,15 +4837,15 @@
             "tp": 0.086721,
             "stop": 0.116309,
             "status": "OPEN",
-            "open_time": "1405/07/24",
-            "open_timestamp": 1792194930,
-            "open_date_str": "1405 07 24 ساعت 23 : 55 دقیقه",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792195244,
+            "open_date_str": "1405 07 25 ساعت 00 : 00 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 4,
-            "global_entry_num": 16
+            "cat_entry_num": 3,
+            "global_entry_num": 8
         }
     ]
 }
