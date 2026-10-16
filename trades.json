@@ -5838,15 +5838,16 @@
             "entry": 0.050575,
             "tp": 0.042989,
             "stop": 0.057656,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/24",
             "open_timestamp": 1792159526,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 0.042989,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 3,
-            "global_entry_num": 12
+            "global_entry_num": 12,
+            "close_timestamp": 1792161934
         }
     ]
 }
