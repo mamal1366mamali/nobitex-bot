@@ -342,23 +342,22 @@ def main():
                     
                     close_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
                     
-                    # Resolve entry price
+                    # Resolve entry price - اول از فیلد entry هشدار بخون
                     entry = 0.0
-                    if a.get("entry"):
-                        try:
-                            entry = float(a["entry"])
-                        except:
-                            pass
+                    try:
+                        entry = float(a.get("entry", 0) or 0)
+                    except:
+                        pass
+                    # اگه entry هنوز صفره از tag امتحان کن
                     if entry == 0 and tag and str(tag).replace('.', '').isdigit():
                         try:
                             entry = float(tag)
                         except:
                             pass
-                    if entry == 0:
-                        entry = close_price if close_price > 0 else float(a.get("tp", 0))
                         
                     if close_price == 0:
-                        close_price = entry
+                        close_price = entry if entry > 0 else 0
+
                         
                     diff_pct = 0.0
                     if entry > 0 and close_price > 0:
@@ -404,7 +403,8 @@ def main():
                 else:
                     send_message(chat_id, f"هشداری برای ارز {target_sym.upper()} در لیست شما پیدا نشد.", keyboard)
 
-        elif text.startswith("هشدار") or "قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("هشدار", "").replace(",", " ").strip().split()) >= 3 and any(char.isdigit() for char in text)):
+        elif text.startswith("هشدار") or "قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", "") or (len(text.replace("هشدار", "").replace(",", " ").strip().split()) >= 3 and any(char.isdigit() for char in text) and not (len(text.replace(",", " ").strip().split()) == 5 and text.replace(",", " ").strip().split()[-1] in ["0", "9"])):
+
             raw = text.replace("هشدار", "").replace(",", " ").strip()
             parts = raw.split()
             sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
