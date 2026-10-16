@@ -5629,6 +5629,25 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "close_timestamp": 1792122336
+        },
+        {
+            "symbol": "STBL_USDT",
+            "category_id": "100_plus",
+            "growth": 164.81299212598418,
+            "low": 0.02032,
+            "high": 0.05381,
+            "entry": 0.040357,
+            "tp": 0.030268,
+            "stop": 0.050446,
+            "status": "OPEN",
+            "open_time": "1405/07/24",
+            "open_timestamp": 1792122630,
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 4,
+            "cat_entry_num": 1,
+            "global_entry_num": 2
         }
     ]
 }
