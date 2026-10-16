@@ -14,6 +14,11 @@ EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN", "")
 REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN", "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E")
 WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN", "8820733728:AAEM4e3UlWM7YekuFcFwsPXBd-GWsgievHE")
 
+def get_exit_token():
+    """توکن خروج: اگر EXIT_BOT_TOKEN تنظیم شده باشد از آن استفاده می‌کند،
+    در غیر این صورت از SELL_BOT_TOKEN (که حتماً باید تنظیم شده باشد) استفاده می‌کند."""
+    return EXIT_BOT_TOKEN if EXIT_BOT_TOKEN else SELL_BOT_TOKEN
+
 PERSONAL_ID = "114669886"
 CHANNEL_EXIT_MAIN = "-1004415777827"
 CHANNEL_REPORT_MAIN = "-1004304608564"
@@ -127,8 +132,21 @@ def load_data():
         try:
             with open(TRADES_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT') and t.get('status') != 'OPEN']
-                data['trades'] = trades
+                all_trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
+                
+                # برای هر symbol+category فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
+                seen_open = {}
+                deduped = []
+                for t in reversed(all_trades):
+                    if t.get('status') == 'OPEN':
+                        key = (t['symbol'], t.get('category_id', ''))
+                        if key not in seen_open:
+                            seen_open[key] = True
+                            deduped.append(t)
+                    else:
+                        deduped.append(t)
+                deduped.reverse()
+                data['trades'] = deduped
                 return data
         except Exception:
             pass
@@ -494,8 +512,8 @@ def process_markets(app_data):
                     vol_str, start_date_str, end_date_str, duration_str, exit_label_cat, trade_type
                 )
                 
-                send_telegram_message(EXIT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
-                send_telegram_message(EXIT_BOT_TOKEN, [cat_info['report_channel']], msg_cat)
+                send_telegram_message(get_exit_token(), [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
+                send_telegram_message(get_exit_token(), [cat_info['report_channel']], msg_cat)
 
         # بررسی کول‌داون و معاملات قبلی:
         # ۱. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، ورود آن در تمام دسته‌ها تا یک روز مسدود می‌شود
@@ -525,11 +543,6 @@ def process_markets(app_data):
                             if (current_ts - trade_ts) < (24 * 3600) or t.get('open_time') == today_str:
                                 can_open = False
                                 break
-                    else:
-                        # در صورتی که معامله باز (OPEN) در دسته دیگر دارد، همزمان ورود جدید باز نشود
-                        if t['status'] == 'OPEN':
-                            can_open = False
-                            break
             cat_cooldowns[cat_id] = can_open
 
         for cat_id in valid_cats:
@@ -548,15 +561,15 @@ def process_markets(app_data):
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
                 target_ratio = 1.0 + cat_info['fixed_growth_target']
-                entry_price = round(low_24h * target_ratio, 6)
-                tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
-                stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
+                entry_price = round(low_24h * target_ratio, 4)
+                tp_price = round(entry_price * (1 - cat_info['tp_drop']), 4)
+                stop_price = round(entry_price * (1 + cat_info['stop_rise']), 4)
                 should_enter = (current_close >= entry_price)
             else:
                 entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
                     if cat_id == valid_cats[0]:
-                        entry_price = round(high_24h * (1 - entry_drop), 6)
+                        entry_price = round(high_24h * (1 - entry_drop), 4)
                     else:
                         cat_targets = {
                             "90_100": 2.00,
@@ -569,15 +582,15 @@ def process_markets(app_data):
                             "20_30": 1.30
                         }
                         target_ratio = cat_targets.get(cat_id, 1.30)
-                        entry_price = round(low_24h * target_ratio * (1 - entry_drop), 6)
+                        entry_price = round(low_24h * target_ratio * (1 - entry_drop), 4)
 
-                    tp_price = round(entry_price * (1 - cat_info['tp_drop']), 6)
-                    stop_price = round(entry_price * (1 + cat_info['stop_rise']), 6)
+                    tp_price = round(entry_price * (1 - cat_info['tp_drop']), 4)
+                    stop_price = round(entry_price * (1 + cat_info['stop_rise']), 4)
                     should_enter = (current_close <= entry_price)
                 else: # long
-                    entry_price = round(high_24h * (1 - entry_drop), 6)
-                    tp_price = round(entry_price * (1 + cat_info['tp_rise']), 6)
-                    stop_price = round(entry_price * (1 - cat_info['stop_drop']), 6)
+                    entry_price = round(high_24h * (1 - entry_drop), 4)
+                    tp_price = round(entry_price * (1 + cat_info['tp_rise']), 4)
+                    stop_price = round(entry_price * (1 - cat_info['stop_drop']), 4)
                     should_enter = (current_close <= entry_price)
                 
             if should_enter:
