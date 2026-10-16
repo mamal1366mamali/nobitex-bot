@@ -4727,15 +4727,16 @@
             "entry": 1.00104,
             "tp": 0.925962,
             "stop": 1.141186,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/23",
             "open_timestamp": 1792044046,
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/24",
+            "close_price": 1.141186,
+            "pnl": -98.0,
             "leverage": 7,
             "cat_entry_num": 24,
-            "global_entry_num": 31
+            "global_entry_num": 31,
+            "close_timestamp": 1792131029
         },
         {
             "symbol": "NIULAI_USDT",
