@@ -1,38 +1,5 @@
 {
-    "last_update_id": 645610782,
-    "alerts": [
-        {
-            "symbol": "gps",
-            "tp": 0.009599,
-            "stop": 0.007178,
-            "chat_id": 114669886
-        },
-        {
-            "symbol": "gps",
-            "tp": 0.009599,
-            "stop": 0.007178,
-            "chat_id": 114669886
-        },
-        {
-            "symbol": "ctk",
-            "tp": 0.1129,
-            "stop": 0.1392,
-            "chat_id": 114669886
-        },
-        {
-            "symbol": "ace",
-            "tag": "",
-            "tp": 0.1576,
-            "stop": 0.1943,
-            "chat_id": 114669886
-        },
-        {
-            "symbol": "ace",
-            "tag": "فروش",
-            "tp": 0.1577,
-            "stop": 0.1944,
-            "chat_id": 114669886
-        }
-    ],
+    "last_update_id": 645610783,
+    "alerts": [],
     "last_daily_report_date": "1405/07/24"
 }
