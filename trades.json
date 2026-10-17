@@ -5578,16 +5578,19 @@
             "entry": 0.398,
             "tp": 0.3682,
             "stop": 0.4537,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/25",
             "open_timestamp": 1792258527,
             "open_date_str": "1405 07 25 ساعت 17 : 35 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/25",
+            "close_price": 0.4537,
+            "pnl": -97.96,
             "leverage": 7,
             "cat_entry_num": 8,
-            "global_entry_num": 40
+            "global_entry_num": 40,
+            "close_timestamp": 1792278633,
+            "close_date_str": "1405 07 25 ساعت 23 : 10 دقیقه",
+            "duration_str": "5 ساعت و 35 دقیقه"
         }
     ]
 }
