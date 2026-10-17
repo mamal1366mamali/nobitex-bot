@@ -5435,6 +5435,26 @@
             "leverage": 7,
             "cat_entry_num": 7,
             "global_entry_num": 34
+        },
+        {
+            "symbol": "BR_USDT",
+            "category_id": "40_50",
+            "growth": 66.19708747751109,
+            "low": 0.29459,
+            "high": 0.4896,
+            "entry": 0.3756,
+            "tp": 0.3193,
+            "stop": 0.4282,
+            "status": "OPEN",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792215937,
+            "open_date_str": "1405 07 25 ساعت 05 : 45 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 35
         }
     ]
 }
