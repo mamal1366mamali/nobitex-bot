@@ -5343,6 +5343,26 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 30
+        },
+        {
+            "symbol": "ZIL_USDT",
+            "category_id": "40_50",
+            "growth": 40.23548518067398,
+            "low": 0.002463,
+            "high": 0.003454,
+            "entry": 0.0029,
+            "tp": 0.0025,
+            "stop": 0.0033,
+            "status": "OPEN",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792209641,
+            "open_date_str": "1405 07 25 ساعت 04 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 31
         }
     ]
 }
