@@ -1,15 +1,5 @@
 {
     "last_update_id": 645610797,
-    "alerts": [
-        {
-            "symbol": "q",
-            "tag": "دسته بندی 40 50 و اهرم",
-            "entry": 7.0,
-            "tp": 0.0521,
-            "stop": 0.0699,
-            "chat_id": 114669886,
-            "created_at": 1792193728
-        }
-    ],
+    "alerts": [],
     "last_daily_report_date": "1405/07/24"
 }
