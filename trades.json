@@ -5366,6 +5366,26 @@
             "close_timestamp": 1792209930,
             "close_date_str": "1405 07 25 ساعت 04 : 05 دقیقه",
             "duration_str": "4 دقیقه"
+        },
+        {
+            "symbol": "BR_USDT",
+            "category_id": "50_60",
+            "growth": 66.19708747751109,
+            "low": 0.29459,
+            "high": 0.4896,
+            "entry": 0.4006,
+            "tp": 0.3405,
+            "stop": 0.4567,
+            "status": "OPEN",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792210228,
+            "open_date_str": "1405 07 25 ساعت 04 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 32
         }
     ]
 }
