@@ -5476,6 +5476,26 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 35
+        },
+        {
+            "symbol": "ICNT_USDT",
+            "category_id": "60_70",
+            "growth": 66.39405204460965,
+            "low": 0.1345,
+            "high": 0.2238,
+            "entry": 0.1902,
+            "tp": 0.1617,
+            "stop": 0.2168,
+            "status": "OPEN",
+            "open_time": "1405/07/25",
+            "open_timestamp": 1792236035,
+            "open_date_str": "1405 07 25 ساعت 11 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 36
         }
     ]
 }
