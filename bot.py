@@ -1,5 +1,6 @@
 import json
 import os
+import math
 import requests
 import pandas as pd
 import jdatetime
@@ -8,11 +9,11 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-SELL_BOT_TOKEN = os.environ.get("SELL_BOT_TOKEN", "")
-BUY_BOT_TOKEN = os.environ.get("BUY_BOT_TOKEN", "")
-EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN", "")
-REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN", "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E")
-WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN", "8820733728:AAEM4e3UlWM7YekuFcFwsPXBd-GWsgievHE")
+SELL_BOT_TOKEN = os.environ.get("SELL_BOT_TOKEN") or ""
+BUY_BOT_TOKEN = os.environ.get("BUY_BOT_TOKEN") or ""
+EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN") or ""
+REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
+WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN") or "8820733728:AAEM4e3UlWM7YekuFcFwsPXBd-GWsgievHE"
 
 def get_exit_token():
     """توکن خروج: اگر EXIT_BOT_TOKEN تنظیم شده باشد از آن استفاده می‌کند،
@@ -111,7 +112,7 @@ CATEGORIES = {
         "report_channel": "-1004458729980",
         "entry_drop": 0.25,
         "tp_drop": 0.25,
-        "stop_rise": 0.14,
+        "stop_rise": 0.25,
         "trade_type": "short",
         "leverage": 7
     }
@@ -188,7 +189,7 @@ def clean_symbol(symbol):
 
 def format_volume(val):
     if val is None or pd.isna(val):
-        return '0usdt'
+        return '0'
     if val >= 1_000_000_000:
         return f'{val / 1_000_000_000:.2f}b'
     elif val >= 1_000_000:
@@ -196,7 +197,33 @@ def format_volume(val):
     elif val >= 1_000:
         return f'{val / 1_000:.0f}k'
     else:
-        return f'{int(val)}usdt'
+        return f'{int(val)}'
+
+def round_price(val):
+    if val is None or val == 0:
+        return 0.0
+    val_float = float(val)
+    if abs(val_float) >= 1:
+        return round(val_float, 4)
+    exponent = math.floor(math.log10(abs(val_float)))
+    leading_zeros = -exponent - 1
+    decimals = leading_zeros + 4
+    return round(val_float, decimals)
+
+def fmt_price(val):
+    if val is None or val == 0:
+        return '0'
+    try:
+        val_float = float(val)
+        if abs(val_float) >= 1:
+            decimals = 4
+        else:
+            exponent = math.floor(math.log10(abs(val_float)))
+            leading_zeros = -exponent - 1
+            decimals = leading_zeros + 4
+        return f"{val_float:.{decimals}f}".rstrip('0').rstrip('.')
+    except Exception:
+        return str(val)
 
 def get_market_overview():
     try:
@@ -253,12 +280,12 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         f"دسته بندی رشد: {cat_name}\n"
         f"میزان رشد: +{growth:.2f} %\n"
         f"درصد منفی: -{neg_percent} %\n"
-        f"Entri: {entry}\n"
-        f"tp: {tp} usdt\n"
-        f"stop: {stop}\n"
+        f"Entri: {fmt_price(entry)}\n"
+        f"tp: {fmt_price(tp)}\n"
+        f"stop: {fmt_price(stop)}\n"
         f"حجم: {vol}\n"
-        f"low: {low} usdt\n"
-        f"hi: {high} usdt\n"
+        f"low: {fmt_price(low)}\n"
+        f"hi: {fmt_price(high)}\n"
         f"تاریخ: {date_str}"
     )
 
@@ -306,14 +333,14 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
     msg += f"دسته بندی رشد: {cat_name}\n"
     msg += f"میزان رشد: +{growth:.2f} %\n"
     msg += f"درصد منفی: -{neg_percent} %\n"
-    msg += f"Entri: {entry}\n"
+    msg += f"Entri: {fmt_price(entry)}\n"
     if exit_type == "tp":
-        msg += f"tp: {tp} usdt\n"
+        msg += f"tp: {fmt_price(tp)}\n"
     else:
-        msg += f"stop: {stop}\n"
+        msg += f"stop: {fmt_price(stop)}\n"
     msg += f"حجم: {vol}\n"
-    msg += f"low: {low} usdt\n"
-    msg += f"hi: {high} usdt\n"
+    msg += f"low: {fmt_price(low)}\n"
+    msg += f"hi: {fmt_price(high)}\n"
     msg += f"زمان شروع: {start_date_str}\n"
     msg += f"زمان پایان: {end_date_str}\n"
     msg += f"زمان سپری شده: {duration_str}"
@@ -321,9 +348,9 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
 
 def get_valid_categories(growth):
     cats = []
-    if growth > 100:
+    if growth >= 100:
         cats = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
-    elif 90 < growth <= 100:
+    elif 90 <= growth < 100:
         cats = ["90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
     elif 80 < growth <= 90:
         cats = ["80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
@@ -515,39 +542,28 @@ def process_markets(app_data):
                 send_telegram_message(get_exit_token(), [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
                 send_telegram_message(get_exit_token(), [cat_info['report_channel']], msg_cat)
 
-        # بررسی کول‌داون و معاملات قبلی:
-        # ۱. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، ورود آن در تمام دسته‌ها تا یک روز مسدود می‌شود
+        # بررسی کول‌داون و معاملات قبلی برای این ارز:
+        # ۱. اگر این ارز هم‌اکنون در هر دسته‌ای معامله OPEN داشته باشد، معامله جدید باز نمی‌شود
+        if any(t.get('symbol', '').upper() == symbol.upper() and t.get('status') == 'OPEN' for t in trades):
+            continue
+
+        # ۲. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، ورود آن در تمام دسته‌ها تا ۲۴ ساعت مسدود است
         symbol_has_stop_cooldown = False
         for t in trades:
-            if t['symbol'] == symbol and t.get('status') == 'stop':
-                trade_stop_ts = t.get('close_timestamp', t.get('open_timestamp', 0))
-                if (current_ts - trade_stop_ts) < (24 * 3600) or t.get('close_time') == today_str:
+            if t.get('symbol', '').upper() == symbol.upper() and str(t.get('status', '')).lower() == 'stop':
+                stop_ts = 0.0
+                try:
+                    stop_ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
+                except Exception:
+                    stop_ts = 0.0
+                if (current_ts - stop_ts) < (24 * 3600) or t.get('close_time') == today_str:
                     symbol_has_stop_cooldown = True
                     break
 
-        cat_cooldowns = {}
-        for cat_id in valid_cats:
-            if symbol_has_stop_cooldown:
-                cat_cooldowns[cat_id] = False
-                continue
-
-            can_open = True
-            for t in trades:
-                if t['symbol'] == symbol:
-                    if t.get('category_id', '20_30') == cat_id:
-                        if t['status'] == 'OPEN':
-                            can_open = False
-                            break
-                        else:
-                            trade_ts = t.get('open_timestamp', 0)
-                            if (current_ts - trade_ts) < (24 * 3600) or t.get('open_time') == today_str:
-                                can_open = False
-                                break
-            cat_cooldowns[cat_id] = can_open
+        if symbol_has_stop_cooldown:
+            continue
 
         for cat_id in valid_cats:
-            if not cat_cooldowns.get(cat_id, False):
-                continue
 
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
@@ -561,15 +577,15 @@ def process_markets(app_data):
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
                 target_ratio = 1.0 + cat_info['fixed_growth_target']
-                entry_price = round(low_24h * target_ratio, 4)
-                tp_price = round(entry_price * (1 - cat_info['tp_drop']), 4)
-                stop_price = round(entry_price * (1 + cat_info['stop_rise']), 4)
+                entry_price = round_price(low_24h * target_ratio)
+                tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
                 should_enter = (current_close >= entry_price)
             else:
                 entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
                     if cat_id == valid_cats[0]:
-                        entry_price = round(high_24h * (1 - entry_drop), 4)
+                        entry_price = round_price(high_24h * (1 - entry_drop))
                     else:
                         cat_targets = {
                             "90_100": 2.00,
@@ -582,15 +598,23 @@ def process_markets(app_data):
                             "20_30": 1.30
                         }
                         target_ratio = cat_targets.get(cat_id, 1.30)
-                        entry_price = round(low_24h * target_ratio * (1 - entry_drop), 4)
+                        entry_price = round_price(low_24h * target_ratio * (1 - entry_drop))
 
-                    tp_price = round(entry_price * (1 - cat_info['tp_drop']), 4)
-                    stop_price = round(entry_price * (1 + cat_info['stop_rise']), 4)
+                    # قانون اختصاصی ارزهای رشد بالای ۱۰۰ درصد:
+                    # شرط ورود حتماً باید حداقل منفی ۲۵ درصد کمتر از بیشترین قیمت (سقف) باشد
+                    # و نباید اجازه ورود به دسته‌های بالاتر مثل ۹۰-۱۰۰ یا ۸۰-۹۰ را قبل از این شرط داشته باشد
+                    if growth >= 100:
+                        min_drop_level = round_price(high_24h * (1 - 0.25))
+                        if entry_price > min_drop_level:
+                            continue
+
+                    tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                    stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
                     should_enter = (current_close <= entry_price)
                 else: # long
-                    entry_price = round(high_24h * (1 - entry_drop), 4)
-                    tp_price = round(entry_price * (1 + cat_info['tp_rise']), 4)
-                    stop_price = round(entry_price * (1 - cat_info['stop_drop']), 4)
+                    entry_price = round_price(high_24h * (1 - entry_drop))
+                    tp_price = round_price(entry_price * (1 + cat_info['tp_rise']))
+                    stop_price = round_price(entry_price * (1 - cat_info['stop_drop']))
                     should_enter = (current_close <= entry_price)
                 
             if should_enter:
@@ -643,7 +667,9 @@ def process_markets(app_data):
     app_data['trades'] = trades
     return app_data
 
-def generate_and_send_daily_report(app_data):
+def generate_and_send_daily_report(app_data, target_date=None):
+    if not target_date:
+        target_date = today_str
     trades = app_data.get('trades', [])
     
     cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': [], 'excel': []} for cat in CATEGORIES.keys()}
@@ -681,7 +707,7 @@ def generate_and_send_daily_report(app_data):
             all_excel_data.append(row)
             
         elif t['status'] in ['tp', 'stop']:
-            if t['close_time'] == today_str:
+            if t.get('close_time') == target_date:
                 stats['closed_pnl'] += t['pnl']
                 pnl_str = f"+{t['pnl']:.2f} %" if t['pnl'] > 0 else f"{t['pnl']:.2f} %"
                 
@@ -720,19 +746,58 @@ def generate_and_send_daily_report(app_data):
         for i, s in enumerate(stats['strings']):
             msg += f"{i+1} {s}\n"
             
-        msg += f"\n6 تاریخ\n{current_date_str}"
+        report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
+        msg += f"\n6 تاریخ\n{report_date_str}"
 
         chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN, cat_info['report_channel']]
         send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
 
     if total_all_transactions == 0:
-        msg = f"گزارش روز\nتعداد معاملات 0\nتاریخ {current_date_str}"
+        report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
+        msg = f"گزارش روز\nتعداد معاملات 0\nتاریخ {report_date_str}"
         chats = [PERSONAL_ID, CHANNEL_REPORT_MAIN]
         for c in CATEGORIES.values():
             chats.append(c['report_channel'])
         chats = list(set(chats))
         send_telegram_message(REPORT_BOT_TOKEN, chats, msg)
         return
+
+    # خروجی مجزا: بیشترین سوددهی دسته‌بندی‌ها از بیشترین به کمترین
+    active_ranking = []
+    for cat_id, stats in cat_stats.items():
+        if (stats['tp'] + stats['stop']) > 0 or stats['closed_pnl'] != 0:
+            active_ranking.append((cat_id, stats))
+            
+    # اگر معامله بسته‌شده‌ای نبود، دسته‌های فعال را بر اساس معاملات باز قرار بده
+    if not active_ranking:
+        for cat_id, stats in cat_stats.items():
+            if stats['opening'] > 0:
+                active_ranking.append((cat_id, stats))
+
+    if active_ranking:
+        active_ranking.sort(key=lambda x: x[1]['closed_pnl'], reverse=True)
+        msg_rank = "بیشترین سوددهی :\n"
+        for cat_id, stats in active_ranking:
+            c_info = CATEGORIES[cat_id]
+            c_name = c_info['name_fa'].replace('+', '').replace('الی', ' ').strip()
+            c_name = " ".join(c_name.split())
+            c_name = c_name.replace('%', '٪')
+            if '٪' not in c_name:
+                c_name = f"{c_name} ٪"
+                
+            pnl_val = round(stats['closed_pnl'], 2)
+            if pnl_val.is_integer():
+                pnl_str = f"+{int(pnl_val)} ٪" if pnl_val > 0 else f"{int(pnl_val)} ٪"
+            else:
+                pnl_str = f"+{pnl_val:.2f} ٪" if pnl_val > 0 else f"{pnl_val:.2f} ٪"
+                
+            msg_rank += f"دسته بندی {c_name} {pnl_str}\n"
+            
+        report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
+        msg_rank += f"\nتاریخ {report_date_str}"
+        
+        chats_rank = [CHANNEL_REPORT_MAIN]
+        send_telegram_message(REPORT_BOT_TOKEN, chats_rank, msg_rank)
 
     # ارسال فایل اکسل طبق درخواست غیرفعال شد
     return
@@ -824,17 +889,19 @@ if __name__ == '__main__':
     app_data = load_data()
     app_data = process_markets(app_data)
     
+    # گزارش روزانه هر شب راس ساعت ۱۲:۰۰ (۰۰:۰۰ نیمه‌شب)
+    # تاریخ گزارش دقیقاً کل معاملات ۲۴ ساعته روز گذشته است (از ۰۰:۰۰ تا ۲۳:۵۹)
     if iran_time.hour == 0:
-        # گزارش روزانه هر شب ساعت ۰۰:۰۰ (نیمه‌شب)
-        if app_data.get('last_report_date') != today_str:
-            generate_and_send_daily_report(app_data)
-            app_data['last_report_date'] = today_str
+        target_date = jdatetime.datetime.fromgregorian(datetime=iran_time - timedelta(hours=1)).strftime('%Y/%m/%d')
+        if app_data.get('last_report_date') != target_date:
+            generate_and_send_daily_report(app_data, target_date=target_date)
+            app_data['last_report_date'] = target_date
             
-        # گزارش هفتگی جمعه‌ها ساعت ۰۰:۰۰ (نیمه‌شب)
+        # گزارش هفتگی بامداد شنبه ساعت ۰۰:۰۰ (پایان هفته جمعه)
         j_now = jdatetime.datetime.fromgregorian(datetime=iran_time)
-        if j_now.weekday() == 6:
-            if app_data.get('last_weekly_report_date') != today_str:
+        if j_now.weekday() == 0: # شنبه بامداد
+            if app_data.get('last_weekly_report_date') != target_date:
                 generate_and_send_weekly_report(app_data)
-                app_data['last_weekly_report_date'] = today_str
+                app_data['last_weekly_report_date'] = target_date
 
     save_data(app_data)
