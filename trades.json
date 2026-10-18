@@ -7070,16 +7070,39 @@
             "entry": 0.0382,
             "tp": 0.03247,
             "stop": 0.04355,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/26",
             "open_timestamp": 1792337446,
             "open_date_str": "1405 07 26 ساعت 15 : 30 دقیقه",
+            "close_time": "1405/07/26",
+            "close_price": 0.03247,
+            "pnl": 105.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 65,
+            "close_timestamp": 1792337729,
+            "close_date_str": "1405 07 26 ساعت 15 : 35 دقیقه",
+            "duration_str": "4 دقیقه"
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "90_100",
+            "growth": 96.4160839160839,
+            "low": 0.02288,
+            "high": 0.04494,
+            "entry": 0.0382,
+            "tp": 0.03247,
+            "stop": 0.04355,
+            "status": "OPEN",
+            "open_time": "1405/07/26",
+            "open_timestamp": 1792337729,
+            "open_date_str": "1405 07 26 ساعت 15 : 35 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 9,
-            "global_entry_num": 65
+            "cat_entry_num": 10,
+            "global_entry_num": 66
         }
     ]
 }
