@@ -5770,26 +5770,6 @@
         },
         {
             "symbol": "AGT_USDT",
-            "category_id": "50_60",
-            "growth": 96.80182263562706,
-            "low": 0.058377,
-            "high": 0.114887,
-            "entry": 0.0794,
-            "tp": 0.0675,
-            "stop": 0.0905,
-            "status": "OPEN",
-            "open_time": "1405/07/26",
-            "open_timestamp": 1792303242,
-            "open_date_str": "1405 07 26 ساعت 06 : 00 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
-            "leverage": 7,
-            "cat_entry_num": 1,
-            "global_entry_num": 8
-        },
-        {
-            "symbol": "AGT_USDT",
             "category_id": "40_50",
             "growth": 96.80182263562706,
             "low": 0.058377,
@@ -5968,26 +5948,6 @@
             "close_timestamp": 1792312525,
             "close_date_str": "1405 07 26 ساعت 08 : 35 دقیقه",
             "duration_str": "4 دقیقه"
-        },
-        {
-            "symbol": "SIREN_USDT",
-            "category_id": "30_40",
-            "growth": 45.038705137227296,
-            "low": 0.02842,
-            "high": 0.04122,
-            "entry": 0.0338,
-            "tp": 0.0287,
-            "stop": 0.0385,
-            "status": "OPEN",
-            "open_time": "1405/07/26",
-            "open_timestamp": 1792312525,
-            "open_date_str": "1405 07 26 ساعت 08 : 35 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
-            "leverage": 7,
-            "cat_entry_num": 4,
-            "global_entry_num": 17
         },
         {
             "symbol": "APR_USDT",
@@ -7139,16 +7099,19 @@
             "entry": 0.0382,
             "tp": 0.03247,
             "stop": 0.04355,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/26",
             "open_timestamp": 1792338334,
             "open_date_str": "1405 07 26 ساعت 15 : 45 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/26",
+            "close_price": 0.03247,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 12,
-            "global_entry_num": 68
+            "global_entry_num": 68,
+            "close_timestamp": 1792338634,
+            "close_date_str": "1405 07 26 ساعت 15 : 50 دقیقه",
+            "duration_str": "5 دقیقه"
         }
     ]
 }
