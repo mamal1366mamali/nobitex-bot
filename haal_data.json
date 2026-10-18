@@ -1,5 +1,5 @@
 {
-    "last_update_id": 645610839,
+    "last_update_id": 645610841,
     "alerts": [
         {
             "symbol": "cati",
@@ -11,17 +11,6 @@
             "alert_num": 1,
             "chat_id": 114669886,
             "created_at": 1792314630
-        },
-        {
-            "symbol": "a",
-            "tag": "",
-            "entry": 0.08822,
-            "tp": 0.08281,
-            "stop": 0.09111,
-            "leverage": 7,
-            "alert_num": 2,
-            "chat_id": 114669886,
-            "created_at": 1792351840
         }
     ],
     "alert_counter": 2,
