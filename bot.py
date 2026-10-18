@@ -135,12 +135,12 @@ def load_data():
                 data = json.load(f)
                 all_trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
                 
-                # برای هر symbol+category فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
+                # برای هر symbol فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
                 seen_open = {}
                 deduped = []
                 for t in reversed(all_trades):
                     if t.get('status') == 'OPEN':
-                        key = (t['symbol'], t.get('category_id', ''))
+                        key = t.get('symbol', '').upper()
                         if key not in seen_open:
                             seen_open[key] = True
                             deduped.append(t)
@@ -367,6 +367,24 @@ def get_valid_categories(growth):
     # ارزهایی که رشد آنها از صفر تابلو تا مثبت 30 درصد بوده کلاً غیرفعال هستند و هیچی اضافه نمی‌شود
     return cats
 
+def get_category_for_growth(growth_val):
+    if growth_val >= 90:
+        return "90_100"
+    elif growth_val >= 80:
+        return "80_90"
+    elif growth_val >= 70:
+        return "70_80"
+    elif growth_val >= 60:
+        return "60_70"
+    elif growth_val >= 50:
+        return "50_60"
+    elif growth_val >= 40:
+        return "40_50"
+    elif growth_val >= 30:
+        return "30_40"
+    else:
+        return "20_30"
+
 def get_overall_market_trend(market_overview):
     up_count = 0
     down_count = 0
@@ -506,9 +524,9 @@ def process_markets(app_data):
                     pnl = calculate_long_pnl(trade['entry'], exit_price, leverage=trade_lev)
                 trade['pnl'] = pnl
                 
-                neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
+                neg_pct = trade.get('neg_pct') or (round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100))
                 
-                # تعداد خروجی‌های امروز در کانال اصلی (ترتیب شمارش ترتیبی از ۱ به بالا بدون ۱ اضافه):
+                # تعداد خروجی‌های امروز در کانال اصلی:
                 global_exit_count = len([
                     t for t in trades 
                     if t.get('close_time') == today_str 
@@ -542,12 +560,76 @@ def process_markets(app_data):
                 send_telegram_message(get_exit_token(), [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
                 send_telegram_message(get_exit_token(), [cat_info['report_channel']], msg_cat)
 
-        # بررسی کول‌داون و معاملات قبلی برای این ارز:
-        # ۱. اگر این ارز هم‌اکنون در هر دسته‌ای معامله OPEN داشته باشد، معامله جدید باز نمی‌شود
-        if any(t.get('symbol', '').upper() == symbol.upper() and t.get('status') == 'OPEN' for t in trades):
-            continue
+                # اگر خروج با TP بود و معامله short در دسته‌های زیر ۱۰۰ درصد بود:
+                # سریعاً همان لحظه (پشتبندش) معامله دسته بعدی باز شود
+                if exit_type == 'tp' and trade_type == 'short' and cat_id != '100_plus':
+                    cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+                    if cat_id in cat_order:
+                        curr_idx = cat_order.index(cat_id)
+                        next_idx = curr_idx + 1
+                        if next_idx < len(cat_order):
+                            next_cat_id = cat_order[next_idx]
+                            
+                            # بررسی اینکه دسته بعدی در ۲۴ ساعت گذشته یا امروز معامله نشده باشد
+                            next_already_traded = any(
+                                t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') == next_cat_id and (
+                                    t.get('open_time') == today_str or t.get('close_time') == today_str or
+                                    (current_ts - float(t.get('open_timestamp') or 0)) < (24 * 3600)
+                                )
+                                for t in trades
+                            )
+                            
+                            if not next_already_traded:
+                                next_cat_info = CATEGORIES[next_cat_id]
+                                next_entry = exit_price  # نقطه ورود = تی‌پی معامله قبلی
+                                next_tp = round_price(next_entry * (1 - 0.15))
+                                next_stop = round_price(next_entry * (1 + 0.14))
+                                next_neg_pct = 15
+                                
+                                cascade_trade = {
+                                    'symbol': symbol,
+                                    'category_id': next_cat_id,
+                                    'growth': trade.get('growth', growth),
+                                    'low': low_24h,
+                                    'high': high_24h,
+                                    'entry': next_entry,
+                                    'tp': next_tp,
+                                    'stop': next_stop,
+                                    'neg_pct': next_neg_pct,
+                                    'status': 'OPEN',
+                                    'open_time': today_str,
+                                    'open_timestamp': int(current_ts),
+                                    'open_date_str': current_date_str,
+                                    'close_time': '',
+                                    'close_price': 0.0,
+                                    'pnl': 0.0,
+                                    'leverage': next_cat_info.get('leverage', 7)
+                                }
+                                trades.append(cascade_trade)
+                                
+                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and t.get('open_time') == today_str])
+                                global_entry_count = len([
+                                    t for t in trades 
+                                    if t.get('open_time') == today_str 
+                                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == 'short'
+                                ])
+                                cascade_trade['cat_entry_num'] = cat_entry_count
+                                cascade_trade['global_entry_num'] = global_entry_count
+                                
+                                c_msg_main = generate_entry_message(
+                                    'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, global_entry_count
+                                )
+                                c_msg_cat = generate_entry_message(
+                                    'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, f"{cat_entry_count} 1"
+                                )
+                                
+                                send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], c_msg_main)
+                                send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], c_msg_cat)
 
-        # ۲. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، ورود آن در تمام دسته‌ها تا ۲۴ ساعت مسدود است
+        # بررسی وضعیت معاملات برای این ارز:
+        # ۱. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، تا ۲۴ ساعت در هیچ دسته‌ای معامله نمی‌شود
         symbol_has_stop_cooldown = False
         for t in trades:
             if t.get('symbol', '').upper() == symbol.upper() and str(t.get('status', '')).lower() == 'stop':
@@ -563,16 +645,53 @@ def process_markets(app_data):
         if symbol_has_stop_cooldown:
             continue
 
+        # بررسی وضعیت معاملات باز این ارز:
+        # معامله 100_plus به طور مستقل از دسته‌های زیر ۱۰۰ درصد می‌تواند باز باشد
+        # در دسته‌های زیر ۱۰۰ درصد نیز همزمان حداکثر ۱ معامله باز آبشاری وجود دارد
+        has_open_100_plus = any(
+            t.get('symbol', '').upper() == symbol.upper() and t.get('status') == 'OPEN' and t.get('category_id') == '100_plus'
+            for t in trades
+        )
+        has_open_sub_cat = any(
+            t.get('symbol', '').upper() == symbol.upper() and t.get('status') == 'OPEN' and t.get('category_id') != '100_plus'
+            for t in trades
+        )
+
         for cat_id in valid_cats:
+            # ۲. هر ارز در هر دسته‌بندی فقط یکبار معامله می‌شود و خروجی می‌دهد:
+            cat_already_traded = False
+            for t in trades:
+                if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') == cat_id:
+                    trade_open_ts = 0.0
+                    trade_close_ts = 0.0
+                    try:
+                        trade_open_ts = float(t.get('open_timestamp') or 0)
+                    except Exception:
+                        trade_open_ts = 0.0
+                    try:
+                        trade_close_ts = float(t.get('close_timestamp') or 0)
+                    except Exception:
+                        trade_close_ts = 0.0
+
+                    if (trade_open_ts > 0 and (current_ts - trade_open_ts) < (24 * 3600)) or \
+                       (trade_close_ts > 0 and (current_ts - trade_close_ts) < (24 * 3600)) or \
+                       t.get('open_time') == today_str or t.get('close_time') == today_str:
+                        cat_already_traded = True
+                        break
+
+            if cat_already_traded:
+                continue
+
+            # ۳. بررسی معامله باز همزمان:
+            if cat_id == '100_plus':
+                if has_open_100_plus:
+                    continue
+            else:
+                if has_open_sub_cat:
+                    continue
 
             cat_info = CATEGORIES[cat_id]
             trade_type = cat_info.get('trade_type', 'short')
-            
-            # فیلتر روند بازار برداشته شد (تمامی معاملات در هر بازاری مجاز هستند):
-            # if trade_type == 'short' and market_trend == 'bullish':
-            #     continue
-            # if trade_type == 'long' and market_trend == 'bearish':
-            #     continue
             
             is_fixed = cat_info.get('is_fixed', False)
             if is_fixed:
@@ -584,9 +703,74 @@ def process_markets(app_data):
             else:
                 entry_drop = cat_info['entry_drop']
                 if trade_type == 'short':
-                    if cat_id == valid_cats[0]:
-                        entry_price = round_price(high_24h * (1 - entry_drop))
+                    cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+
+                    if growth >= 100:
+                        drop_price_25 = round_price(high_24h * (1 - 0.25))
+                        drop_growth = ((drop_price_25 - low_24h) / low_24h) * 100 if low_24h > 0 else 0
+                        drop_cat = "100_plus" if drop_growth >= 100 else get_category_for_growth(drop_growth)
+                        drop_cat_idx = cat_order.index(drop_cat)
+                        current_cat_idx = cat_order.index(cat_id) if cat_id in cat_order else 999
+
+                        if cat_id == "100_plus":
+                            # ورود اولیه مثبت ۱۰۰ به بالا: منفی ۲۵ درصد سقف، تی‌پی منفی ۲۵ درصد ورود، استاپ مثبت ۲۵ درصد ورود
+                            entry_price = drop_price_25
+                            tp_price = round_price(entry_price * (1 - 0.25))
+                            stop_price = round_price(entry_price * (1 + 0.25))
+                            neg_pct = 25
+                            should_enter = (current_close <= entry_price and current_close > tp_price)
+                        else:
+                            # دسته‌های زیر ۱۰۰ درصد برای ارز با رشد بالای ۱۰۰:
+                            # الف) دسته‌های بالاتر و دسته‌ای که افت ۲۵ درصدی در آن واقع شده، کاملاً مسدود هستند (در همان دسته که هیچ)
+                            if current_cat_idx <= drop_cat_idx:
+                                continue
+
+                            first_cascade_cat = cat_order[drop_cat_idx + 1]
+
+                            # بررسی معاملات قبلی آبشاری زیر ۱۰۰ درصد برای این ارز
+                            prev_sub_trades = [
+                                t for t in trades 
+                                if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order and t.get('category_id') != '100_plus'
+                            ]
+
+                            if not prev_sub_trades:
+                                # اولین معامله آبشار فقط در دسته بلافاصله زیر افت مجاز است (مثلاً ۷۰-۸۰)
+                                if cat_id != first_cascade_cat:
+                                    continue
+
+                                cat_targets = {
+                                    "90_100": 2.00,
+                                    "80_90": 1.90,
+                                    "70_80": 1.80,
+                                    "60_70": 1.70,
+                                    "50_60": 1.60,
+                                    "40_50": 1.50,
+                                    "30_40": 1.40,
+                                    "20_30": 1.30
+                                }
+                                target_ratio = cat_targets.get(cat_id, 1.30)
+                                entry_price = round_price(low_24h * target_ratio * (1 - 0.15))
+                                tp_price = round_price(entry_price * (1 - 0.15))
+                                stop_price = round_price(entry_price * (1 + 0.14))
+                                neg_pct = 15
+                                should_enter = (current_close <= entry_price and current_close > tp_price)
+                            else:
+                                # اگر قبلاً معامله آبشاری انجام شده و TP خورده باشد، معامله بعدی از طریق پشتبند TP باز می‌شود
+                                last_sub = prev_sub_trades[-1]
+                                if last_sub.get('status') == 'tp':
+                                    last_cat_idx = cat_order.index(last_sub['category_id'])
+                                    if current_cat_idx == last_cat_idx + 1:
+                                        entry_price = round_price(float(last_sub['tp']))
+                                        tp_price = round_price(entry_price * (1 - 0.15))
+                                        stop_price = round_price(entry_price * (1 + 0.14))
+                                        neg_pct = 15
+                                        should_enter = (current_close <= entry_price and current_close > tp_price)
+                                    else:
+                                        continue
+                                else:
+                                    continue
                     else:
+                        # منطق ارزهای با رشد زیر ۱۰۰ درصد:
                         cat_targets = {
                             "90_100": 2.00,
                             "80_90": 1.90,
@@ -597,25 +781,43 @@ def process_markets(app_data):
                             "30_40": 1.40,
                             "20_30": 1.30
                         }
-                        target_ratio = cat_targets.get(cat_id, 1.30)
-                        entry_price = round_price(low_24h * target_ratio * (1 - entry_drop))
 
-                    # قانون اختصاصی ارزهای رشد بالای ۱۰۰ درصد:
-                    # شرط ورود حتماً باید حداقل منفی ۲۵ درصد کمتر از بیشترین قیمت (سقف) باشد
-                    # و نباید اجازه ورود به دسته‌های بالاتر مثل ۹۰-۱۰۰ یا ۸۰-۹۰ را قبل از این شرط داشته باشد
-                    if growth >= 100:
-                        min_drop_level = round_price(high_24h * (1 - 0.25))
-                        if entry_price > min_drop_level:
-                            continue
+                        prev_sub_trades = [
+                            t for t in trades 
+                            if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order
+                        ]
 
-                    tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
-                    stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
-                    should_enter = (current_close <= entry_price)
+                        if not prev_sub_trades:
+                            if cat_id == valid_cats[0]:
+                                entry_price = round_price(high_24h * (1 - entry_drop))
+                            else:
+                                target_ratio = cat_targets.get(cat_id, 1.30)
+                                entry_price = round_price(low_24h * target_ratio * (1 - entry_drop))
+
+                            tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                            stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
+                            neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
+                            should_enter = (current_close <= entry_price and current_close > tp_price)
+                        else:
+                            last_sub = prev_sub_trades[-1]
+                            if last_sub.get('status') == 'tp':
+                                last_cat_idx = cat_order.index(last_sub['category_id'])
+                                if current_cat_idx == last_cat_idx + 1:
+                                    entry_price = round_price(float(last_sub['tp']))
+                                    tp_price = round_price(entry_price * (1 - 0.15))
+                                    stop_price = round_price(entry_price * (1 + 0.14))
+                                    neg_pct = 15
+                                    should_enter = (current_close <= entry_price and current_close > tp_price)
+                                else:
+                                    continue
+                            else:
+                                continue
                 else: # long
                     entry_price = round_price(high_24h * (1 - entry_drop))
                     tp_price = round_price(entry_price * (1 + cat_info['tp_rise']))
                     stop_price = round_price(entry_price * (1 - cat_info['stop_drop']))
-                    should_enter = (current_close <= entry_price)
+                    neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
+                    should_enter = (current_close >= entry_price and current_close < tp_price)
                 
             if should_enter:
                 new_trade = {
@@ -627,6 +829,7 @@ def process_markets(app_data):
                     'entry': entry_price,
                     'tp': tp_price,
                     'stop': stop_price,
+                    'neg_pct': neg_pct,
                     'status': 'OPEN',
                     'open_time': today_str,
                     'open_timestamp': int(current_ts),
@@ -638,7 +841,6 @@ def process_markets(app_data):
                 }
                 trades.append(new_trade)
                 
-                neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
                 cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == today_str])
                 global_entry_count = len([
                     t for t in trades 
@@ -662,7 +864,12 @@ def process_markets(app_data):
                 
                 send_telegram_message(bot_token, [PERSONAL_ID, cat_info['entry_channel']], msg_main)
                 send_telegram_message(bot_token, [cat_info['report_channel']], msg_cat)
-                break
+                
+                if cat_id == '100_plus':
+                    has_open_100_plus = True
+                else:
+                    has_open_sub_cat = True
+                    break
                     
     app_data['trades'] = trades
     return app_data
