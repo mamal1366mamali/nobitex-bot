@@ -1,5 +1,5 @@
 {
-    "last_update_id": 645610849,
+    "last_update_id": 645610851,
     "alerts": [
         {
             "symbol": "cati",
@@ -13,6 +13,6 @@
             "created_at": 1792314630
         }
     ],
-    "alert_counter": 3,
+    "alert_counter": 4,
     "last_daily_report_date": "1405/07/26"
 }
