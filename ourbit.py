@@ -1,5 +1,6 @@
 import json
 import os
+import math
 import requests
 import jdatetime
 from datetime import datetime, timedelta
@@ -41,6 +42,21 @@ def format_volume(val):
         return f'{val / 1_000:.0f}K'
     else:
         return f'{int(val)}'
+
+def fmt_price(val):
+    if val is None or val == 0:
+        return '0'
+    try:
+        val_float = float(val)
+        if abs(val_float) >= 1:
+            decimals = 4
+        else:
+            exponent = math.floor(math.log10(abs(val_float)))
+            leading_zeros = -exponent - 1
+            decimals = leading_zeros + 4
+        return f"{val_float:.{decimals}f}".rstrip('0').rstrip('.')
+    except Exception:
+        return str(val)
 
 def main():
     data = load_data()
@@ -154,9 +170,9 @@ def main():
                                 f"حجم ۴ ساعت فعلی {format_volume(curr_4h_vol)}\n"
                                 f"حجم ۴ ساعت گذشته {format_volume(prev_4h_vol)}\n"
                                 f"تحلیل {vol_status}\n"
-                                f"قیمت: {current_price} usdt\n"
-                                f"کمترین قیمت: {low_price} usdt\n"
-                                f"بیشترین قیمت: {high_price} usdt"
+                                f"قیمت: {fmt_price(current_price)}\n"
+                                f"کمترین قیمت: {fmt_price(low_price)}\n"
+                                f"بیشترین قیمت: {fmt_price(high_price)}"
                             )
                             send_telegram_message(msg)
                             
