@@ -443,7 +443,9 @@ def main():
                         elif any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell']):
                             is_short = True
                         
-                    leverage = int(a.get("leverage", 1) or 1)
+                    leverage = int(a.get("leverage") or 7)
+                    if leverage == 1:
+                        leverage = 7
                     diff_pct = 0.0
                     if entry > 0 and close_price > 0:
                         if is_short:
@@ -576,14 +578,14 @@ def main():
                     if entry == 0:
                         entry = float(prices.get(sym, 0))
 
-                    # پارس اهرم از متن (مثلاً «اهرم 7» یا «اهرم10»)
-                    leverage = 1
+                    # پارس اهرم از متن (پیش‌فرض اهرم 7)
+                    leverage = 7
                     lev_match = re.search(r'اهرم\s*(\d+)', raw)
                     if lev_match:
                         try:
                             leverage = int(lev_match.group(1))
                         except Exception:
-                            leverage = 1
+                            leverage = 7
 
                     # شماره ترتیبی هشدار
                     data["alert_counter"] = data.get("alert_counter", 0) + 1
@@ -681,7 +683,9 @@ def main():
             
         if triggered:
             entry_price = float(alert.get("entry", 0) or 0)
-            leverage = int(alert.get("leverage", 1) or 1)
+            leverage = int(alert.get("leverage") or 7)
+            if leverage == 1:
+                leverage = 7
             alert_num = alert.get("alert_num", "")
 
             # محاسبه سود یا ضرر با اهرم
