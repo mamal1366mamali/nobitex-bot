@@ -5890,6 +5890,26 @@
             "close_timestamp": 1792308326,
             "close_date_str": "1405 07 26 ساعت 07 : 25 دقیقه",
             "duration_str": "24 دقیقه"
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "30_40",
+            "growth": 31.659693165969315,
+            "low": 0.03585,
+            "high": 0.0472,
+            "entry": 0.0401,
+            "tp": 0.0341,
+            "stop": 0.0457,
+            "status": "OPEN",
+            "open_time": "1405/07/26",
+            "open_timestamp": 1792311925,
+            "open_date_str": "1405 07 26 ساعت 08 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 14
         }
     ]
 }
