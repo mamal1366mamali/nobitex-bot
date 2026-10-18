@@ -5817,16 +5817,19 @@
             "entry": 0.0695,
             "tp": 0.0591,
             "stop": 0.0792,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/07/26",
             "open_timestamp": 1792305638,
             "open_date_str": "1405 07 26 ساعت 06 : 40 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/26",
+            "close_price": 0.0792,
+            "pnl": -97.7,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 10
+            "global_entry_num": 10,
+            "close_timestamp": 1792322725,
+            "close_date_str": "1405 07 26 ساعت 11 : 25 دقیقه",
+            "duration_str": "4 ساعت و 44 دقیقه"
         },
         {
             "symbol": "Q_USDT",
@@ -6173,16 +6176,19 @@
             "entry": 0.0401,
             "tp": 0.0341,
             "stop": 0.0457,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/26",
             "open_timestamp": 1792322433,
             "open_date_str": "1405 07 26 ساعت 11 : 20 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/26",
+            "close_price": 0.0341,
+            "pnl": 104.74,
             "leverage": 7,
             "cat_entry_num": 3,
-            "global_entry_num": 26
+            "global_entry_num": 26,
+            "close_timestamp": 1792322725,
+            "close_date_str": "1405 07 26 ساعت 11 : 25 دقیقه",
+            "duration_str": "4 دقیقه"
         }
     ]
 }
