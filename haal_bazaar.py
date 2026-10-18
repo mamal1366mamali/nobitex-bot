@@ -407,7 +407,7 @@ def main():
                 for i, a in enumerate(my_alerts, 1):
                     sym = a['symbol'].lower()
                     tag = a.get('tag', '')
-                    tag_str = f" ({tag})" if tag and not str(tag).replace('.', '').isdigit() else ""
+                    tag_display = str(tag).strip() if tag and not str(tag).replace('.', '').isdigit() else "ندارد"
                     
                     close_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
                     
@@ -427,19 +427,49 @@ def main():
                     if close_price == 0:
                         close_price = entry if entry > 0 else 0
 
+                    # تشخیص نوع معامله (شورت یا لانگ):
+                    is_short = False
+                    tp_val = float(a.get('tp', 0) or 0)
+                    stop_val = float(a.get('stop', 0) or 0)
+                    if entry > 0:
+                        if tp_val > 0 and tp_val < entry:
+                            is_short = True
+                        elif stop_val > 0 and stop_val > entry:
+                            is_short = True
+                        elif tp_val > 0 and tp_val > entry:
+                            is_short = False
+                        elif stop_val > 0 and stop_val < entry:
+                            is_short = False
+                        elif any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell']):
+                            is_short = True
                         
                     leverage = int(a.get("leverage", 1) or 1)
                     diff_pct = 0.0
                     if entry > 0 and close_price > 0:
-                        diff_pct = round(((close_price - entry) / entry) * 100 * leverage, 2)
-                    diff_sign = "+" if diff_pct > 0 else ""
-                    if diff_pct == int(diff_pct):
-                        diff_val_str = str(int(diff_pct))
-                    else:
-                        diff_val_str = f"{diff_pct:.2f}".rstrip('0').rstrip('.')
-                    diff_str = f"{diff_sign}{diff_val_str} ٪"
+                        if is_short:
+                            diff_pct = round(((entry - close_price) / entry) * 100 * leverage, 2)
+                        else:
+                            diff_pct = round(((close_price - entry) / entry) * 100 * leverage, 2)
                     
-                    msg += f"{i}- عرض {sym}{tag_str} close {fmt_price(close_price)} entri {fmt_price(entry)} tp {fmt_price(a['tp'])} stop {fmt_price(a['stop'])} اختلاف درصد قیمت به ورودی {diff_str}\n\n"
+                    abs_diff = abs(diff_pct)
+                    if abs_diff == int(abs_diff):
+                        diff_val_str = str(int(abs_diff))
+                    else:
+                        diff_val_str = f"{abs_diff:.2f}".rstrip('0').rstrip('.')
+
+                    if diff_pct > 0:
+                        pnl_str = f"سود + {diff_val_str}٪"
+                    elif diff_pct < 0:
+                        pnl_str = f"ضرر - {diff_val_str}٪"
+                    else:
+                        pnl_str = "سود + 0٪"
+                    
+                    msg += (
+                        f"{i}- نام: {sym}  نشانه: {tag_display}\n"
+                        f"قیمت: {fmt_price(close_price)}  entri: {fmt_price(entry)}\n"
+                        f"تیپی: {fmt_price(a['tp'])}  استاپ: {fmt_price(a['stop'])}\n"
+                        f"{pnl_str}\n\n"
+                    )
                 
                 msg += "راهنمای حذف:\n"
                 msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.\n"
@@ -573,11 +603,9 @@ def main():
                     tag_display = tag if tag else "بدون نشانه"
                     confirm_msg = (
                         f"✅ هشدار با موفقیت ثبت شد!\n\n"
-                        f"1 نام : {sym.upper()}\n"
-                        f"2 نشانه : {tag_display}\n"
-                        f"3 ورود : {fmt_price(entry)}\n"
-                        f"4 تیپی : {fmt_price(tp)}\n"
-                        f"5 استاپ : {fmt_price(stop)}"
+                        f"نام: {sym.upper()}  نشانه: {tag_display}\n"
+                        f"entri: {fmt_price(entry)}\n"
+                        f"تیپی: {fmt_price(tp)}  استاپ: {fmt_price(stop)}"
                     )
                     send_message(chat_id, confirm_msg, keyboard)
                 else:
@@ -661,9 +689,9 @@ def main():
                 pnl_pct = abs((trigger_price - entry_price) / entry_price) * leverage * 100
                 pnl_pct_rounded = round(pnl_pct)
                 if triggered_type == "tp":
-                    pnl_label = f"سود +{pnl_pct_rounded}٪"
+                    pnl_label = f"سود + {pnl_pct_rounded}٪"
                 else:
-                    pnl_label = f"ضرر -{pnl_pct_rounded}٪"
+                    pnl_label = f"ضرر - {pnl_pct_rounded}٪"
             else:
                 pnl_label = ""
 
