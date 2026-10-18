@@ -5731,16 +5731,19 @@
             "entry": 0.0893,
             "tp": 0.0759,
             "stop": 0.1018,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/26",
             "open_timestamp": 1792302635,
             "open_date_str": "1405 07 26 ساعت 05 : 50 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/26",
+            "close_price": 0.0759,
+            "pnl": 105.04,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 6
+            "global_entry_num": 6,
+            "close_timestamp": 1792303242,
+            "close_date_str": "1405 07 26 ساعت 06 : 00 دقیقه",
+            "duration_str": "10 دقیقه"
         },
         {
             "symbol": "AGT_USDT",
@@ -5761,6 +5764,26 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 7
+        },
+        {
+            "symbol": "AGT_USDT",
+            "category_id": "50_60",
+            "growth": 96.80182263562706,
+            "low": 0.058377,
+            "high": 0.114887,
+            "entry": 0.0794,
+            "tp": 0.0675,
+            "stop": 0.0905,
+            "status": "OPEN",
+            "open_time": "1405/07/26",
+            "open_timestamp": 1792303242,
+            "open_date_str": "1405 07 26 ساعت 06 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 8
         }
     ]
 }
