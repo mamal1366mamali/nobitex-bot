@@ -6189,6 +6189,46 @@
             "close_timestamp": 1792322725,
             "close_date_str": "1405 07 26 ساعت 11 : 25 دقیقه",
             "duration_str": "4 دقیقه"
+        },
+        {
+            "symbol": "ZEREBRO_USDT",
+            "category_id": "30_40",
+            "growth": 35.164553720066586,
+            "low": 0.023427,
+            "high": 0.031665,
+            "entry": 0.02692,
+            "tp": 0.02288,
+            "stop": 0.03069,
+            "status": "OPEN",
+            "open_time": "1405/07/26",
+            "open_timestamp": 1792325435,
+            "open_date_str": "1405 07 26 ساعت 12 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 27
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "90_100",
+            "growth": 90.7070707070707,
+            "low": 0.02475,
+            "high": 0.0472,
+            "entry": 0.04012,
+            "tp": 0.0341,
+            "stop": 0.04574,
+            "status": "OPEN",
+            "open_time": "1405/07/26",
+            "open_timestamp": 1792325435,
+            "open_date_str": "1405 07 26 ساعت 12 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 28
         }
     ]
 }
