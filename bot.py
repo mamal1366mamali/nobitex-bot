@@ -572,11 +572,9 @@ def process_markets(app_data):
                             
                             # بررسی اینکه دسته بعدی در ۲۴ ساعت گذشته یا امروز معامله نشده باشد
                             next_already_traded = any(
-                                t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') == next_cat_id and (
-                                    t.get('status') == 'OPEN' or
-                                    t.get('open_time') == today_str or t.get('close_time') == today_str or
-                                    (current_ts - float(t.get('open_timestamp') or 0)) < (24 * 3600)
-                                )
+                                t.get('symbol', '').upper() == symbol.upper()
+                                and t.get('category_id') == next_cat_id
+                                and t.get('status') == 'OPEN'
                                 for t in trades
                             )
                             
@@ -659,27 +657,15 @@ def process_markets(app_data):
         )
 
         for cat_id in valid_cats:
-            # ۲. هر ارز در هر دسته‌بندی فقط یکبار معامله می‌شود و خروجی می‌دهد:
-            cat_already_traded = False
-            for t in trades:
-                if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') == cat_id:
-                    trade_open_ts = 0.0
-                    trade_close_ts = 0.0
-                    try:
-                        trade_open_ts = float(t.get('open_timestamp') or 0)
-                    except Exception:
-                        trade_open_ts = 0.0
-                    try:
-                        trade_close_ts = float(t.get('close_timestamp') or 0)
-                    except Exception:
-                        trade_close_ts = 0.0
-
-                    if t.get('status') == 'OPEN' or \
-                       (trade_open_ts > 0 and (current_ts - trade_open_ts) < (24 * 3600)) or \
-                       (trade_close_ts > 0 and (current_ts - trade_close_ts) < (24 * 3600)) or \
-                       t.get('open_time') == today_str or t.get('close_time') == today_str:
-                        cat_already_traded = True
-                        break
+            # ۲. فقط اگر همین دسته در همین لحظه معامله‌ی باز داشته باشد، دوباره باز نمی‌شود.
+            #    کول‌داون استاپ (کل ارز، ۲۴ ساعت) در بالای همین حلقه اعمال می‌شود.
+            #    تی‌پی هیچ بلاکی ایجاد نمی‌کند و دسته بلافاصله بعد از تی‌پی آزاد است.
+            cat_already_traded = any(
+                t.get('symbol', '').upper() == symbol.upper()
+                and t.get('category_id') == cat_id
+                and t.get('status') == 'OPEN'
+                for t in trades
+            )
 
             if cat_already_traded:
                 continue
@@ -1104,21 +1090,25 @@ def generate_and_send_weekly_report(app_data):
 
 if __name__ == '__main__':
     app_data = load_data()
-    app_data = process_markets(app_data)
-    
-    # گزارش روزانه هر شب راس ساعت ۱۲:۰۰ (۰۰:۰۰ نیمه‌شب)
-    # تاریخ گزارش دقیقاً کل معاملات ۲۴ ساعته روز گذشته است (از ۰۰:۰۰ تا ۲۳:۵۹)
-    if iran_time.hour == 0:
-        target_date = jdatetime.datetime.fromgregorian(datetime=iran_time - timedelta(hours=1)).strftime('%Y/%m/%d')
-        if app_data.get('last_report_date') != target_date:
-            generate_and_send_daily_report(app_data, target_date=target_date)
-            app_data['last_report_date'] = target_date
-            
-        # گزارش هفتگی بامداد شنبه ساعت ۰۰:۰۰ (پایان هفته جمعه)
-        j_now = jdatetime.datetime.fromgregorian(datetime=iran_time)
-        if j_now.weekday() == 0: # شنبه بامداد
-            if app_data.get('last_weekly_report_date') != target_date:
-                generate_and_send_weekly_report(app_data)
-                app_data['last_weekly_report_date'] = target_date
+    try:
+        app_data = process_markets(app_data)
 
-    save_data(app_data)
+        # گزارش روزانه هر شب راس ساعت ۱۲:۰۰ (۰۰:۰۰ نیمه‌شب)
+        # تاریخ گزارش دقیقاً کل معاملات ۲۴ ساعته روز گذشته است (از ۰۰:۰۰ تا ۲۳:۵۹)
+        if iran_time.hour == 0:
+            target_date = jdatetime.datetime.fromgregorian(datetime=iran_time - timedelta(hours=1)).strftime('%Y/%m/%d')
+            if app_data.get('last_report_date') != target_date:
+                generate_and_send_daily_report(app_data, target_date=target_date)
+                app_data['last_report_date'] = target_date
+
+            # گزارش هفتگی بامداد شنبه ساعت ۰۰:۰۰ (پایان هفته جمعه)
+            j_now = jdatetime.datetime.fromgregorian(datetime=iran_time)
+            if j_now.weekday() == 0: # شنبه بامداد
+                if app_data.get('last_weekly_report_date') != target_date:
+                    generate_and_send_weekly_report(app_data)
+                    app_data['last_weekly_report_date'] = target_date
+    finally:
+        # ذخیره‌ی نهایی — حتی اگر وسط اجرا خطایی پیش بیاید.
+        # دلیل: پیام خروج/ورود *قبل* از ذخیره ارسال می‌شود؛ پس اگر اجرا نیمه‌کاره بمیرد،
+        # اجرای بعدی همان معامله را «باز» می‌بیند و همان پیام را دوباره می‌فرستد.
+        save_data(app_data)
