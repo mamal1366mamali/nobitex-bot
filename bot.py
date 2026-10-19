@@ -135,14 +135,14 @@ def load_data():
                 data = json.load(f)
                 all_trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
                 
-                # برای هر symbol فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
-                seen_open = {}
+                # برای هر symbol و دسته فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
+                seen_open = set()
                 deduped = []
                 for t in reversed(all_trades):
                     if t.get('status') == 'OPEN':
-                        key = t.get('symbol', '').upper()
+                        key = (t.get('symbol', '').upper(), t.get('category_id'))
                         if key not in seen_open:
-                            seen_open[key] = True
+                            seen_open.add(key)
                             deduped.append(t)
                     else:
                         deduped.append(t)
@@ -573,6 +573,7 @@ def process_markets(app_data):
                             # بررسی اینکه دسته بعدی در ۲۴ ساعت گذشته یا امروز معامله نشده باشد
                             next_already_traded = any(
                                 t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') == next_cat_id and (
+                                    t.get('status') == 'OPEN' or
                                     t.get('open_time') == today_str or t.get('close_time') == today_str or
                                     (current_ts - float(t.get('open_timestamp') or 0)) < (24 * 3600)
                                 )
@@ -673,7 +674,8 @@ def process_markets(app_data):
                     except Exception:
                         trade_close_ts = 0.0
 
-                    if (trade_open_ts > 0 and (current_ts - trade_open_ts) < (24 * 3600)) or \
+                    if t.get('status') == 'OPEN' or \
+                       (trade_open_ts > 0 and (current_ts - trade_open_ts) < (24 * 3600)) or \
                        (trade_close_ts > 0 and (current_ts - trade_close_ts) < (24 * 3600)) or \
                        t.get('open_time') == today_str or t.get('close_time') == today_str:
                         cat_already_traded = True
@@ -727,10 +729,13 @@ def process_markets(app_data):
 
                             first_cascade_cat = cat_order[drop_cat_idx + 1]
 
-                            # بررسی معاملات قبلی آبشاری زیر ۱۰۰ درصد برای این ارز
+                            # بررسی معاملات قبلی آبشاری زیر ۱۰۰ درصد برای این ارز در چرخه اخیر (امروز یا ۲۴ ساعت گذشته)
                             prev_sub_trades = [
                                 t for t in trades 
-                                if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order and t.get('category_id') != '100_plus'
+                                if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order and t.get('category_id') != '100_plus' and (
+                                    t.get('open_time') == today_str or t.get('close_time') == today_str or
+                                    (current_ts - float(t.get('open_timestamp') or 0)) < (24 * 3600)
+                                )
                             ]
 
                             if not prev_sub_trades:
@@ -782,9 +787,13 @@ def process_markets(app_data):
                             "20_30": 1.30
                         }
 
+                        # بررسی معاملات قبلی آبشاری زیر ۱۰۰ درصد برای این ارز در چرخه اخیر (امروز یا ۲۴ ساعت گذشته)
                         prev_sub_trades = [
                             t for t in trades 
-                            if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order
+                            if t.get('symbol', '').upper() == symbol.upper() and t.get('category_id') in cat_order and (
+                                t.get('open_time') == today_str or t.get('close_time') == today_str or
+                                (current_ts - float(t.get('open_timestamp') or 0)) < (24 * 3600)
+                            )
                         ]
 
                         if not prev_sub_trades:
