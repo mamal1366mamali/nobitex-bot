@@ -7358,6 +7358,27 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 10
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "30_40",
+            "growth": 32.36420886906325,
+            "low": 1.9055,
+            "high": 2.5222,
+            "entry": 2.1439,
+            "tp": 1.8223,
+            "stop": 2.444,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/27",
+            "open_timestamp": 1792426540,
+            "open_date_str": "1405 07 27 ساعت 16 : 15 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 11
         }
     ]
 }
