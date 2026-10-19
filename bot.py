@@ -776,6 +776,7 @@ def process_markets(app_data):
                                     continue
                     else:
                         # منطق ارزهای با رشد زیر ۱۰۰ درصد:
+                        current_cat_idx = cat_order.index(cat_id) if cat_id in cat_order else 999
                         cat_targets = {
                             "90_100": 2.00,
                             "80_90": 1.90,
