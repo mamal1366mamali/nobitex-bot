@@ -7483,16 +7483,40 @@
             "tp": 0.02135,
             "stop": 0.02864,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/28",
             "open_timestamp": 1792454446,
             "open_date_str": "1405 07 28 ساعت 00 : 00 دقیقه",
+            "close_time": "1405/07/28",
+            "close_price": 0.02135,
+            "pnl": 105.06,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1,
+            "close_timestamp": 1792455636,
+            "close_date_str": "1405 07 28 ساعت 00 : 20 دقیقه",
+            "duration_str": "19 دقیقه"
+        },
+        {
+            "symbol": "SIREN_USDT",
+            "category_id": "20_30",
+            "growth": 64.18758882046424,
+            "low": 0.02111,
+            "high": 0.03466,
+            "entry": 0.02135,
+            "tp": 0.01815,
+            "stop": 0.02434,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/28",
+            "open_timestamp": 1792455636,
+            "open_date_str": "1405 07 28 ساعت 00 : 20 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 2
         }
     ]
 }
