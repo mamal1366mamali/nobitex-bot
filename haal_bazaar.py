@@ -428,19 +428,21 @@ def main():
                         close_price = entry if entry > 0 else 0
 
                     # تشخیص نوع معامله (شورت یا لانگ):
-                    is_short = False
+                    trade_type = a.get('trade_type', '')
+                    is_short = (trade_type == 'short')
                     tp_val = float(a.get('tp', 0) or 0)
                     stop_val = float(a.get('stop', 0) or 0)
-                    if entry > 0:
-                        if tp_val > 0 and tp_val < entry:
-                            is_short = True
-                        elif stop_val > 0 and stop_val > entry:
-                            is_short = True
-                        elif tp_val > 0 and tp_val > entry:
-                            is_short = False
-                        elif stop_val > 0 and stop_val < entry:
-                            is_short = False
-                        elif any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell']):
+                    if not trade_type:
+                        if entry > 0:
+                            if tp_val > 0 and tp_val < entry:
+                                is_short = True
+                            elif stop_val > 0 and stop_val > entry:
+                                is_short = True
+                            elif tp_val > 0 and tp_val > entry:
+                                is_short = False
+                            elif stop_val > 0 and stop_val < entry:
+                                is_short = False
+                        if not is_short and any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell', 'مثبت']):
                             is_short = True
                         
                     leverage = int(a.get("leverage") or 7)
@@ -449,8 +451,10 @@ def main():
                     diff_pct = 0.0
                     if entry > 0 and close_price > 0:
                         if is_short:
+                            # در معامله شورت: در نزول قیمت سود، در صعود قیمت ضرر
                             diff_pct = round(((entry - close_price) / entry) * 100 * leverage, 2)
                         else:
+                            # در معامله لانگ: در صعود قیمت سود، در نزول قیمت ضرر
                             diff_pct = round(((close_price - entry) / entry) * 100 * leverage, 2)
                     
                     abs_diff = abs(diff_pct)
@@ -538,54 +542,65 @@ def main():
         ):
 
             raw = text.replace("هشدار", "").replace(",", " ").strip()
+            # تبدیل اعداد فارسی به انگلیسی
+            persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+            for idx_p, d in enumerate(persian_digits):
+                raw = raw.replace(d, str(idx_p))
+
             parts = raw.split()
             sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
             tag = ""
             entry = 0.0
             tp = 0.0
             stop = 0.0
+            leverage = 7
             valid = False
 
-            # پیدا کردن سه عدد آخر به عنوان entry، tp، stop
-            # همه قطعه‌های بینابینی به عنوان tag ذخیره می‌شوند (بدون محدودیت)
-            numeric_indices = []
-            for i, p in enumerate(parts[1:], start=1):
+            # پارس اهرم در صورت وجود (پیش‌فرض ۷)
+            lev_match = re.search(r'اهرم\s*(\d+)', raw)
+            if lev_match:
                 try:
-                    float(p)
-                    numeric_indices.append(i)
-                except ValueError:
-                    pass
+                    leverage = int(lev_match.group(1))
+                except Exception:
+                    leverage = 7
 
-            if len(numeric_indices) >= 2:
-                # دو عدد آخر همیشه تارگت‌های tp و stop هستند
-                tp_idx, stop_idx = numeric_indices[-2], numeric_indices[-1]
+            # طبق دستور دقیق کاربر:
+            # دو کادر/عدد آخر در نظر گرفته می‌شوند:
+            # آخرین عدد (چهارمی) = استاپ (stop)
+            # یکی مانده به آخر (سومی) = تی‌پی (tp)
+            # تمام بخش‌های بین نام ارز و تی‌پی = نشانه (tag)
+            try:
+                stop = float(parts[-1])
+                tp = float(parts[-2])
+                tag_parts = parts[1:-2]
+                tag = " ".join(tag_parts).strip()
+                valid = True
+            except (ValueError, IndexError):
+                # اگر فقط یک عدد در انتها وارد شده بود (فقط تی‌پی)
                 try:
-                    tp = float(parts[tp_idx])
-                    stop = float(parts[stop_idx])
-                    # قیمت ورود همیشه قیمت زنده بازار در لحظه ثبت است
-                    entry = float(prices.get(sym, 0))
-                    # همه بخش‌های بینابینی (غیر از sym و دو عدد آخر) به عنوان tag ذخیره می‌شوند
-                    tag_parts = [p for i, p in enumerate(parts[1:], start=1) if i not in (tp_idx, stop_idx)]
+                    tp = float(parts[-1])
+                    stop = 0.0
+                    tag_parts = parts[1:-1]
                     tag = " ".join(tag_parts).strip()
                     valid = True
-                except:
+                except (ValueError, IndexError):
                     valid = False
 
             if valid:
                 if sym in prices:
                     if "alerts" not in data:
                         data["alerts"] = []
-                    if entry == 0:
-                        entry = float(prices.get(sym, 0))
 
-                    # پارس اهرم از متن (پیش‌فرض اهرم 7)
-                    leverage = 7
-                    lev_match = re.search(r'اهرم\s*(\d+)', raw)
-                    if lev_match:
-                        try:
-                            leverage = int(lev_match.group(1))
-                        except Exception:
-                            leverage = 7
+                    # قیمت کلوز اینتری = قیمت زنده بازار در لحظه ثبت معامله
+                    entry = float(prices.get(sym, 0))
+
+                    # قانون مستقیم کاربر:
+                    # اگر سومی که تیپی هست زیر قیمت کلوز اینتری باشه معامله شورت
+                    # و اگر تیپی بالای قیمت کلوز اینتری باشه معامله لانگ
+                    if tp < entry:
+                        trade_type = "short"
+                    else:
+                        trade_type = "long"
 
                     # شماره ترتیبی هشدار
                     data["alert_counter"] = data.get("alert_counter", 0) + 1
@@ -597,15 +612,18 @@ def main():
                         "entry": entry,
                         "tp": tp,
                         "stop": stop,
+                        "trade_type": trade_type,
                         "leverage": leverage,
                         "alert_num": alert_num,
                         "chat_id": chat_id,
                         "created_at": int(datetime.utcnow().timestamp())
                     })
                     tag_display = tag if tag else "بدون نشانه"
+                    type_display = "شورت (فروش)" if trade_type == "short" else "لانگ (خرید)"
                     confirm_msg = (
                         f"✅ هشدار با موفقیت ثبت شد!\n\n"
-                        f"نام: {sym.upper()}  نشانه: {tag_display}\n"
+                        f"نام: {sym.upper()}  نوع: {type_display}\n"
+                        f"نشانه: {tag_display}\n"
                         f"entri: {fmt_price(entry)}\n"
                         f"تیپی: {fmt_price(tp)}  استاپ: {fmt_price(stop)}"
                     )
@@ -657,42 +675,68 @@ def main():
             remaining_alerts.append(alert)
             continue
             
+        entry_price = float(alert.get("entry", 0) or 0)
+        tp_price = float(alert.get("tp", 0) or 0)
+        stop_price = float(alert.get("stop", 0) or 0)
+        trade_type = alert.get("trade_type", "")
+        
+        # تشخیص دقیق شورت یا لانگ
+        is_short = (trade_type == "short")
+        if not trade_type:
+            if tp_price > 0 and entry_price > 0:
+                is_short = (tp_price < entry_price)
+            elif stop_price > 0 and entry_price > 0:
+                is_short = (stop_price > entry_price)
+            elif any(k in str(alert.get("tag", "")).lower() for k in ["شورت", "فروش", "short", "sell", "مثبت"]):
+                is_short = True
+            else:
+                is_short = False
+
         triggered = False
         triggered_type = ""
         trigger_price = 0
         
-        upper_bound = max(alert["tp"], alert["stop"])
-        lower_bound = min(alert["tp"], alert["stop"])
-        
-        if current_price >= upper_bound:
-            triggered = True
-            if alert["tp"] == upper_bound:
+        if is_short:
+            # در معامله شورت:
+            # تی‌پی پایین‌تر از نقطه ورود است (نزول قیمت = سود)
+            if tp_price > 0 and current_price <= tp_price:
+                triggered = True
                 triggered_type = "tp"
-                trigger_price = alert["tp"]
-            else:
+                trigger_price = tp_price
+            # استاپ بالاتر از نقطه ورود است (صعود قیمت = ضرر)
+            elif stop_price > 0 and current_price >= stop_price:
+                triggered = True
                 triggered_type = "stop"
-                trigger_price = alert["stop"]
-        elif current_price <= lower_bound:
-            triggered = True
-            if alert["tp"] == lower_bound:
+                trigger_price = stop_price
+        else:
+            # در معامله لانگ:
+            # تی‌پی بالاتر از نقطه ورود است (صعود قیمت = سود)
+            if tp_price > 0 and current_price >= tp_price:
+                triggered = True
                 triggered_type = "tp"
-                trigger_price = alert["tp"]
-            else:
+                trigger_price = tp_price
+            # استاپ پایین‌تر از نقطه ورود است (نزول قیمت = ضرر)
+            elif stop_price > 0 and current_price <= stop_price:
+                triggered = True
                 triggered_type = "stop"
-                trigger_price = alert["stop"]
+                trigger_price = stop_price
             
         if triggered:
-            entry_price = float(alert.get("entry", 0) or 0)
             leverage = int(alert.get("leverage") or 7)
             if leverage == 1:
                 leverage = 7
             alert_num = alert.get("alert_num", "")
 
-            # محاسبه سود یا ضرر با اهرم
+            # محاسبه دقیق سود یا ضرر با اهرم
+            # در شورت: نزول = سود، صعود = ضرر
+            # در لانگ: صعود = سود، نزول = ضرر
             if entry_price > 0:
-                pnl_pct = abs((trigger_price - entry_price) / entry_price) * leverage * 100
-                pnl_pct_rounded = round(pnl_pct)
-                if triggered_type == "tp":
+                if is_short:
+                    pnl_pct = ((entry_price - trigger_price) / entry_price) * leverage * 100
+                else:
+                    pnl_pct = ((trigger_price - entry_price) / entry_price) * leverage * 100
+                pnl_pct_rounded = round(abs(pnl_pct))
+                if pnl_pct >= 0:
                     pnl_label = f"سود + {pnl_pct_rounded}٪"
                 else:
                     pnl_label = f"ضرر - {pnl_pct_rounded}٪"
