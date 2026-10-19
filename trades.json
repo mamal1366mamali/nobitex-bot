@@ -7372,16 +7372,19 @@
             "tp": 1.8223,
             "stop": 2.444,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/27",
             "open_timestamp": 1792426540,
             "open_date_str": "1405 07 27 ساعت 16 : 15 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/27",
+            "close_price": 1.8223,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "close_timestamp": 1792436453,
+            "close_date_str": "1405 07 27 ساعت 19 : 00 دقیقه",
+            "duration_str": "2 ساعت و 45 دقیقه"
         },
         {
             "symbol": "ZEREBRO_USDT",
@@ -7403,6 +7406,27 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 12
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "20_30",
+            "growth": 32.36420886906325,
+            "low": 1.7917,
+            "high": 2.5222,
+            "entry": 1.8223,
+            "tp": 1.549,
+            "stop": 2.0774,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/27",
+            "open_timestamp": 1792436453,
+            "open_date_str": "1405 07 27 ساعت 19 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 13
         }
     ]
 }
