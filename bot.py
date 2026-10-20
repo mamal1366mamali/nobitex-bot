@@ -34,7 +34,8 @@ CATEGORIES = {
         "tp_drop": 0.075,
         "stop_rise": 0.14,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 7,
+        "enabled": False
     },
     "30_40": {
         "name_fa": "+30 الی 40 %",
@@ -209,6 +210,11 @@ def round_price(val):
     leading_zeros = -exponent - 1
     decimals = leading_zeros + 4
     return round(val_float, decimals)
+
+def drop_to_percent(drop):
+    """تبدیل نسبت افت دسته به درصد تمیز برای نمایش در پیام: 0.14 → 14 و 0.075 → 7.5"""
+    p = round(float(drop) * 100, 1)
+    return int(p) if p % 1 == 0 else p
 
 def fmt_price(val):
     if val is None or val == 0:
@@ -578,12 +584,15 @@ def process_markets(app_data):
                                 for t in trades
                             )
                             
-                            if not next_already_traded:
-                                next_cat_info = CATEGORIES[next_cat_id]
+                            # اگر دستهٔ بعدی غیرفعال باشد، پشتبند هم باز نمی‌شود
+                            next_cat_info = CATEGORIES[next_cat_id]
+                            next_cat_enabled = next_cat_info.get('enabled', True)
+
+                            if not next_already_traded and next_cat_enabled:
                                 next_entry = exit_price  # نقطه ورود = تی‌پی معامله قبلی
-                                next_tp = round_price(next_entry * (1 - 0.15))
-                                next_stop = round_price(next_entry * (1 + 0.14))
-                                next_neg_pct = 15
+                                next_tp = round_price(next_entry * (1 - next_cat_info['tp_drop']))
+                                next_stop = round_price(next_entry * (1 + next_cat_info['stop_rise']))
+                                next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
                                 
                                 cascade_trade = {
                                     'symbol': symbol,
@@ -679,6 +688,9 @@ def process_markets(app_data):
                     continue
 
             cat_info = CATEGORIES[cat_id]
+            # دستهٔ غیرفعال هیچ معامله‌ای باز نمی‌کند (فعلاً ۲۰ تا ۳۰ غیرفعال است)
+            if not cat_info.get('enabled', True):
+                continue
             trade_type = cat_info.get('trade_type', 'short')
             
             is_fixed = cat_info.get('is_fixed', False)
@@ -725,6 +737,9 @@ def process_markets(app_data):
                             ]
 
                             if not prev_sub_trades:
+                                # دسته ۲۰ تا ۳۰ هرگز با رشد ۲۰-۳۰ درصدی باز نمی‌شود؛ فقط پشتبندِ دستهٔ بالایی
+                                if cat_id == '20_30':
+                                    continue
                                 # اولین معامله آبشار فقط در دسته بلافاصله زیر افت مجاز است (مثلاً ۷۰-۸۰)
                                 if cat_id != first_cascade_cat:
                                     continue
@@ -740,10 +755,10 @@ def process_markets(app_data):
                                     "20_30": 1.30
                                 }
                                 target_ratio = cat_targets.get(cat_id, 1.30)
-                                entry_price = round_price(low_24h * target_ratio * (1 - 0.15))
-                                tp_price = round_price(entry_price * (1 - 0.15))
-                                stop_price = round_price(entry_price * (1 + 0.14))
-                                neg_pct = 15
+                                entry_price = round_price(low_24h * target_ratio * (1 - cat_info['entry_drop']))
+                                tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                                stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
+                                neg_pct = drop_to_percent(cat_info['entry_drop'])
                                 should_enter = (current_close <= entry_price and current_close > tp_price)
                             else:
                                 # اگر قبلاً معامله آبشاری انجام شده و TP خورده باشد، معامله بعدی از طریق پشتبند TP باز می‌شود
@@ -752,9 +767,9 @@ def process_markets(app_data):
                                     last_cat_idx = cat_order.index(last_sub['category_id'])
                                     if current_cat_idx == last_cat_idx + 1:
                                         entry_price = round_price(float(last_sub['tp']))
-                                        tp_price = round_price(entry_price * (1 - 0.15))
-                                        stop_price = round_price(entry_price * (1 + 0.14))
-                                        neg_pct = 15
+                                        tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                                        stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
+                                        neg_pct = drop_to_percent(cat_info['entry_drop'])
                                         should_enter = (current_close <= entry_price and current_close > tp_price)
                                     else:
                                         continue
@@ -784,6 +799,9 @@ def process_markets(app_data):
                         ]
 
                         if not prev_sub_trades:
+                            # دسته ۲۰ تا ۳۰ هرگز با رشد ۲۰-۳۰ درصدی باز نمی‌شود؛ فقط پشتبندِ دستهٔ بالایی
+                            if cat_id == '20_30':
+                                continue
                             if cat_id == valid_cats[0]:
                                 entry_price = round_price(high_24h * (1 - entry_drop))
                             else:
@@ -800,9 +818,9 @@ def process_markets(app_data):
                                 last_cat_idx = cat_order.index(last_sub['category_id'])
                                 if current_cat_idx == last_cat_idx + 1:
                                     entry_price = round_price(float(last_sub['tp']))
-                                    tp_price = round_price(entry_price * (1 - 0.15))
-                                    stop_price = round_price(entry_price * (1 + 0.14))
-                                    neg_pct = 15
+                                    tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
+                                    stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
+                                    neg_pct = drop_to_percent(cat_info['entry_drop'])
                                     should_enter = (current_close <= entry_price and current_close > tp_price)
                                 else:
                                     continue
