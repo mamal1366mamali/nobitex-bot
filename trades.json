@@ -6099,16 +6099,19 @@
             "entry": 0.2717,
             "tp": 0.2309,
             "stop": 0.3097,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/26",
             "open_timestamp": 1792321527,
             "open_date_str": "1405 07 26 ساعت 11 : 05 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/28",
+            "close_price": 0.2309,
+            "pnl": 105.12,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 24
+            "global_entry_num": 24,
+            "close_timestamp": 1792482633,
+            "close_date_str": "1405 07 28 ساعت 07 : 50 دقیقه",
+            "duration_str": "1 روز و 20 ساعت و 45 دقیقه"
         },
         {
             "symbol": "EPIC_USDT",
@@ -7565,6 +7568,27 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 4
+        },
+        {
+            "symbol": "EPIC_USDT",
+            "category_id": "20_30",
+            "growth": 30.342577487765087,
+            "low": 0.2269,
+            "high": 0.31,
+            "entry": 0.2309,
+            "tp": 0.1963,
+            "stop": 0.2632,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/28",
+            "open_timestamp": 1792482633,
+            "open_date_str": "1405 07 28 ساعت 07 : 50 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 5
         }
     ]
 }
