@@ -7156,16 +7156,19 @@
             "tp": 0.1637,
             "stop": 0.2196,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/27",
             "open_timestamp": 1792384833,
             "open_date_str": "1405 07 27 ساعت 04 : 40 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/28",
+            "close_price": 0.1637,
+            "pnl": 105.04,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 1,
+            "close_timestamp": 1792489230,
+            "close_date_str": "1405 07 28 ساعت 09 : 40 دقیقه",
+            "duration_str": "1 روز و 4 ساعت و 59 دقیقه"
         },
         {
             "symbol": "AVA_USDT",
@@ -7634,6 +7637,27 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 7
+        },
+        {
+            "symbol": "ICNT_USDT",
+            "category_id": "30_40",
+            "growth": 48.88304862023652,
+            "low": 0.1633,
+            "high": 0.193,
+            "entry": 0.1637,
+            "tp": 0.1391,
+            "stop": 0.1866,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/28",
+            "open_timestamp": 1792489230,
+            "open_date_str": "1405 07 28 ساعت 09 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 8
         }
     ]
 }
