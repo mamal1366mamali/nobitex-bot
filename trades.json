@@ -7520,6 +7520,27 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 2
+        },
+        {
+            "symbol": "PHA_USDT",
+            "category_id": "40_50",
+            "growth": 45.84557280738565,
+            "low": 0.04766,
+            "high": 0.06951,
+            "entry": 0.05908,
+            "tp": 0.05022,
+            "stop": 0.06735,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/28",
+            "open_timestamp": 1792470333,
+            "open_date_str": "1405 07 28 ساعت 04 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 3
         }
     ]
 }
