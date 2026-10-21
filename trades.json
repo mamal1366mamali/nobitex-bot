@@ -8096,6 +8096,27 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 15
+        },
+        {
+            "symbol": "DOOD_USDT",
+            "category_id": "60_70",
+            "growth": 132.42481203007517,
+            "low": 0.002128,
+            "high": 0.004946,
+            "entry": 0.003075,
+            "tp": 0.002614,
+            "stop": 0.003506,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792610437,
+            "open_date_str": "1405 07 29 ساعت 19 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 16
         }
     ]
 }
