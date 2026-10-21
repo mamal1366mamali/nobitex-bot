@@ -8189,6 +8189,27 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 19
+        },
+        {
+            "symbol": "MAGMA_USDT",
+            "category_id": "30_40",
+            "growth": 39.33512962423537,
+            "low": 0.27464,
+            "high": 0.38267,
+            "entry": 0.3253,
+            "tp": 0.2765,
+            "stop": 0.3708,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792614035,
+            "open_date_str": "1405 07 29 ساعت 20 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 20
         }
     ]
 }
