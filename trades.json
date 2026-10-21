@@ -8279,6 +8279,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 2
+        },
+        {
+            "symbol": "DNA_USDT",
+            "category_id": "30_40",
+            "growth": 30.104712041884813,
+            "low": 0.191,
+            "high": 0.2485,
+            "entry": 0.2112,
+            "tp": 0.1795,
+            "stop": 0.2408,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792637734,
+            "open_date_str": "1405 07 30 ساعت 02 : 55 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 3
         }
     ]
 }
