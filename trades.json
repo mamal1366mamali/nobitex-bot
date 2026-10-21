@@ -7895,6 +7895,27 @@
             "close_timestamp": 1792580128,
             "close_date_str": "1405 07 29 ساعت 10 : 55 دقیقه",
             "duration_str": "4 دقیقه"
+        },
+        {
+            "symbol": "AGT_USDT",
+            "category_id": "100_plus",
+            "growth": 100.31902029895289,
+            "low": 0.038869,
+            "high": 0.077862,
+            "entry": 0.0584,
+            "tp": 0.0438,
+            "stop": 0.073,
+            "neg_pct": 25,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792580441,
+            "open_date_str": "1405 07 29 ساعت 11 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 7
         }
     ]
 }
