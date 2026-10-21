@@ -8030,6 +8030,48 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 12
+        },
+        {
+            "symbol": "BIRB_USDT",
+            "category_id": "30_40",
+            "growth": 37.26453726453727,
+            "low": 0.04884,
+            "high": 0.06704,
+            "entry": 0.05698,
+            "tp": 0.04843,
+            "stop": 0.06496,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792608336,
+            "open_date_str": "1405 07 29 ساعت 18 : 45 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 13
+        },
+        {
+            "symbol": "AXIS_USDT",
+            "category_id": "30_40",
+            "growth": 34.26326129666012,
+            "low": 0.2545,
+            "high": 0.3417,
+            "entry": 0.2904,
+            "tp": 0.2468,
+            "stop": 0.3311,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792608336,
+            "open_date_str": "1405 07 29 ساعت 18 : 45 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 7,
+            "global_entry_num": 14
         }
     ]
 }
