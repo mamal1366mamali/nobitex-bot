@@ -1,8 +1,10 @@
 import os
 import json
 import math
+import time
 import requests
 import re
+import concurrent.futures
 from datetime import datetime, timedelta
 import jdatetime
 import pandas as pd
@@ -93,6 +95,92 @@ def get_market_data():
     except Exception as e:
         print(f"Error fetching market data from Ourbit Futures: {e}")
     return prices, stats_data
+
+def _kline_ref_24h(pair):
+    """کلوز ۲۴ ساعت قبل از کندل ساعتی"""
+    for _ in range(3):
+        try:
+            r = requests.get(
+                f"{OURBIT_KLINE_URL}/{pair}?interval=Min60&limit=25",
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=20
+            )
+            res = r.json()
+            d = res.get("data") or {}
+            closes = d.get("close") if isinstance(d, dict) else None
+            if closes and len(closes) >= 25:
+                return float(closes[-25])
+        except Exception:
+            pass
+        time.sleep(0.3)
+    return None
+
+def get_true_24h_counts(stats_data, data, force=False):
+    """شمارش مثبت/منفی بر اساس ۲۴ ساعت واقعی: کلوز الان نسبت به کلوز ۲۴ ساعت قبل.
+    مرجع هر ساعت یک‌بار محاسبه و در haal_data.json کش می‌شود تا دکمهٔ دستی سریع باشد."""
+    hour_key = int(time.time() // 3600)
+    cache = data.get("ref_cache") or {}
+    if force or cache.get("hour") != hour_key:
+        refs = {}
+    else:
+        refs = dict(cache.get("prices") or {})
+
+    syms = list(stats_data.keys())
+    missing = [s for s in syms if not refs.get(s)]
+
+    if missing:
+        pairs = [f"{s.upper()}_USDT" for s in missing]
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
+                results = list(ex.map(_kline_ref_24h, pairs))
+            for s, ref in zip(missing, results):
+                if ref and ref > 0:
+                    refs[s] = ref
+        except Exception:
+            pass
+
+        # تلاش دوم فقط برای ارزهایی که بار اول جواب ندادند
+        still = [s for s in missing if not refs.get(s)]
+        if still and len(still) < len(missing):
+            pairs = [f"{s.upper()}_USDT" for s in still]
+            try:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+                    results = list(ex.map(_kline_ref_24h, pairs))
+                for s, ref in zip(still, results):
+                    if ref and ref > 0:
+                        refs[s] = ref
+            except Exception:
+                pass
+
+    if refs:
+        data["ref_cache"] = {"hour": hour_key, "prices": refs}
+
+    up = 0
+    down = 0
+    for sym, item in stats_data.items():
+        ref = refs.get(sym)
+        last = item.get("lastPrice", 0) or 0
+        if not ref or last <= 0:
+            continue
+        if last > ref:
+            up += 1
+        elif last < ref:
+            down += 1
+
+    return up, down, len(refs)
+
+def build_market_status_line(up_count, down_count):
+    total = up_count + down_count
+    if total <= 0:
+        return None
+    # عدد = درصد ارزهای صعودی (مثبت)
+    up_pct = int(round((up_count / total) * 100))
+    # مرزها: زیر ۳۳ نزولی، ۳۳ تا ۶۶ رنج، ۶۶ به بالا صعودی
+    if up_count * 3 <= total:
+        return f"نزولی {up_pct} %"
+    elif up_count * 3 >= total * 2:
+        return f"صعودی {up_pct} %"
+    return f"رنج {up_pct} %"
 
 def format_volume(val):
     if not val:
@@ -333,26 +421,26 @@ def main():
             
             up_count = 0
             down_count = 0
-            for item in stats_data.values():
-                chg = item.get("dayChange", 0)
-                if chg > 0:
-                    up_count += 1
-                elif chg < 0:
-                    down_count += 1
-                    
+
+            # محاسبهٔ خودمان: کلوز الان نسبت به کلوز ۲۴ ساعت قبل (به درصد تابلو کاری ندارد)
+            up_count, down_count, covered = get_true_24h_counts(stats_data, data)
+
+            # اگر داده ناقص بود، یک بار دیگر با گرفتن مجدد قیمت‌ها تلاش کن
+            if (up_count + down_count) == 0:
+                up_count, down_count, covered = get_true_24h_counts(stats_data, data, force=True)
+
+            if (up_count + down_count) == 0:
+                send_message(chat_id, "دریافت قیمت‌ها انجام نشد. لطفاً چند لحظه بعد دوباره بزنید.", keyboard)
+                continue
+
             total = up_count + down_count
             if total > 0:
-                up_pct = int(round((up_count / total) * 100))
-                down_pct = int(round((down_count / total) * 100))
-                
-                if up_pct >= 60:
-                    msg = f"روند بازار صعودی +{up_pct} %\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
-                elif down_pct >= 60:
-                    msg = f"روند بازار نزولی -{down_pct} %\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
-                else:
-                    msg = f"روند بازار رنج\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}"
-                    
-                send_message(chat_id, msg, keyboard)
+                trend = build_market_status_line(up_count, down_count)
+                if trend:
+                    msg = (f"روند بازار {trend}\n"
+                           f"تعداد ارزهای مثبت {up_count}\n"
+                           f"تعداد ارزهای منفی {down_count}")
+                    send_message(chat_id, msg, keyboard)
                 
         elif text in ["بیشترین رشد و افت 📈📉", "بیشترین رشد و افت", "بیشترین رشد", "بیشترین افت"]:
             if not stats_data:
@@ -758,39 +846,60 @@ def main():
             
     data["alerts"] = remaining_alerts
 
-    # Daily Market Status Report to CHANNEL_REPORT_MAIN at 20:00 (8 PM Iran time)
+    # Daily Market Status Report to CHANNEL_REPORT_MAIN
+    # مرحله ۱: ساعت ۱۹:۲۰ عکس می‌گیرد (از عدد خود صرافی)
+    # مرحله ۲: ساعت ۱۹:۲۵ همان عکس را ارسال می‌کند
     iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
     shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
     today_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y/%m/%d')
     time_str = iran_time.strftime('%H : %M')
     current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
 
-    if iran_time.hour >= 20 and data.get("last_daily_report_date") != today_str:
-        if stats_data:
-            up_count = 0
-            down_count = 0
-            for item in stats_data.values():
-                chg = item.get("dayChange", 0)
-                if chg > 0:
-                    up_count += 1
-                elif chg < 0:
-                    down_count += 1
-                    
-            total = up_count + down_count
-            if total > 0:
-                up_pct = int(round((up_count / total) * 100))
-                down_pct = int(round((down_count / total) * 100))
-                
-                if up_pct >= 60:
-                    status_line = f"حال بازار صعودی +{up_pct} %"
-                elif down_pct >= 60:
-                    status_line = f"حال بازار نزولی -{down_pct} %"
-                else:
-                    status_line = "حال بازار رنج"
-                    
-                daily_report_msg = f"{status_line}\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\nتاریخ {current_date_str}"
+    minute_of_day = iran_time.hour * 60 + iran_time.minute
+    snap_minute = 19 * 60 + 20   # 19:20
+    send_minute = 19 * 60 + 25   # 19:25
+
+    if data.get("last_daily_report_date") != today_str:
+
+        # --- مرحله ۱: عکس‌گرفتن ساعت ۱۹:۲۰ ---
+        if minute_of_day >= snap_minute and data.get("pending_report_date") != today_str:
+            if stats_data:
+                snap_up = 0
+                snap_down = 0
+                for item in stats_data.values():
+                    chg = item.get("dayChange", 0)
+                    if chg > 0:
+                        snap_up += 1
+                    elif chg < 0:
+                        snap_down += 1
+
+                if (snap_up + snap_down) > 0:
+                    data["pending_report"] = {
+                        "date": today_str,
+                        "up": snap_up,
+                        "down": snap_down,
+                        "time_str": current_date_str,
+                    }
+                    data["pending_report_date"] = today_str
+
+        # --- مرحله ۲: ارسال ساعت ۱۹:۲۵ ---
+        pending = data.get("pending_report") or {}
+        if minute_of_day >= send_minute and pending.get("date") == today_str:
+            up_count = int(pending.get("up", 0))
+            down_count = int(pending.get("down", 0))
+
+            trend = build_market_status_line(up_count, down_count)
+            if trend:
+                daily_report_msg = (
+                    f"حال بازار {trend}\n"
+                    f"تعداد ارزهای مثبت {up_count}\n"
+                    f"تعداد ارزهای منفی {down_count}\n\n"
+                    f"تاریخ {pending.get('time_str', current_date_str)}"
+                )
                 send_message(CHANNEL_REPORT_MAIN, daily_report_msg)
                 data["last_daily_report_date"] = today_str
+                data.pop("pending_report", None)
+                data.pop("pending_report_date", None)
     
     # Save data locally
     try:
