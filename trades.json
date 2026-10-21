@@ -8213,6 +8213,27 @@
             "leverage": 7,
             "cat_entry_num": 9,
             "global_entry_num": 20
+        },
+        {
+            "symbol": "ALT_USDT",
+            "category_id": "60_70",
+            "growth": 64.47021613073272,
+            "low": 0.009485,
+            "high": 0.0156,
+            "entry": 0.01326,
+            "tp": 0.01127,
+            "stop": 0.01512,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792616732,
+            "open_date_str": "1405 07 29 ساعت 21 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 21
         }
     ]
 }
