@@ -8134,16 +8134,19 @@
             "tp": 0.002222,
             "stop": 0.00298,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/29",
             "open_timestamp": 1792611056,
             "open_date_str": "1405 07 29 ساعت 19 : 30 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/29",
+            "close_price": 0.002222,
+            "pnl": 104.97,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 17
+            "global_entry_num": 17,
+            "close_timestamp": 1792613126,
+            "close_date_str": "1405 07 29 ساعت 20 : 05 دقیقه",
+            "duration_str": "34 دقیقه"
         },
         {
             "symbol": "BMT_USDT",
@@ -8165,6 +8168,27 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 18
+        },
+        {
+            "symbol": "DOOD_USDT",
+            "category_id": "40_50",
+            "growth": 132.42481203007517,
+            "low": 0.002216,
+            "high": 0.004946,
+            "entry": 0.002222,
+            "tp": 0.001889,
+            "stop": 0.002533,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/29",
+            "open_timestamp": 1792613126,
+            "open_date_str": "1405 07 29 ساعت 20 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 19
         }
     ]
 }
