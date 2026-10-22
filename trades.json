@@ -8311,16 +8311,19 @@
             "tp": 0.2233,
             "stop": 0.2995,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792645839,
             "open_date_str": "1405 07 30 ساعت 05 : 10 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/30",
+            "close_price": 0.2233,
+            "pnl": 104.99,
             "leverage": 7,
             "cat_entry_num": 4,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "close_timestamp": 1792650037,
+            "close_date_str": "1405 07 30 ساعت 06 : 20 دقیقه",
+            "duration_str": "1 ساعت و 9 دقیقه"
         }
     ]
 }
