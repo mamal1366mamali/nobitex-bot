@@ -8393,6 +8393,27 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 7
+        },
+        {
+            "symbol": "IOST_USDT",
+            "category_id": "30_40",
+            "growth": 98.89545910967308,
+            "low": 0.0008963,
+            "high": 0.0017827,
+            "entry": 0.001067,
+            "tp": 0.000907,
+            "stop": 0.001216,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792661455,
+            "open_date_str": "1405 07 30 ساعت 09 : 30 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 8
         }
     ]
 }
