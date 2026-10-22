@@ -8383,16 +8383,19 @@
             "tp": 1.5546,
             "stop": 2.0851,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792658735,
             "open_date_str": "1405 07 30 ساعت 08 : 45 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/30",
+            "close_price": 1.5546,
+            "pnl": 105.02,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 6
+            "global_entry_num": 6,
+            "close_timestamp": 1792712440,
+            "close_date_str": "1405 07 30 ساعت 23 : 40 دقیقه",
+            "duration_str": "14 ساعت و 55 دقیقه"
         },
         {
             "symbol": "ALT_USDT",
@@ -8597,6 +8600,27 @@
             "close_timestamp": 1792704656,
             "close_date_str": "1405 07 30 ساعت 21 : 30 دقیقه",
             "duration_str": "1 ساعت و 10 دقیقه"
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "50_60",
+            "growth": 64.4855526677878,
+            "low": 1.5182,
+            "high": 1.8401,
+            "entry": 1.5546,
+            "tp": 1.3214,
+            "stop": 1.7722,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792712440,
+            "open_date_str": "1405 07 30 ساعت 23 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 16
         }
     ]
 }
