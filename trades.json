@@ -8645,6 +8645,27 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1
+        },
+        {
+            "symbol": "4STOCK_USDT",
+            "category_id": "30_40",
+            "growth": 38.76923076923078,
+            "low": 0.00325,
+            "high": 0.00451,
+            "entry": 0.003834,
+            "tp": 0.003259,
+            "stop": 0.004371,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/01",
+            "open_timestamp": 1792716942,
+            "open_date_str": "1405 08 01 ساعت 00 : 55 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 2
         }
     ]
 }
