@@ -8611,16 +8611,40 @@
             "tp": 1.3214,
             "stop": 1.7722,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792712440,
             "open_date_str": "1405 07 30 ساعت 23 : 40 دقیقه",
+            "close_time": "1405/08/01",
+            "close_price": 1.3214,
+            "pnl": 105.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 16,
+            "close_timestamp": 1792714840,
+            "close_date_str": "1405 08 01 ساعت 00 : 20 دقیقه",
+            "duration_str": "40 دقیقه"
+        },
+        {
+            "symbol": "BTW_USDT",
+            "category_id": "40_50",
+            "growth": 64.4855526677878,
+            "low": 1.2855,
+            "high": 1.8401,
+            "entry": 1.3214,
+            "tp": 1.1232,
+            "stop": 1.5064,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/01",
+            "open_timestamp": 1792714840,
+            "open_date_str": "1405 08 01 ساعت 00 : 20 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
-            "cat_entry_num": 3,
-            "global_entry_num": 16
+            "cat_entry_num": 1,
+            "global_entry_num": 1
         }
     ]
 }
