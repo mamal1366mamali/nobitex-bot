@@ -8300,6 +8300,27 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "GRVT_USDT",
+            "category_id": "30_40",
+            "growth": 32.247710348369424,
+            "low": 0.23366,
+            "high": 0.30901,
+            "entry": 0.2627,
+            "tp": 0.2233,
+            "stop": 0.2995,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792645839,
+            "open_date_str": "1405 07 30 ساعت 05 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 4
         }
     ]
 }
