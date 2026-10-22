@@ -8327,6 +8327,27 @@
             "close_timestamp": 1792650037,
             "close_date_str": "1405 07 30 ساعت 06 : 20 دقیقه",
             "duration_str": "1 ساعت و 9 دقیقه"
+        },
+        {
+            "symbol": "BILL_USDT",
+            "category_id": "30_40",
+            "growth": 38.20840950639853,
+            "low": 0.00547,
+            "high": 0.00756,
+            "entry": 0.006426,
+            "tp": 0.005462,
+            "stop": 0.007326,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792656042,
+            "open_date_str": "1405 07 30 ساعت 08 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 5
         }
     ]
 }
