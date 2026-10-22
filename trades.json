@@ -8552,6 +8552,27 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 13
+        },
+        {
+            "symbol": "STONK_USDT",
+            "category_id": "30_40",
+            "growth": 30.313718210506767,
+            "low": 0.10774,
+            "high": 0.1404,
+            "entry": 0.1193,
+            "tp": 0.1014,
+            "stop": 0.136,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792694445,
+            "open_date_str": "1405 07 30 ساعت 18 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 14
         }
     ]
 }
