@@ -8584,16 +8584,19 @@
             "tp": 184.0352,
             "stop": 246.8237,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792700440,
             "open_date_str": "1405 07 30 ساعت 20 : 20 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/30",
+            "close_price": 184.0352,
+            "pnl": 105.0,
             "leverage": 7,
             "cat_entry_num": 10,
-            "global_entry_num": 15
+            "global_entry_num": 15,
+            "close_timestamp": 1792704656,
+            "close_date_str": "1405 07 30 ساعت 21 : 30 دقیقه",
+            "duration_str": "1 ساعت و 10 دقیقه"
         }
     ]
 }
