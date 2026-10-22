@@ -8573,6 +8573,27 @@
             "leverage": 7,
             "cat_entry_num": 9,
             "global_entry_num": 14
+        },
+        {
+            "symbol": "MRNA_USDT",
+            "category_id": "30_40",
+            "growth": 30.2982249731444,
+            "low": 195.49,
+            "high": 254.72,
+            "entry": 216.512,
+            "tp": 184.0352,
+            "stop": 246.8237,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792700440,
+            "open_date_str": "1405 07 30 ساعت 20 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 10,
+            "global_entry_num": 15
         }
     ]
 }
