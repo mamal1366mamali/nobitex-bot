@@ -8389,16 +8389,19 @@
             "tp": 0.009579,
             "stop": 0.01285,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792661132,
             "open_date_str": "1405 07 30 ساعت 09 : 25 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/07/30",
+            "close_price": 0.009579,
+            "pnl": 105.03,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 7
+            "global_entry_num": 7,
+            "close_timestamp": 1792663830,
+            "close_date_str": "1405 07 30 ساعت 10 : 10 دقیقه",
+            "duration_str": "44 دقیقه"
         },
         {
             "symbol": "IOST_USDT",
@@ -8423,6 +8426,27 @@
             "close_timestamp": 1792662635,
             "close_date_str": "1405 07 30 ساعت 09 : 50 دقیقه",
             "duration_str": "19 دقیقه"
+        },
+        {
+            "symbol": "ALT_USDT",
+            "category_id": "40_50",
+            "growth": 64.47021613073272,
+            "low": 0.009485,
+            "high": 0.0156,
+            "entry": 0.009579,
+            "tp": 0.008142,
+            "stop": 0.01092,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792663830,
+            "open_date_str": "1405 07 30 ساعت 10 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 9
         }
     ]
 }
