@@ -8461,16 +8461,40 @@
             "tp": 0.07523,
             "stop": 0.1009,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/07/30",
             "open_timestamp": 1792668931,
             "open_date_str": "1405 07 30 ساعت 11 : 35 دقیقه",
+            "close_time": "1405/07/30",
+            "close_price": 0.07523,
+            "pnl": 105.03,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 10,
+            "close_timestamp": 1792682133,
+            "close_date_str": "1405 07 30 ساعت 15 : 15 دقیقه",
+            "duration_str": "3 ساعت و 40 دقیقه"
+        },
+        {
+            "symbol": "LUMIA_USDT",
+            "category_id": "40_50",
+            "growth": 54.74810521622826,
+            "low": 0.06729,
+            "high": 0.10413,
+            "entry": 0.07523,
+            "tp": 0.06395,
+            "stop": 0.08576,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/07/30",
+            "open_timestamp": 1792682133,
+            "open_date_str": "1405 07 30 ساعت 15 : 15 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 10
+            "global_entry_num": 11
         }
     ]
 }
