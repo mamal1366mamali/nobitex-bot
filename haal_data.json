@@ -26,7 +26,7 @@
         }
     ],
     "alert_counter": 5,
-    "last_daily_report_date": "1405/07/29",
+    "last_daily_report_date": "1405/07/30",
     "ref_cache": {
         "hour": 497965,
         "prices": {
@@ -712,12 +712,5 @@
             "powr": 0.05264,
             "hive": 0.05058
         }
-    },
-    "pending_report": {
-        "date": "1405/07/30",
-        "up": 91,
-        "down": 667,
-        "time_str": "1405 07 30 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/07/30"
+    }
 }
