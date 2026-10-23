@@ -1,10 +1,11 @@
 import json
 import os
 import math
+import re
 import requests
 import pandas as pd
 import jdatetime
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -329,24 +330,20 @@ def format_shamsi_from_timestamp(ts):
 
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type):
     name = clean_symbol(symbol).lower()
-    trade_name = "فروش" if trade_type == 'short' else "خرید"
-    status_fa = f"{trade_name} {exit_type}"
+    status_fa = exit_type
     if daily_count:
         msg = f"{daily_count} {status_fa}\n"
     else:
         msg = f"{status_fa}\n"
     msg += f"نام: {name}\n"
-    msg += f"دسته بندی رشد: {cat_name}\n"
-    msg += f"میزان رشد: +{growth:.2f} %\n"
-    msg += f"درصد منفی: -{neg_percent} %\n"
-    msg += f"Entri: {fmt_price(entry)}\n"
+    msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} % درصد منفی: -{neg_percent} %\n"
     if exit_type == "tp":
-        msg += f"tp: {fmt_price(tp)}\n"
+        msg += f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)}\n"
     else:
-        msg += f"stop: {fmt_price(stop)}\n"
-    msg += f"زمان شروع: {start_date_str}\n"
-    msg += f"زمان پایان: {end_date_str}\n"
-    msg += f"زمان سپری شده: {duration_str}\n"
+        msg += f"Entri: {fmt_price(entry)} stop: {fmt_price(stop)}\n"
+    msg += f"شروع: {start_date_str}\n"
+    msg += f"پایان: {end_date_str}\n"
+    msg += f"مدت {duration_str}\n"
     msg += f"حجم: {vol}\n"
     msg += f"low: {fmt_price(low)}\n"
     msg += f"hi: {fmt_price(high)}"
@@ -518,6 +515,151 @@ def get_market_summary_string(market_overview=None):
     else:
         return f"حال بازار رنج\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
 
+# ---------- پایش اعلانات «حذف ارز» در صرافی ----------
+DELIST_SECTION_URL = "https://www.ourbit.com/support/categories/360000254192"
+DELIST_ARTICLE_URL = "https://www.ourbit.com/support/articles/{id}"
+DELIST_CHECK_INTERVAL = 6 * 3600     # هر ۶ ساعت یک‌بار اعلانات چک می‌شود
+DELIST_CLOSE_BEFORE = 3 * 3600       # سه ساعت مانده به زمان حذف، معامله بسته می‌شود
+DELIST_MAX_PER_RUN = 8
+
+_MONTHS_EN = {
+    'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6,
+    'july': 7, 'august': 8, 'september': 9, 'october': 10, 'november': 11, 'december': 12
+}
+
+
+def real_now_ts():
+    """زمان واقعی UTC به epoch (مستقل از ساعت داخلی برنامه)"""
+    return datetime.now(timezone.utc).timestamp()
+
+
+def ts_to_iran_str(ts):
+    """epoch واقعی → تاریخ شمسی و ساعت تهران"""
+    try:
+        dt = datetime.fromtimestamp(float(ts), timezone(timedelta(hours=3, minutes=30)))
+        jd = jdatetime.date.fromgregorian(date=dt.date())
+        return f"{jd.year}/{jd.month:02d}/{jd.day:02d} ساعت {dt.hour:02d}:{dt.minute:02d}"
+    except Exception:
+        return "-"
+
+
+def _next_data_json(html):
+    m = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html, re.S)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))
+    except Exception:
+        return None
+
+
+def fetch_delist_announcements():
+    """لیست اعلان‌های بخش «حذف ارز» صرافی: [(id, title)]"""
+    try:
+        r = requests.get(DELIST_SECTION_URL, headers={'User-Agent': 'Mozilla/5.0'}, timeout=25)
+        j = _next_data_json(r.text)
+        if not j:
+            return []
+        groups = (((j.get('props') or {}).get('pageProps') or {}).get('_articleLists')) or []
+        items = []
+        for g in groups:
+            for a in (g.get('articles') or []):
+                title = a.get('title') or ''
+                if a.get('id') and re.search(r'delist', title, re.I):
+                    items.append((str(a['id']), title))
+        return items
+    except Exception:
+        return []
+
+
+def parse_delist_deadline_utc(text):
+    """زمان حذف از متن اعلان (UTC) → epoch واقعی"""
+    m = re.search(r'(\d{1,2}):(\d{2})\s*,?\s*([A-Za-z]+)\s+(\d{1,2})\s*,?\s*(\d{4})\s*\(UTC\)', text)
+    if not m:
+        return None
+    try:
+        month = _MONTHS_EN.get(m.group(3).lower())
+        if not month:
+            return None
+        dt = datetime(int(m.group(5)), month, int(m.group(4)),
+                      int(m.group(1)), int(m.group(2)), tzinfo=timezone.utc)
+        return dt.timestamp()
+    except Exception:
+        return None
+
+
+def fetch_delist_symbols(article_id):
+    """نمادهای اعلان حذف + زمان حذف (None یعنی خطا)"""
+    try:
+        r = requests.get(DELIST_ARTICLE_URL.format(id=article_id),
+                         headers={'User-Agent': 'Mozilla/5.0'}, timeout=25)
+        j = _next_data_json(r.text)
+        if not j:
+            return None
+        fd = ((j.get('props') or {}).get('pageProps') or {}).get('fallbackData') or {}
+        body = (fd.get('data') or {}).get('body') or ''
+        if not body:
+            return None
+        text = re.sub(r'<[^>]+>', ' ', body)
+        for a, b in (('&nbsp;', ' '), ('&#39;', "'"), ('&amp;', '&'), ('&quot;', '"')):
+            text = text.replace(a, b)
+        symbols = set(re.findall(r'\b([A-Z0-9]{2,15})USDT\b', text.upper()))
+        return symbols, parse_delist_deadline_utc(text)
+    except Exception:
+        return None
+
+
+def check_delist_announcements(app_data, trades, current_ts):
+    """هر ۶ ساعت اعلانات حذف ارز خوانده می‌شود؛ برای معاملهٔ بازِ در خطر، زمان حذف ذخیره می‌شود"""
+    now = real_now_ts()
+    try:
+        last_check = float(app_data.get('delist_last_check') or 0)
+    except Exception:
+        last_check = 0.0
+    if now - last_check < DELIST_CHECK_INTERVAL:
+        return
+
+    announcements = fetch_delist_announcements()
+    if not announcements:
+        return  # صفحه در دسترس نبود؛ دفعهٔ بعد تلاش می‌شود
+
+    app_data['delist_last_check'] = int(now)
+    seen = set(str(x) for x in (app_data.get('delist_seen_ids') or []))
+    open_trades = [t for t in trades if t.get('status') == 'OPEN']
+
+    processed = 0
+    for aid, title in announcements:
+        if aid in seen or processed >= DELIST_MAX_PER_RUN:
+            continue
+        processed += 1
+        result = fetch_delist_symbols(aid)
+        if result is None:
+            continue  # خطا → «دیده‌شده» علامت نمی‌شود تا بعداً دوباره تلاش شود
+        symbols, deadline = result
+        seen.add(aid)
+        # فقط اعلان‌هایی که زمان حذفشان مشخص و مربوط به آیندهٔ نزدیک است
+        if deadline is None or deadline < real_now_ts() - 86400:
+            continue
+        for trade in open_trades:
+            base = (trade.get('symbol') or '').upper().replace('_USDT', '')
+            if not base or base not in symbols or trade.get('delist_ts'):
+                continue
+            trade['delist_ts'] = float(deadline)
+            trade['delist_announce_title'] = title
+            name = clean_symbol(trade.get('symbol', '')).lower()
+            when = ts_to_iran_str(deadline)
+            msg = (
+                "اعلان حذف ارز در صرافی\n"
+                f"{name}\n"
+                f"زمان حذف : {when}\n"
+                "برنامه : تا ۳ ساعت مانده به حذف نگه داشته می‌شود تا شاید tp بخورد،\n"
+                "اگر tp نخورد ۳ ساعت قبل از حذف بسته می‌شود"
+            )
+            send_telegram_message(REPORT_BOT_TOKEN, [PERSONAL_ID], msg)
+
+    app_data['delist_seen_ids'] = list(seen)[-300:]
+
+
 def process_markets(app_data):
     trades = app_data.get('trades', [])
     market_overview = get_market_overview()
@@ -526,6 +668,33 @@ def process_markets(app_data):
     
     current_ts = iran_time.timestamp()
     open_symbols = set([t['symbol'] for t in trades if t['status'] == 'OPEN'])
+
+    # پایش اعلانات حذف ارز در صرافی (هر ۶ ساعت)
+    check_delist_announcements(app_data, trades, current_ts)
+
+    # ارزهایی که اعلان حذف دارند: معاملهٔ جدید روی آن‌ها باز نمی‌شود
+    delist_symbols = set()
+    for t in trades:
+        dts = t.get('delist_ts')
+        if dts and float(dts) + 86400 > real_now_ts():
+            delist_symbols.add((t.get('symbol') or '').upper())
+
+    # اگر ارزی از صرافی حذف شود (قیمت نداشته باشد) معاملهٔ بازِ آن بسته می‌شود
+    if len(symbols) > 100:
+        symbol_set = set(symbols)
+        closed_delisted = 0
+        for t in trades:
+            if t.get('status') == 'OPEN' and t.get('symbol') not in symbol_set:
+                t['status'] = 'closed'
+                t['close_reason'] = 'delisted'
+                t['close_price'] = t.get('entry', 0)
+                t['pnl'] = 0.0
+                t['close_time'] = today_str
+                t['close_timestamp'] = int(current_ts)
+                closed_delisted += 1
+        if closed_delisted:
+            print(f"delisted open trades closed: {closed_delisted}")
+            open_symbols = set([t['symbol'] for t in trades if t['status'] == 'OPEN'])
     
     for symbol in symbols:
         ticker = market_overview[symbol]
@@ -579,6 +748,45 @@ def process_markets(app_data):
                 elif current_close <= trade['stop']:
                     exit_type = 'stop'
                     exit_price = trade['stop']
+
+            # ارزی که اعلان حذف دارد: ۳ ساعت مانده به زمان حذف با قیمت بازار بسته می‌شود
+            if exit_type is None and trade.get('delist_ts') is not None:
+                deadline_ts = float(trade.get('delist_ts') or 0)
+                close_at = deadline_ts - DELIST_CLOSE_BEFORE if deadline_ts > 0 else real_now_ts()
+                if real_now_ts() >= close_at:
+                    exit_type = 'delist'
+                    exit_price = current_close
+
+            if exit_type == 'delist':
+                trade['status'] = 'closed'
+                trade['close_reason'] = 'delist_announcement'
+                trade['close_time'] = today_str
+                trade['close_timestamp'] = int(current_ts)
+                trade['close_date_str'] = current_date_str
+                trade['close_price'] = exit_price
+
+                trade_lev = trade.get('leverage') or cat_info.get('leverage', 7)
+                if trade_type == 'short':
+                    pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=trade_lev)
+                else:
+                    pnl = calculate_long_pnl(trade['entry'], exit_price, leverage=trade_lev)
+                trade['pnl'] = pnl
+                trade['duration_str'] = calculate_duration_str(trade.get('open_timestamp', int(current_ts)), int(current_ts))
+
+                name = clean_symbol(symbol).lower()
+                pnl_str = f"+{pnl:.0f} %" if pnl > 0 else f"{pnl:.0f} %"
+                pnl_kind = "سود" if pnl > 0 else ("ضرر" if pnl < 0 else "بدون سود و ضرر")
+                when = ts_to_iran_str(trade['delist_ts']) if float(trade.get('delist_ts') or 0) > 0 else 'نامشخص'
+                msg_delist = (
+                    f"ارز {name} به دلیل حذف از صرافی با {pnl_kind} {pnl_str} بسته شد\n"
+                    f"دسته بندی {cat_info['name_fa'].replace('+','')}\n"
+                    f"قیمت بسته شدن : {exit_price}\n"
+                    f"زمان حذف در صرافی : {when}\n"
+                    f"پایان :\n{current_date_str}"
+                )
+                send_telegram_message(get_exit_token(), [PERSONAL_ID, CHANNEL_EXIT_MAIN, CHANNEL_REPORT_MAIN], msg_delist)
+                continue
+
                     
             if exit_type:
                 trade['status'] = exit_type
@@ -735,6 +943,10 @@ def process_markets(app_data):
                     break
 
         if symbol_has_stop_cooldown:
+            continue
+
+        # ارزی که اعلان حذف دارد، معاملهٔ جدید روی آن باز نمی‌شود
+        if symbol.upper() in delist_symbols:
             continue
 
         # قانون ۲۴ ساعتهٔ TP: بعد از TP در یک دسته، همان دسته و تمام دسته‌های بالاتر
@@ -1035,26 +1247,55 @@ def cat_display_name(cat_id):
 
 def build_counts_block(cat_stats, week=False):
     """بخش تعداد معاملات: جمع کل + دسته‌بندی‌ها از بیشترین به کمترین"""
-    total_all = sum(s['tp'] + s['stop'] + s['opening'] for s in cat_stats.values())
+    # در گزارش روز فقط معاملات بازِ همان روز شمرده می‌شود (بازهای گذشته جدا نوشته می‌شوند)
+    def open_count(st):
+        return st['opening'] if week else st.get('opening_today', st['opening'])
+
+    def open_pnl_of(st):
+        return st['open_pnl'] if week else st.get('open_pnl_today', st['open_pnl'])
+
+    total_all = sum(s['tp'] + s['stop'] + open_count(s) for s in cat_stats.values())
     if total_all <= 0:
         return ''
 
     sum_tp = sum(s['tp'] for s in cat_stats.values())
     sum_stop = sum(s['stop'] for s in cat_stats.values())
-    sum_open = sum(s['opening'] for s in cat_stats.values())
+    sum_open = sum(open_count(s) for s in cat_stats.values())
+    sum_open_pnl = sum(open_pnl_of(s) for s in cat_stats.values())
 
-    label = ' هفته' if week else ''
+    label = ' هفته' if week else ' امروز'
     out = f"تعداد تمامی معاملات{label} {total_all}\n"
     out += f"tp {sum_tp}\n"
     out += f"stop {sum_stop}\n"
-    out += f"open {sum_open}\n"
+    out += f"open {sum_open} {pnl_word(sum_open_pnl)}\n"
+
+    # معاملات باز مانده از روزهای گذشته (جمع تمام دسته‌بندی‌ها)
+    if not week:
+        past_count = sum(s.get('opening_past', 0) for s in cat_stats.values())
+        if past_count > 0:
+            past_pnl = sum(s.get('open_pnl_past', 0.0) for s in cat_stats.values())
+            past_line = f"opening روزهای گذشته : {past_count} {pnl_word(past_pnl)}"
+
+            oldest_candidates = [(s.get('oldest_open_date'), s.get('oldest_open_ts') or 0)
+                                 for s in cat_stats.values() if s.get('oldest_open_date')]
+            if oldest_candidates:
+                oldest_candidates.sort(key=lambda x: x[0])
+                oldest_date, oldest_ts = oldest_candidates[0]
+                past_line += f" قدیمی ترین {oldest_date.replace('/', ' ')}"
+                if oldest_ts:
+                    elapsed_days = int((iran_time.timestamp() - oldest_ts) / 86400)
+                    if elapsed_days < 0:
+                        elapsed_days = 0
+                    past_line += f" مدت {elapsed_days} روز"
+
+            out += past_line + "\n"
 
     ranked = [(cid, st) for cid, st in cat_stats.items()
-              if (st['tp'] + st['stop'] + st['opening']) > 0]
-    ranked.sort(key=lambda x: (x[1]['tp'] + x[1]['stop'] + x[1]['opening']), reverse=True)
+              if (st['tp'] + st['stop'] + open_count(st)) > 0]
+    ranked.sort(key=lambda x: (x[1]['tp'] + x[1]['stop'] + open_count(x[1])), reverse=True)
 
     for cat_id, st in ranked:
-        out += f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {st['opening']}\n"
+        out += f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {open_count(st)}\n"
 
     return out
 
@@ -1064,7 +1305,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
         target_date = today_str
     trades = app_data.get('trades', [])
     
-    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'closed_strings': [], 'open_strings': [], 'excel': []} for cat in CATEGORIES.keys()}
+    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'opening_today': 0, 'opening_past': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'open_pnl_today': 0.0, 'open_pnl_past': 0.0, 'oldest_open_date': None, 'oldest_open_ts': 0, 'closed_strings': [], 'open_strings': [], 'excel': []} for cat in CATEGORIES.keys()}
     all_excel_data = []
 
     for t in trades:
@@ -1076,10 +1317,26 @@ def generate_and_send_daily_report(app_data, target_date=None):
         stats = cat_stats[cat_id]
         
         if t['status'] == 'OPEN':
+            # ارزی که قیمت ندارد (حذف یا متوقف شده) از گزارش حذف می‌شود و ربات هم کرش نمی‌کند
+            try:
+                df = get_candles(t['symbol'], resolution=60, num_candles=1)
+                current_close = float(df['close'].iloc[-1]) if (df is not None and len(df) > 0) else None
+            except Exception:
+                current_close = None
+            if not current_close or current_close <= 0:
+                continue
+
             stats['opening'] += 1
-            df = get_candles(t['symbol'], resolution=60, num_candles=1)
-            current_close = float(df['close'].iloc[-1]) if df is not None else t['entry']
-            
+            is_today = (t.get('open_time') == target_date)
+            if is_today:
+                stats['opening_today'] += 1
+            else:
+                stats['opening_past'] += 1
+                open_ts = int(t.get('open_timestamp') or 0)
+                if not stats['oldest_open_date'] or (open_ts and open_ts < stats['oldest_open_ts']):
+                    stats['oldest_open_date'] = t.get('open_time')
+                    stats['oldest_open_ts'] = open_ts
+
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
@@ -1090,6 +1347,10 @@ def generate_and_send_daily_report(app_data, target_date=None):
                 live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=t_lev)
                 
             stats['open_pnl'] += live_pnl
+            if is_today:
+                stats['open_pnl_today'] += live_pnl
+            else:
+                stats['open_pnl_past'] += live_pnl
 
             live_int = int(live_pnl)
             pnl_str = f"+{live_int} %" if live_int > 0 else f"{live_int} %"
@@ -1120,31 +1381,24 @@ def generate_and_send_daily_report(app_data, target_date=None):
 
     total_all_transactions = 0
 
-    # ---------- آمار معاملات بسته‌شدهٔ روزهای گذشته (تا ۱۰ روز) ----------
-    past_day_dates = {n: shamsi_days_back(target_date, n) for n in range(1, 11)}
-    cat_day_stats = {cat: {} for cat in CATEGORIES.keys()}
+    # ---------- محاسبات از دو روز پیش تا امروز ----------
+    hist_start_date = shamsi_days_back(target_date, 2)
+    cat_closed_history = {cat: {'pnl': 0.0, 'count': 0} for cat in CATEGORIES.keys()}
 
     for t in trades:
         if t.get('status') not in ('tp', 'stop'):
             continue
         cid = t.get('category_id', '20_30')
-        if cid not in cat_day_stats:
+        if cid not in cat_closed_history:
             cid = '20_30'
-        close_time = t.get('close_time', '')
-        day_n = 0
-        for n, ds in past_day_dates.items():
-            if ds and close_time == ds:
-                day_n = n
-                break
-        if not day_n:
+        close_time = t.get('close_time') or ''
+        if not close_time or not hist_start_date:
             continue
-        day = cat_day_stats[cid].setdefault(day_n, {'pnl': 0.0, 'count': 0, 'tp': 0, 'stop': 0})
-        day['pnl'] += 100.0 if t['status'] == 'tp' else -100.0
-        day['count'] += 1
-        if t['status'] == 'tp':
-            day['tp'] += 1
-        else:
-            day['stop'] += 1
+        if close_time < hist_start_date or close_time > target_date:
+            continue
+        hist = cat_closed_history[cid]
+        hist['pnl'] += 100.0 if t['status'] == 'tp' else -100.0
+        hist['count'] += 1
 
     for cat_id, stats in cat_stats.items():
         total = stats['tp'] + stats['stop'] + stats['opening']
@@ -1153,52 +1407,56 @@ def generate_and_send_daily_report(app_data, target_date=None):
         cat_info = CATEGORIES[cat_id]
         report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
 
-        # دسته‌ای که هیچ معامله‌ای نداشته، باز هم گزارش می‌فرستد
+        # دسته‌ای که هیچ معامله‌ای نداشته، هیچ خروجی‌ای نمی‌فرستد
         if total == 0:
-            if not cat_info.get('enabled', True):
-                continue
-            empty_msg = (
-                f"گزارش روز\n"
-                f"میزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
-                f"معامله ای انجام نشده است\n"
-                f"تاریخ {target_date.replace('/', ' ')}"
-            )
-            send_telegram_message(REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_REPORT_MAIN, cat_info['report_channel']], empty_msg)
+            continue
+        if not cat_info.get('enabled', True):
             continue
 
         closed_pnl_str_with_word = pnl_word(stats['closed_pnl'])
         open_pnl_word = pnl_word(stats['open_pnl'])
 
+        total_today_trades = stats['tp'] + stats['stop'] + stats['opening_today']
+
         msg = f"گزارش روز\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
         msg += f"محاسبات معاملات بسته شده امروز : {closed_pnl_str_with_word}\n"
-        if stats['opening'] > 0:
-            msg += f"محاسبات معاملات باز امروز : {open_pnl_word}\n"
+        if stats['opening_today'] > 0:
+            msg += f"محاسبات معاملات باز امروز : {pnl_word(stats['open_pnl_today'])}\n"
         else:
             msg += "محاسبات معاملات باز امروز : 0 بدون معامله باز\n"
-        msg += f"تعداد معاملات : {total}\n"
+        msg += f"تعداد معاملات : {total_today_trades}\n"
         msg += f"tp : {stats['tp']}\n"
         msg += f"stop : {stats['stop']}\n"
-        msg += f"opening : {stats['opening']}\n"
+        msg += f"opening امروز : {stats['opening_today']}"
+        if stats['opening_today'] > 0:
+            msg += f" {pnl_word(stats['open_pnl_today'])}"
+        msg += "\n"
+        if stats['opening_past'] > 0:
+            past_open_line = f"opening روزهای گذشته : {stats['opening_past']} {pnl_word(stats['open_pnl_past'])}"
+            if stats.get('oldest_open_date'):
+                past_open_line += f" تاریخ قدیمیترین {stats['oldest_open_date'].replace('/', ' ')}"
+            oldest_ts = stats.get('oldest_open_ts') or 0
+            if oldest_ts:
+                elapsed_days = int((iran_time.timestamp() - oldest_ts) / 86400)
+                if elapsed_days < 0:
+                    elapsed_days = 0
+                past_open_line += f" مدت {elapsed_days} روز"
+            msg += past_open_line + "\n"
+        else:
+            msg += "opening روزهای گذشته : 0\n"
 
-        # ---------- روزهای گذشته با امروز (تا ۱۰ روز) ----------
-        old_days = cat_day_stats.get(cat_id, {})
-        if old_days:
-            max_n = max(old_days.keys())
-            total_past_pnl = stats['closed_pnl'] + sum(d['pnl'] for d in old_days.values())
-            msg += f"محاسبات معاملات روزهای گذشته با امروز : {pnl_word(total_past_pnl)}\n"
-
-            run_pnl = stats['closed_pnl']
-            run_count = stats['tp'] + stats['stop']
-            run_tp = stats['tp']
-            run_stop = stats['stop']
-            for n in sorted(old_days.keys()):
-                d = old_days[n]
-                run_pnl += d['pnl']
-                run_count += d['count']
-                run_tp += d['tp']
-                run_stop += d['stop']
-                msg += (f"محاسبات معاملات بسته شده {n} روز گذشته با امروز : {pnl_word(run_pnl)} "
-                        f"تعداد معاملات {run_count} tp {run_tp} stop {run_stop}\n")
+        # ---------- جمع سود/ضرر از دو روز پیش تا امروز ----------
+        hist = cat_closed_history.get(cat_id, {})
+        if hist.get('count', 0) > 0:
+            days_count = 3
+            try:
+                y1, m1, d1 = [int(x) for x in hist_start_date.split('/')]
+                y2, m2, d2 = [int(x) for x in target_date.split('/')]
+                days_count = (jdatetime.date(y2, m2, d2) - jdatetime.date(y1, m1, d1)).days + 1
+            except Exception:
+                days_count = 3
+            msg += (f"محاسبات معاملات روزهای گذشته از {hist_start_date.replace('/', ' ')} تا امروز "
+                    f"مدت {days_count} روز : {pnl_word(hist['pnl'])}\n")
 
         msg += "نام عرض معاملات بسته و باز همراه سود یا ضرر\n"
         
@@ -1276,10 +1534,17 @@ def generate_and_send_weekly_report(app_data):
         stats = cat_stats[cat_id]
         
         if t['status'] == 'OPEN':
+            # ارزی که قیمت ندارد (حذف یا متوقف شده) از گزارش حذف می‌شود
+            try:
+                df = get_candles(t['symbol'], resolution=60, num_candles=1)
+                current_close = float(df['close'].iloc[-1]) if (df is not None and len(df) > 0) else None
+            except Exception:
+                current_close = None
+            if not current_close or current_close <= 0:
+                continue
+
             stats['opening'] += 1
-            df = get_candles(t['symbol'], resolution=60, num_candles=1)
-            current_close = float(df['close'].iloc[-1]) if df is not None else t['entry']
-            
+
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['20_30'])
             trade_type = cat_info.get('trade_type', 'short')
             
