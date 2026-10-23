@@ -8875,6 +8875,27 @@
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 11
+        },
+        {
+            "symbol": "JCT_USDT",
+            "category_id": "50_60",
+            "growth": 57.05096486887682,
+            "low": 0.004042,
+            "high": 0.006348,
+            "entry": 0.005396,
+            "tp": 0.004587,
+            "stop": 0.006151,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/01",
+            "open_timestamp": 1792785643,
+            "open_date_str": "1405 08 01 ساعت 20 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 12
         }
     ],
     "delist_last_check": 1792756857,
