@@ -26,7 +26,7 @@
         }
     ],
     "alert_counter": 5,
-    "last_daily_report_date": "1405/07/30",
+    "last_daily_report_date": "1405/08/01",
     "ref_cache": {
         "hour": 497981,
         "prices": {
@@ -716,12 +716,5 @@
             "carv": 0.0348,
             "ge": 295.74
         }
-    },
-    "pending_report": {
-        "date": "1405/08/01",
-        "up": 523,
-        "down": 233,
-        "time_str": "1405 08 01 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/01"
+    }
 }
