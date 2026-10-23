@@ -1,5 +1,5 @@
 {
-    "last_report_date": "1405/07/30",
+    "last_report_date": "1405/08/01",
     "trades": [
         {
             "symbol": "LUMIA_USDT",
@@ -9002,5 +9002,6 @@
         "17827791513822",
         "17827791513812",
         "17827791513787"
-    ]
+    ],
+    "last_weekly_report_date": "1405/08/01"
 }
