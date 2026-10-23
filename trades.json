@@ -7849,16 +7849,18 @@
             "tp": 0.1631,
             "stop": 0.2188,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "closed",
             "open_time": "1405/07/29",
             "open_timestamp": 1792569041,
             "open_date_str": "1405 07 29 ساعت 07 : 50 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
+            "close_time": "1405/08/01",
+            "close_price": 0.1919,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "close_reason": "delisted",
+            "close_timestamp": 1792769456
         },
         {
             "symbol": "AVA_USDT",
@@ -8781,5 +8783,16 @@
             "cat_entry_num": 1,
             "global_entry_num": 7
         }
+    ],
+    "delist_last_check": 1792756857,
+    "delist_seen_ids": [
+        "17827791513857",
+        "17827791513836",
+        "17827791513828",
+        "17827791513415",
+        "17827791513822",
+        "17827791513853",
+        "17827791513858",
+        "17827791513854"
     ]
 }
