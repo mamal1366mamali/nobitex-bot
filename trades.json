@@ -9613,6 +9613,27 @@
             "leverage": 7,
             "cat_entry_num": 10,
             "global_entry_num": 28
+        },
+        {
+            "symbol": "M_USDT",
+            "category_id": "30_40",
+            "growth": 32.51875426233234,
+            "low": 0.8798,
+            "high": 1.1659,
+            "entry": 0.991,
+            "tp": 0.8423,
+            "stop": 1.1297,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792866930,
+            "open_date_str": "1405 08 02 ساعت 18 : 35 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 11,
+            "global_entry_num": 29
         }
     ],
     "delist_last_check": 1792844139,
