@@ -9679,6 +9679,27 @@
             "leverage": 7,
             "cat_entry_num": 12,
             "global_entry_num": 31
+        },
+        {
+            "symbol": "LIGHT_USDT",
+            "category_id": "40_50",
+            "growth": 44.59396751740139,
+            "low": 0.2155,
+            "high": 0.3116,
+            "entry": 0.2649,
+            "tp": 0.2252,
+            "stop": 0.302,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792868442,
+            "open_date_str": "1405 08 02 ساعت 19 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 32
         }
     ],
     "delist_last_check": 1792844139,
