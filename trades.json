@@ -9412,6 +9412,27 @@
             "leverage": 7,
             "cat_entry_num": 5,
             "global_entry_num": 19
+        },
+        {
+            "symbol": "KAT_USDT",
+            "category_id": "50_60",
+            "growth": 58.60323886639678,
+            "low": 0.003952,
+            "high": 0.006268,
+            "entry": 0.005328,
+            "tp": 0.004529,
+            "stop": 0.006074,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792854330,
+            "open_date_str": "1405 08 02 ساعت 15 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 20
         }
     ],
     "delist_last_check": 1792822534,
