@@ -9046,6 +9046,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "AXIS_USDT",
+            "category_id": "50_60",
+            "growth": 50.89503661513426,
+            "low": 0.2458,
+            "high": 0.3709,
+            "entry": 0.3153,
+            "tp": 0.268,
+            "stop": 0.3594,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792818632,
+            "open_date_str": "1405 08 02 ساعت 05 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 4
         }
     ],
     "delist_last_check": 1792800643,
