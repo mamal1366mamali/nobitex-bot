@@ -9724,6 +9724,27 @@
             "leverage": 7,
             "cat_entry_num": 13,
             "global_entry_num": 33
+        },
+        {
+            "symbol": "AKE_USDT",
+            "category_id": "40_50",
+            "growth": 41.07355725404952,
+            "low": 0.028522,
+            "high": 0.040237,
+            "entry": 0.0342,
+            "tp": 0.02907,
+            "stop": 0.03899,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792874438,
+            "open_date_str": "1405 08 02 ساعت 20 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 7,
+            "global_entry_num": 34
         }
     ],
     "delist_last_check": 1792844139,
