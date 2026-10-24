@@ -9322,6 +9322,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 15
+        },
+        {
+            "symbol": "ORDER_USDT",
+            "category_id": "100_plus",
+            "growth": 224.007561436673,
+            "low": 0.03174,
+            "high": 0.10284,
+            "entry": 0.07713,
+            "tp": 0.05785,
+            "stop": 0.09641,
+            "neg_pct": 25,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792852246,
+            "open_date_str": "1405 08 02 ساعت 14 : 30 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 4,
+            "cat_entry_num": 2,
+            "global_entry_num": 16
         }
     ],
     "delist_last_check": 1792822534,
