@@ -9391,6 +9391,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 18
+        },
+        {
+            "symbol": "TRUST_USDT",
+            "category_id": "30_40",
+            "growth": 33.401513601963586,
+            "low": 0.04889,
+            "high": 0.06522,
+            "entry": 0.05544,
+            "tp": 0.04712,
+            "stop": 0.0632,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792853730,
+            "open_date_str": "1405 08 02 ساعت 14 : 55 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 19
         }
     ],
     "delist_last_check": 1792822534,
