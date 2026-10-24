@@ -9817,6 +9817,27 @@
             "leverage": 7,
             "cat_entry_num": 8,
             "global_entry_num": 37
+        },
+        {
+            "symbol": "AGT_USDT",
+            "category_id": "30_40",
+            "growth": 73.05659203980099,
+            "low": 0.06432,
+            "high": 0.11131,
+            "entry": 0.07654,
+            "tp": 0.06506,
+            "stop": 0.08726,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792882841,
+            "open_date_str": "1405 08 02 ساعت 23 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 14,
+            "global_entry_num": 38
         }
     ],
     "delist_last_check": 1792865742,
