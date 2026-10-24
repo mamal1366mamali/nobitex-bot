@@ -9259,6 +9259,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 12
+        },
+        {
+            "symbol": "BLEND_USDT",
+            "category_id": "40_50",
+            "growth": 45.217057241644255,
+            "low": 0.05206,
+            "high": 0.0756,
+            "entry": 0.06426,
+            "tp": 0.05462,
+            "stop": 0.07326,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792849833,
+            "open_date_str": "1405 08 02 ساعت 13 : 50 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 13
         }
     ],
     "delist_last_check": 1792822534,
