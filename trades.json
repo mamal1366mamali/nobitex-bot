@@ -9700,6 +9700,27 @@
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 32
+        },
+        {
+            "symbol": "ZCAT_USDT",
+            "category_id": "30_40",
+            "growth": 31.648351648351646,
+            "low": 0.04095,
+            "high": 0.05391,
+            "entry": 0.04582,
+            "tp": 0.03895,
+            "stop": 0.05223,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792869333,
+            "open_date_str": "1405 08 02 ساعت 19 : 15 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 13,
+            "global_entry_num": 33
         }
     ],
     "delist_last_check": 1792844139,
