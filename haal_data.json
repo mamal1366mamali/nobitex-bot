@@ -15,7 +15,7 @@
         }
     ],
     "alert_counter": 5,
-    "last_daily_report_date": "1405/08/01",
+    "last_daily_report_date": "1405/08/02",
     "ref_cache": {
         "hour": 498013,
         "prices": {
@@ -704,12 +704,5 @@
             "bananas31": 0.006147,
             "mrvl": 227.75
         }
-    },
-    "pending_report": {
-        "date": "1405/08/02",
-        "up": 98,
-        "down": 656,
-        "time_str": "1405 08 02 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/02"
+    }
 }
