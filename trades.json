@@ -9502,6 +9502,27 @@
             "leverage": 7,
             "cat_entry_num": 7,
             "global_entry_num": 23
+        },
+        {
+            "symbol": "WOO_USDT",
+            "category_id": "30_40",
+            "growth": 34.61950696677385,
+            "low": 0.00933,
+            "high": 0.01256,
+            "entry": 0.01068,
+            "tp": 0.009078,
+            "stop": 0.01218,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792859131,
+            "open_date_str": "1405 08 02 ساعت 16 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 8,
+            "global_entry_num": 24
         }
     ],
     "delist_last_check": 1792844139,
