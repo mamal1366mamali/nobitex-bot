@@ -9745,6 +9745,27 @@
             "leverage": 7,
             "cat_entry_num": 7,
             "global_entry_num": 34
+        },
+        {
+            "symbol": "Q_USDT",
+            "category_id": "50_60",
+            "growth": 77.84621672115833,
+            "low": 0.068512,
+            "high": 0.121846,
+            "entry": 0.09318,
+            "tp": 0.0792,
+            "stop": 0.1062,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/02",
+            "open_timestamp": 1792875035,
+            "open_date_str": "1405 08 02 ساعت 20 : 50 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 35
         }
     ],
     "delist_last_check": 1792844139,
