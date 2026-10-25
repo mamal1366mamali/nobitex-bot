@@ -10474,6 +10474,27 @@
             "close_timestamp": 1792955736,
             "close_date_str": "1405 08 03 ساعت 19 : 15 دقیقه",
             "duration_str": "40 دقیقه"
+        },
+        {
+            "symbol": "LIGHT_USDT",
+            "category_id": "60_70",
+            "growth": 76.63802363050485,
+            "low": 0.1862,
+            "high": 0.3289,
+            "entry": 0.2691,
+            "tp": 0.2287,
+            "stop": 0.3068,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1792976443,
+            "open_date_str": "1405 08 04 ساعت 01 : 00 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
         }
     ],
     "delist_last_check": 1792952732,
