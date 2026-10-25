@@ -10309,6 +10309,27 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 20
+        },
+        {
+            "symbol": "BIRB_USDT",
+            "category_id": "40_50",
+            "growth": 98.62637362637362,
+            "low": 0.06916,
+            "high": 0.13737,
+            "entry": 0.08818,
+            "tp": 0.07495,
+            "stop": 0.1005,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/03",
+            "open_timestamp": 1792935050,
+            "open_date_str": "1405 08 03 ساعت 13 : 30 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 21
         }
     ],
     "delist_last_check": 1792909237,
