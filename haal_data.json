@@ -15,7 +15,7 @@
         }
     ],
     "alert_counter": 5,
-    "last_daily_report_date": "1405/08/02",
+    "last_daily_report_date": "1405/08/03",
     "ref_cache": {
         "hour": 498035,
         "prices": {
@@ -699,12 +699,5 @@
             "crml": 6.338,
             "nanya": 12.694
         }
-    },
-    "pending_report": {
-        "date": "1405/08/03",
-        "up": 561,
-        "down": 189,
-        "time_str": "1405 08 03 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/03"
+    }
 }
