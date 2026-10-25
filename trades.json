@@ -10075,6 +10075,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 10
+        },
+        {
+            "symbol": "BMT_USDT",
+            "category_id": "30_40",
+            "growth": 62.39683063717397,
+            "low": 0.03029,
+            "high": 0.04919,
+            "entry": 0.03605,
+            "tp": 0.03064,
+            "stop": 0.0411,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/03",
+            "open_timestamp": 1792908332,
+            "open_date_str": "1405 08 03 ساعت 06 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 11
         }
     ],
     "delist_last_check": 1792887637,
