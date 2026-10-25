@@ -10189,6 +10189,27 @@
             "leverage": 7,
             "cat_entry_num": 5,
             "global_entry_num": 15
+        },
+        {
+            "symbol": "PREDICT_USDT",
+            "category_id": "30_40",
+            "growth": 34.169645758856035,
+            "low": 1.5385,
+            "high": 2.0642,
+            "entry": 1.7546,
+            "tp": 1.4914,
+            "stop": 2.0002,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/03",
+            "open_timestamp": 1792924843,
+            "open_date_str": "1405 08 03 ساعت 10 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 16
         }
     ],
     "delist_last_check": 1792909237,
