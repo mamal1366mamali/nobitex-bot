@@ -1,5 +1,5 @@
 {
-    "last_update_id": 645610961,
+    "last_update_id": 645610963,
     "alerts": [
         {
             "symbol": "a",
@@ -12,9 +12,33 @@
             "alert_num": 5,
             "chat_id": 114669886,
             "created_at": 1792379128
+        },
+        {
+            "symbol": "irys",
+            "tag": "",
+            "entry": 0.03591,
+            "tp": 0.03574,
+            "stop": 0.04794,
+            "trade_type": "short",
+            "leverage": 7,
+            "alert_num": 6,
+            "chat_id": 114669886,
+            "created_at": 1792987248
+        },
+        {
+            "symbol": "irys",
+            "tag": "فروش مثبت چهل ولی تابلو منفی",
+            "entry": 0.03591,
+            "tp": 0.03575,
+            "stop": 0.04795,
+            "trade_type": "short",
+            "leverage": 7,
+            "alert_num": 7,
+            "chat_id": 114669886,
+            "created_at": 1792987248
         }
     ],
-    "alert_counter": 5,
+    "alert_counter": 7,
     "last_daily_report_date": "1405/08/03",
     "ref_cache": {
         "hour": 498050,
