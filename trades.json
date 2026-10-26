@@ -10879,6 +10879,27 @@
             "leg": "stop",
             "cat_entry_num": 3,
             "global_entry_num": 17
+        },
+        {
+            "symbol": "AIN_USDT",
+            "category_id": "50_60",
+            "growth": 50.76128330614465,
+            "low": 0.03678,
+            "high": 0.05545,
+            "entry": 0.04713,
+            "tp": 0.04006,
+            "stop": 0.05373,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1793042731,
+            "open_date_str": "1405 08 04 ساعت 19 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 18
         }
     ],
     "delist_last_check": 1793017849,
