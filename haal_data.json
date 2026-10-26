@@ -15,7 +15,7 @@
         }
     ],
     "alert_counter": 7,
-    "last_daily_report_date": "1405/08/03",
+    "last_daily_report_date": "1405/08/04",
     "ref_cache": {
         "hour": 498059,
         "prices": {
@@ -779,12 +779,5 @@
             "xal": 3035.82,
             "mana": 0.07817
         }
-    },
-    "pending_report": {
-        "date": "1405/08/04",
-        "up": 434,
-        "down": 315,
-        "time_str": "1405 08 04 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/04"
+    }
 }
