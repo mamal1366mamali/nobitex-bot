@@ -10711,6 +10711,27 @@
             "close_timestamp": 1793015435,
             "close_date_str": "1405 08 04 ساعت 11 : 50 دقیقه",
             "duration_str": "1 ساعت و 14 دقیقه"
+        },
+        {
+            "symbol": "HUMA_USDT",
+            "category_id": "30_40",
+            "growth": 31.759794476557495,
+            "low": 0.018684,
+            "high": 0.024618,
+            "entry": 0.02093,
+            "tp": 0.01779,
+            "stop": 0.02386,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1793017863,
+            "open_date_str": "1405 08 04 ساعت 12 : 31 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 5,
+            "global_entry_num": 11
         }
     ],
     "delist_last_check": 1792996244,
