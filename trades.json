@@ -10926,6 +10926,27 @@
             "release_entry": true,
             "cat_entry_num": 9,
             "global_entry_num": 19
+        },
+        {
+            "symbol": "NEX_USDT",
+            "category_id": "30_40",
+            "growth": 39.67213114754098,
+            "low": 6.1e-07,
+            "high": 8.52e-07,
+            "entry": 7.242e-07,
+            "tp": 6.156e-07,
+            "stop": 8.256e-07,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1793044238,
+            "open_date_str": "1405 08 04 ساعت 19 : 50 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 10,
+            "global_entry_num": 20
         }
     ],
     "delist_last_check": 1793017849,
