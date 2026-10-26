@@ -10684,6 +10684,27 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 9
+        },
+        {
+            "symbol": "CAP_USDT",
+            "category_id": "30_40",
+            "growth": 38.48699763593382,
+            "low": 0.0846,
+            "high": 0.11716,
+            "entry": 0.09959,
+            "tp": 0.08465,
+            "stop": 0.1135,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1793010936,
+            "open_date_str": "1405 08 04 ساعت 10 : 35 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 4,
+            "global_entry_num": 10
         }
     ],
     "delist_last_check": 1792996244,
