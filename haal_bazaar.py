@@ -96,9 +96,9 @@ def get_market_data():
         print(f"Error fetching market data from Ourbit Futures: {e}")
     return prices, stats_data
 
-def _kline_ref_24h(pair):
+def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
     """کلوز ۲۴ ساعت قبل از کندل ساعتی"""
-    for _ in range(3):
+    for i in range(tries):
         try:
             r = requests.get(
                 f"{OURBIT_KLINE_URL}/{pair}?interval=Min60&limit=25",
@@ -112,8 +112,25 @@ def _kline_ref_24h(pair):
                 return float(closes[-25])
         except Exception:
             pass
-        time.sleep(0.3)
+        if i < tries - 1:
+            time.sleep(sleep_base * (i + 1))
     return None
+
+def _fetch_refs(syms, workers, tries, sleep_base):
+    """گرفتن مرجع ۲۴ ساعته برای لیستی از ارزها"""
+    if not syms:
+        return {}
+    pairs = [f"{s.upper()}_USDT" for s in syms]
+    out = {}
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+            results = list(ex.map(lambda p: _kline_ref_24h(p, tries, sleep_base), pairs))
+        for s, ref in zip(syms, results):
+            if ref and ref > 0:
+                out[s] = ref
+    except Exception:
+        pass
+    return out
 
 def get_true_24h_counts(stats_data, data, force=False):
     """شمارش مثبت/منفی بر اساس ۲۴ ساعت واقعی: کلوز الان نسبت به کلوز ۲۴ ساعت قبل.
@@ -128,29 +145,15 @@ def get_true_24h_counts(stats_data, data, force=False):
     syms = list(stats_data.keys())
     missing = [s for s in syms if not refs.get(s)]
 
-    if missing:
-        pairs = [f"{s.upper()}_USDT" for s in missing]
-        try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=12) as ex:
-                results = list(ex.map(_kline_ref_24h, pairs))
-            for s, ref in zip(missing, results):
-                if ref and ref > 0:
-                    refs[s] = ref
-        except Exception:
-            pass
-
-        # تلاش دوم فقط برای ارزهایی که بار اول جواب ندادند
-        still = [s for s in missing if not refs.get(s)]
-        if still and len(still) < len(missing):
-            pairs = [f"{s.upper()}_USDT" for s in still]
-            try:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
-                    results = list(ex.map(_kline_ref_24h, pairs))
-                for s, ref in zip(still, results):
-                    if ref and ref > 0:
-                        refs[s] = ref
-            except Exception:
-                pass
+    # چند مرحله تلاش: اول پرسرعت، بعد آهسته‌تر برای ارزهایی که جواب ندادند
+    # (صرافی درخواست‌های هم‌زمان زیاد را محدود می‌کند؛ با تلاش دوباره تقریباً همه شمرده می‌شوند)
+    for workers, tries, pause in ((12, 2, 0.3), (6, 3, 0.8), (3, 4, 1.5)):
+        if not missing:
+            break
+        got = _fetch_refs(missing, workers, tries, pause)
+        if got:
+            refs.update(got)
+        missing = [s for s in missing if not refs.get(s)]
 
     if refs:
         data["ref_cache"] = {"hour": hour_key, "prices": refs}
