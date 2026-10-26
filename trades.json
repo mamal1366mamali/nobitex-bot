@@ -10546,6 +10546,27 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "DODO_USDT",
+            "category_id": "30_40",
+            "growth": 36.64556381319386,
+            "low": 0.021798,
+            "high": 0.029786,
+            "entry": 0.02532,
+            "tp": 0.02152,
+            "stop": 0.02886,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1792992040,
+            "open_date_str": "1405 08 04 ساعت 05 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 4
         }
     ],
     "delist_last_check": 1792974336,
