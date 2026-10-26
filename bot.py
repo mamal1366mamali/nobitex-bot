@@ -278,11 +278,61 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
     pnl = ((exit_price - entry) / entry) * 100 * leverage
     return round(pnl, 2)
 
-def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, daily_count):
+def get_coin_day_number(trades, trade, today_str):
+    """شمارهٔ این معامله برای همین ارز در همین روز (۱، ۲، ۳ …)
+    ترتیب بر اساس زمان ورود؛ تی‌پی و استاپ هر دو شمرده می‌شوند."""
+    sym = (trade.get('symbol') or '').upper()
+    day = []
+    for t in trades:
+        if (t.get('symbol') or '').upper() != sym:
+            continue
+        if t.get('open_time') == today_str or t.get('close_time') == today_str:
+            day.append(t)
+    day.sort(key=lambda t: float(t.get('open_timestamp') or 0))
+    for i, t in enumerate(day):
+        if t is trade:
+            return i + 1
+    return 1
+
+def is_release_entry(trades, symbol, current_ts, lock_hours=24, window_hours=72):
+    """آیا این ورود، ورودِ بعد از پایانِ قفل ۲۴ ساعتهٔ استاپ است؟ (علامت z)
+    یعنی ارز قبلاً قفل شده بود و بعد از یک روز دوباره معامله می‌شود."""
+    sym = symbol.upper()
+    last_stop = 0.0
+    for t in trades:
+        if t.get('symbol', '').upper() != sym:
+            continue
+        if str(t.get('status', '')).lower() != 'stop':
+            continue
+        try:
+            ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
+        except Exception:
+            ts = 0.0
+        if ts > last_stop:
+            last_stop = ts
+    if last_stop <= 0:
+        return False
+    age = current_ts - last_stop
+    return lock_hours * 3600 <= age <= window_hours * 3600
+
+def coin_is_z(trades, symbol, current_ts, today_str):
+    """آیا این ارز امروز در حالت z است؟
+    یعنی قبلاً قفل بوده و بعد از یک روز آزاد شده؛ تا آخر همان روز
+    همهٔ معاملاتش (ورود و خروج) با z علامت می‌خورند."""
+    sym = symbol.upper()
+    for t in trades:
+        if t.get('symbol', '').upper() != sym:
+            continue
+        if t.get('open_time') == today_str and t.get('release_entry'):
+            return True
+    return is_release_entry(trades, symbol, current_ts)
+
+def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num, release_flag=False):
     name = clean_symbol(symbol).lower()
     type_str = "فروش" if trade_type == 'short' else "خرید"
+    tail = " z" if release_flag else ""
     return (
-        f"{daily_count} {type_str}\n"
+        f"{type_str} {coin_num}{tail}\n"
         f"نام: {name}\n"
         f"دسته بندی رشد: {cat_name}\n"
         f"میزان رشد: +{growth:.2f} %\n"
@@ -328,9 +378,11 @@ def format_shamsi_from_timestamp(ts):
     except Exception:
         return current_date_str
 
-def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type):
+def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type, coin_num=1, release_flag=False):
     name = clean_symbol(symbol).lower()
-    status_fa = exit_type
+    status_fa = f"{exit_type} {coin_num}"
+    if release_flag:
+        status_fa = f"{status_fa} z"
     if daily_count:
         msg = f"{daily_count} {status_fa}\n"
     else:
@@ -421,6 +473,96 @@ def get_tp_blocked_categories(trades, symbol, current_ts):
         if cat != '100_plus':
             blocked.add(cat)
     return blocked
+
+def is_cascade_trade(trades, trade):
+    """آیا این معامله در «پشتبند» معاملهٔ قبلی باز شده (نه ورود اول)؟
+    پشتبند یعنی نقطهٔ ورودش برابر tp یا stop یک معاملهٔ قبلیِ همان ارز است."""
+    if trade.get('leg') in ('tp', 'stop'):
+        return True
+    try:
+        entry = float(trade.get('entry') or 0)
+    except Exception:
+        entry = 0.0
+    if entry <= 0:
+        return False
+    symbol = trade.get('symbol', '').upper()
+    try:
+        open_ts = float(trade.get('open_timestamp') or 0)
+    except Exception:
+        open_ts = 0.0
+    for t in trades:
+        if t is trade:
+            continue
+        if t.get('symbol', '').upper() != symbol:
+            continue
+        if str(t.get('status', '')).lower() not in ('tp', 'stop'):
+            continue
+        try:
+            close_ts = float(t.get('close_timestamp') or 0)
+        except Exception:
+            close_ts = 0.0
+        # فقط معامله‌ای که قبل از این معامله بسته شده
+        if open_ts > 0 and close_ts > 0 and close_ts > open_ts + 60:
+            continue
+        for key in ('tp', 'stop'):
+            try:
+                level = float(t.get(key) or 0)
+            except Exception:
+                level = 0.0
+            if level > 0 and abs(entry - level) / level <= 0.002:
+                return True
+    return False
+
+def get_symbol_stop_state(trades, symbol, current_ts):
+    """وضعیت قفلِ بعد از استاپ برای این ارز.
+    خروجی: (locked, only_100plus, equality_required)
+    - locked           : تا ۲۴ ساعت هیچ معامله‌ای مجاز نیست
+    - only_100plus     : در مدت قفل، فقط دستهٔ ۱۰۰+ مجاز است
+    - equality_required: قیمت ورود باید با قیمت بازار یکی باشد"""
+    sym = symbol.upper()
+    closed = []
+    for t in trades:
+        if t.get('symbol', '').upper() != sym:
+            continue
+        st = str(t.get('status', '')).lower()
+        if st not in ('tp', 'stop', 'closed'):
+            continue
+        try:
+            ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
+        except Exception:
+            ts = 0.0
+        closed.append((ts, st, t))
+    if not closed:
+        return False, False, False
+    closed.sort(key=lambda x: x[0])
+
+    # تعداد استاپ‌های پشت سر هم از آخرین معاملهٔ بسته‌شده
+    consec = 0
+    for ts, st, t in reversed(closed):
+        if st == 'stop':
+            consec += 1
+        else:
+            break
+    if consec == 0:
+        return False, False, False
+
+    last_ts = closed[-1][0]
+    age = current_ts - last_ts
+    equality_required = 0 <= age <= 72 * 3600
+    in_lock = age < 24 * 3600
+
+    if consec >= 2:
+        # دو استاپ پشت سر هم → قفل کامل ۲۴ ساعته
+        return in_lock, False, equality_required
+
+    # یک استاپ: اگر ورودش از پشتبند (tp قبلی) بوده، آبشاری است و ادامهٔ فوری مجاز است
+    if is_cascade_trade(trades, closed[-1][2]):
+        return False, False, equality_required
+
+    # ورود اول استاپ خورده → قفل ۲۴ ساعته، در این مدت فقط دستهٔ ۱۰۰+ مجاز
+    if in_lock:
+        return True, True, equality_required
+    return False, False, equality_required
 
 def price_returned_to_level(df, since_ts_utc, level):
     """آیا قیمت بعد از زمان داده‌شده (ثانیه UTC) دوباره به این سطح رسیده است؟"""
@@ -514,6 +656,11 @@ def get_market_summary_string(market_overview=None):
         return f"حال بازار نزولی -{down_pct} %\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
     else:
         return f"حال بازار رنج\nتعداد ارزهای مثبت {up_count}\nتعداد ارزهای منفی {down_count}\n\n"
+
+# ---------- فیلتر هم‌خوانی قیمت ورود با قیمت بازار ----------
+# قیمت محاسبه‌شدهٔ ورود باید با قیمت لحظهٔ بازار (کلوز) یکی باشد؛
+# اختلاف مجاز ۰.۵ درصد است (برای صفر کردن دقیقاً، مقدار را کمتر کن)
+ENTRY_MATCH_TOL = 0.005
 
 # ---------- پایش اعلانات «حذف ارز» در صرافی ----------
 DELIST_SECTION_URL = "https://www.ourbit.com/support/categories/360000254192"
@@ -659,6 +806,228 @@ def check_delist_announcements(app_data, trades, current_ts):
 
     app_data['delist_seen_ids'] = list(seen)[-300:]
 
+
+# ================== مدیریت سرمایه (فعلاً غیرفعال) ==================
+# برای فعال‌سازی فقط CAPITAL_MANAGEMENT_ENABLED را True کن.
+CAPITAL_MANAGEMENT_ENABLED = False
+
+CONTRACT_DETAIL_URL = "https://futures.ourbit.com/api/v1/contract/detail"
+
+CAPITAL_SETTINGS = {
+    'total_capital': 4.78,       # موجودی فعلی (دلار)
+    'max_trades': 50,            # سرمایه روی ۵۰ معامله تقسیم می‌شود
+    'min_per_trade': 0.20,       # کف مارجین هر معامله (۲۰ سنت)
+    'max_per_trade': 100000.0,   # سقف مارجین هر معامله
+    'default_leverage': 7,
+}
+
+# جدول پله‌ها: (سرمایه از این عدد به بالا, مارجین هر معامله)
+# مبنا = عدد گردِ پایین‌تر، تقسیم بر ۵۰
+CAPITAL_TIERS = [
+    (30, 0.40), (40, 0.60), (50, 0.80), (60, 1.00), (70, 1.20), (80, 1.40), (90, 1.60),
+    (100, 1.80), (110, 2.00),
+    (160, 3.00), (210, 4.00), (260, 5.00), (310, 6.00), (360, 7.00),
+    (410, 8.00), (460, 9.00), (510, 10.00),
+    (610, 12.00), (710, 14.00), (810, 16.00), (910, 18.00),
+    (1100, 20.00), (1600, 30.00), (2100, 40.00), (2600, 50.00), (3000, 60.00),
+    (3600, 70.00), (4100, 80.00), (4600, 90.00), (5100, 100.00),
+    (6100, 120.00), (7100, 140.00), (8100, 160.00), (9100, 180.00),
+    (10100, 200.00), (21000, 400.00), (31000, 600.00), (41000, 800.00), (51000, 1000.00),
+    (110000, 2000.00), (210000, 4000.00), (310000, 6000.00), (410000, 8000.00), (510000, 10000.00),
+    (610000, 12000.00), (710000, 14000.00),
+    (1100000, 20000.00), (2100000, 40000.00), (3100000, 60000.00),
+    (4100000, 80000.00), (5100000, 100000.00),
+]
+
+_contract_details_cache = {}
+
+
+def get_contract_details():
+    """جزئیات قراردادها (contractSize و minVol) — یک‌بار خوانده و کش می‌شود"""
+    global _contract_details_cache
+    if _contract_details_cache:
+        return _contract_details_cache
+    try:
+        r = requests.get(CONTRACT_DETAIL_URL, timeout=20)
+        data = (r.json() or {}).get('data') or []
+        cache = {}
+        for c in data:
+            if c.get('symbol'):
+                cache[c['symbol']] = c
+        if cache:
+            _contract_details_cache = cache
+    except Exception:
+        pass
+    return _contract_details_cache
+
+
+def get_wallet_capital(settings=None):
+    """موجودی کل"""
+    s = settings or CAPITAL_SETTINGS
+    try:
+        return max(0.0, float(s.get('total_capital', 0)))
+    except Exception:
+        return 0.0
+
+
+def get_margin_per_trade(capital=None, settings=None):
+    """مارجین هر معامله بر اساس پله‌های سرمایه"""
+    s = settings or CAPITAL_SETTINGS
+    if capital is None:
+        capital = get_wallet_capital(s)
+    try:
+        capital = float(capital)
+    except Exception:
+        return 0.0
+    if capital <= 0:
+        return 0.0
+
+    min_per = float(s.get('min_per_trade', 0.20))
+    max_per = float(s.get('max_per_trade', 100000.0))
+
+    # زیر ۳۰ دلار: ثابت ۲۰ سنت
+    if capital < 30:
+        return min(min_per, max_per)
+
+    size = min_per
+    for threshold, value in CAPITAL_TIERS:
+        if capital >= threshold:
+            size = value
+        else:
+            break
+    return min(size, max_per)
+
+
+def get_total_slots(capital=None, settings=None):
+    """چند معاملهٔ همزمان با این سرمایه ممکن است (بدون کسر جای خالی)"""
+    s = settings or CAPITAL_SETTINGS
+    if capital is None:
+        capital = get_wallet_capital(s)
+    per = get_margin_per_trade(capital, s)
+    if per <= 0:
+        return 0
+    try:
+        affordable = int(math.floor(float(capital) / per))
+    except Exception:
+        return 0
+    return max(0, min(int(s.get('max_trades', 50)), affordable))
+
+
+def count_open_trades(trades):
+    """تعداد معاملات باز"""
+    return len([t for t in trades if t.get('status') == 'OPEN'])
+
+
+def get_free_slots(trades, settings=None):
+    """جای خالی برای معاملهٔ جدید (یک جای خالی همیشه آزاد می‌ماند)"""
+    s = settings or CAPITAL_SETTINGS
+    capital = get_wallet_capital(s)
+    per = get_margin_per_trade(capital, s)
+    if per <= 0:
+        return 0
+    usable = max(0, get_total_slots(capital, s) - 1)
+    return max(0, usable - count_open_trades(trades))
+
+
+def get_available_margin(trades, settings=None):
+    """مارجین آزاد = موجودی − مارجین معاملات باز − یک سهم ذخیره"""
+    s = settings or CAPITAL_SETTINGS
+    capital = get_wallet_capital(s)
+    per = get_margin_per_trade(capital, s)
+    if per <= 0:
+        return 0.0
+    locked = 0.0
+    for t in trades:
+        if t.get('status') == 'OPEN':
+            try:
+                locked += float(t.get('cap_margin') or per)
+            except Exception:
+                locked += per
+    return max(0.0, capital - locked - per)
+
+
+def get_min_order_notional(symbol, price):
+    """کوچک‌ترین سفارش ممکن این ارز به دلار (۱ قرارداد)"""
+    c = get_contract_details().get(symbol)
+    if not c or not price:
+        return None
+    try:
+        min_vol = float(c.get('minVol') or 1)
+        contract_size = float(c.get('contractSize') or 0)
+        if contract_size <= 0:
+            return None
+        return min_vol * contract_size * float(price)
+    except Exception:
+        return None
+
+
+def get_position_size(symbol, price, leverage=None, margin=None, settings=None):
+    """تعداد قرارداد و مارجین لازم برای یک معامله طبق سهم تعیین‌شده"""
+    s = settings or CAPITAL_SETTINGS
+    lev = float(leverage or s.get('default_leverage', 7))
+    if lev <= 0:
+        lev = float(s.get('default_leverage', 7))
+    if margin is None:
+        margin = get_margin_per_trade(get_wallet_capital(s), s)
+    margin = float(margin)
+    c = get_contract_details().get(symbol)
+    if not c or not price or float(price) <= 0 or margin <= 0:
+        return None
+    try:
+        contract_size = float(c.get('contractSize') or 0)
+        min_vol = float(c.get('minVol') or 1)
+        if contract_size <= 0:
+            return None
+        budget = margin * lev
+        contracts = int(math.floor(budget / (contract_size * float(price))))
+        if contracts < min_vol:
+            return {'contracts': 0, 'notional': 0.0, 'margin_used': 0.0, 'leverage': lev}
+        notional = contracts * contract_size * float(price)
+        return {
+            'contracts': contracts,
+            'notional': notional,
+            'margin_used': notional / lev,
+            'leverage': lev,
+        }
+    except Exception:
+        return None
+
+
+def capital_check(symbol, price, trades, leverage=None, settings=None):
+    """آیا از نظر مدیریت سرمایه می‌توان این معامله را گرفت؟
+    خروجی: (allowed, reason, size_info)"""
+    s = settings or CAPITAL_SETTINGS
+    capital = get_wallet_capital(s)
+    per = get_margin_per_trade(capital, s)
+    if per <= 0:
+        return False, 'سرمایه صفر است', None
+    if get_free_slots(trades, s) <= 0:
+        return False, 'ظرفیت معاملات باز پر است (یک جای خالی ذخیره شده)', None
+    if get_available_margin(trades, s) < per:
+        return False, 'مارجین آزاد کافی نیست', None
+    if not get_contract_details():
+        # جزئیات قرارداد در دسترس نیست؛ فقط ظرفیت و مارجین بررسی شده
+        return True, 'ok', None
+    size = get_position_size(symbol, price, leverage, per, s)
+    if not size or size.get('contracts', 0) <= 0:
+        return False, 'حداقل سفارش این ارز از سهم ما بیشتر است', None
+    return True, 'ok', size
+
+
+def capital_summary(trades, settings=None):
+    """خلاصهٔ وضعیت سرمایه برای گزارش"""
+    s = settings or CAPITAL_SETTINGS
+    capital = get_wallet_capital(s)
+    per = get_margin_per_trade(capital, s)
+    total_slots = get_total_slots(capital, s)
+    return {
+        'capital': capital,
+        'margin_per_trade': per,
+        'usable_slots': max(0, total_slots - 1),
+        'open_trades': count_open_trades(trades),
+        'free_slots': get_free_slots(trades, s),
+        'available_margin': get_available_margin(trades, s),
+    }
 
 def process_markets(app_data):
     trades = app_data.get('trades', [])
@@ -830,16 +1199,20 @@ def process_markets(app_data):
                 
                 exit_label_cat = f"{entry_num_cat} 1"
                 
+                coin_num = get_coin_day_number(trades, trade, today_str)
+                
                 msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, start_date_str, end_date_str, duration_str, exit_label_global, trade_type
+                    vol_str, start_date_str, end_date_str, duration_str, exit_label_global, trade_type, coin_num,
+                    bool(trade.get('release_entry'))
                 )
                 
                 msg_cat = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
-                    vol_str, start_date_str, end_date_str, duration_str, exit_label_cat, trade_type
+                    vol_str, start_date_str, end_date_str, duration_str, exit_label_cat, trade_type, coin_num,
+                    bool(trade.get('release_entry'))
                 )
                 
                 send_telegram_message(get_exit_token(), [PERSONAL_ID, CHANNEL_EXIT_MAIN], msg_main)
@@ -903,9 +1276,13 @@ def process_markets(app_data):
                                     'close_time': '',
                                     'close_price': 0.0,
                                     'pnl': 0.0,
-                                    'leverage': next_cat_info.get('leverage', 7)
+                                    'leverage': next_cat_info.get('leverage', 7),
+                                    'leg': 'tp'
                                 }
                                 trades.append(cascade_trade)
+                                
+                                if coin_is_z(trades[:-1], symbol, current_ts, today_str):
+                                    cascade_trade['release_entry'] = True
                                 
                                 cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and t.get('open_time') == today_str])
                                 global_entry_count = len([
@@ -916,33 +1293,108 @@ def process_markets(app_data):
                                 cascade_trade['cat_entry_num'] = cat_entry_count
                                 cascade_trade['global_entry_num'] = global_entry_count
                                 
+                                c_coin_num = get_coin_day_number(trades, cascade_trade, today_str)
+                                c_zflag = bool(cascade_trade.get('release_entry'))
                                 c_msg_main = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, global_entry_count
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, c_coin_num, c_zflag
                                 )
                                 c_msg_cat = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, f"{cat_entry_count} 1"
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, c_coin_num, c_zflag
                                 )
                                 
                                 send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], c_msg_main)
                                 send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], c_msg_cat)
 
-        # بررسی وضعیت معاملات برای این ارز:
-        # ۱. اگر این ارز در ۲۴ ساعت گذشته یا امروز استاپ خورده باشد، تا ۲۴ ساعت در هیچ دسته‌ای معامله نمی‌شود
-        symbol_has_stop_cooldown = False
-        for t in trades:
-            if t.get('symbol', '').upper() == symbol.upper() and str(t.get('status', '')).lower() == 'stop':
-                stop_ts = 0.0
-                try:
-                    stop_ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
-                except Exception:
-                    stop_ts = 0.0
-                if (current_ts - stop_ts) < (24 * 3600) or t.get('close_time') == today_str:
-                    symbol_has_stop_cooldown = True
-                    break
+                # اگر خروج با STOP بود و این معامله خودش «پشتبند» بود (بعد از یک tp یا stop باز شده):
+                # قفل ۲۴ ساعته ندارد؛ همان لحظه با همان قیمت استاپ، معاملهٔ دستهٔ پایین‌تر باز می‌شود
+                # (tp منفی ۱۵٪ و استاپ مثبت ۱۴٪ و اهرم ۷) و تا دستهٔ ۳۰-۴۰ ادامه می‌یابد
+                if (exit_type == 'stop' and trade_type == 'short'
+                        and is_cascade_trade(trades, trade)
+                        and not get_symbol_stop_state(trades, symbol, current_ts)[0]):
+                    cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
+                    if cat_id in cat_order:
+                        curr_idx = cat_order.index(cat_id)
+                        next_idx = curr_idx + 1
+                        next_cat_id = cat_order[next_idx] if next_idx < len(cat_order) else None
+                        # ۳۰-۴۰ آخرین دستهٔ مجاز این پشتبند است (۲۰-۳۰ غیرفعال و پایین‌تر نمی‌رویم)
+                        if next_cat_id and next_cat_id != '20_30':
+                            next_cat_info = CATEGORIES[next_cat_id]
+                            next_already_traded = any(
+                                t.get('symbol', '').upper() == symbol.upper()
+                                and t.get('category_id') == next_cat_id
+                                and t.get('status') == 'OPEN'
+                                for t in trades
+                            )
+                            tp_blocked_cats = get_tp_blocked_categories(trades, symbol, current_ts)
+                            # قیمت باید همان سطح استاپ باشد؛ اگر پایین‌تر رفته باشد معامله انجام نمی‌شود
+                            price_at_level = current_close >= exit_price * (1 - ENTRY_MATCH_TOL)
+                            if (not next_already_traded
+                                    and next_cat_info.get('enabled', True)
+                                    and next_cat_id not in tp_blocked_cats
+                                    and symbol.upper() not in delist_symbols
+                                    and price_at_level):
+                                next_entry = exit_price
+                                next_tp = round_price(next_entry * (1 - next_cat_info['tp_drop']))
+                                next_stop = round_price(next_entry * (1 + next_cat_info['stop_rise']))
+                                next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
 
-        if symbol_has_stop_cooldown:
+                                stop_cascade_trade = {
+                                    'symbol': symbol,
+                                    'category_id': next_cat_id,
+                                    'growth': trade.get('growth', growth),
+                                    'low': low_24h,
+                                    'high': high_24h,
+                                    'entry': next_entry,
+                                    'tp': next_tp,
+                                    'stop': next_stop,
+                                    'neg_pct': next_neg_pct,
+                                    'status': 'OPEN',
+                                    'open_time': today_str,
+                                    'open_timestamp': int(current_ts),
+                                    'open_date_str': current_date_str,
+                                    'close_time': '',
+                                    'close_price': 0.0,
+                                    'pnl': 0.0,
+                                    'leverage': next_cat_info.get('leverage', 7),
+                                    'leg': 'stop'
+                                }
+                                trades.append(stop_cascade_trade)
+
+                                if coin_is_z(trades[:-1], symbol, current_ts, today_str):
+                                    stop_cascade_trade['release_entry'] = True
+
+                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and t.get('open_time') == today_str])
+                                global_entry_count = len([
+                                    t for t in trades
+                                    if t.get('open_time') == today_str
+                                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == 'short'
+                                ])
+                                stop_cascade_trade['cat_entry_num'] = cat_entry_count
+                                stop_cascade_trade['global_entry_num'] = global_entry_count
+
+                                s_coin_num = get_coin_day_number(trades, stop_cascade_trade, today_str)
+                                s_zflag = bool(stop_cascade_trade.get('release_entry'))
+                                s_msg_main = generate_entry_message(
+                                    'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, s_coin_num, s_zflag
+                                )
+                                s_msg_cat = generate_entry_message(
+                                    'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, s_coin_num, s_zflag
+                                )
+
+                                send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], s_msg_main)
+                                send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], s_msg_cat)
+
+        # وضعیت قفل بعد از استاپ:
+        # - استاپ در ورود اول → قفل ۲۴ ساعته، فقط دستهٔ ۱۰۰+ مجاز
+        # - دو استاپ پشت سر هم → قفل کامل ۲۴ ساعته
+        # - استاپ بعد از tp (آبشاری) → ادامهٔ فوری مجاز است
+        # و برای ارزهای قفلی، قیمت ورود باید با قیمت بازار یکی باشد
+        locked, only_100plus, equality_required = get_symbol_stop_state(trades, symbol, current_ts)
+        if locked and not only_100plus:
             continue
 
         # ارزی که اعلان حذف دارد، معاملهٔ جدید روی آن باز نمی‌شود
@@ -966,6 +1418,9 @@ def process_markets(app_data):
         )
 
         for cat_id in valid_cats:
+            # در مدت قفلِ بعد از استاپِ ورود اول، فقط دستهٔ ۱۰۰+ اجازهٔ ورود دارد
+            if only_100plus and cat_id != '100_plus':
+                continue
             # ۲. فقط اگر همین دسته در همین لحظه معامله‌ی باز داشته باشد، دوباره باز نمی‌شود.
             #    کول‌داون استاپ (کل ارز، ۲۴ ساعت) در بالای همین حلقه اعمال می‌شود.
             #    بعد از TP در یک دسته، همان دسته و بالاترها تا ۲۴ ساعت ممنوع‌اند (tp_blocked_cats)
@@ -1059,7 +1514,9 @@ def process_markets(app_data):
                                 )
                             ]
 
-                            if not prev_sub_trades:
+                            chain_reset = (not prev_sub_trades) or (
+                                str(prev_sub_trades[-1].get('status', '')).lower() == 'stop')
+                            if chain_reset:
                                 # دسته ۲۰ تا ۳۰ هرگز با رشد ۲۰-۳۰ درصدی باز نمی‌شود؛ فقط پشتبندِ دستهٔ بالایی
                                 if cat_id == '20_30':
                                     continue
@@ -1121,7 +1578,9 @@ def process_markets(app_data):
                             )
                         ]
 
-                        if not prev_sub_trades:
+                        chain_reset = (not prev_sub_trades) or (
+                            str(prev_sub_trades[-1].get('status', '')).lower() == 'stop')
+                        if chain_reset:
                             # دسته ۲۰ تا ۳۰ هرگز با رشد ۲۰-۳۰ درصدی باز نمی‌شود؛ فقط پشتبندِ دستهٔ بالایی
                             if cat_id == '20_30':
                                 continue
@@ -1161,8 +1620,24 @@ def process_markets(app_data):
                     stop_price = round_price(entry_price * (1 - cat_info['stop_drop']))
                     neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
                     should_enter = (current_close >= entry_price and current_close < tp_price)
-                
+
+            # شرط ارزی که اخیراً استاپ خورده (باگ تی‌پی الکی):
+            # قیمت محاسبه‌شدهٔ ورود باید با قیمت لحظهٔ بازار (کلوز) یکی باشد؛
+            # اگر قیمت از سطح ورود فاصله گرفته باشد، این معامله انجام نمی‌شود
+            if should_enter and entry_price > 0 and equality_required:
+                price_gap = abs(current_close - entry_price) / entry_price
+                if price_gap > ENTRY_MATCH_TOL:
+                    should_enter = False
+
             if should_enter:
+                # ---------- مدیریت سرمایه (فعلاً غیرفعال) ----------
+                cap_size = None
+                if CAPITAL_MANAGEMENT_ENABLED:
+                    cap_ok, cap_reason, cap_size = capital_check(
+                        symbol, entry_price, trades, leverage=cat_info.get('leverage', 7))
+                    if not cap_ok:
+                        continue
+
                 new_trade = {
                     'symbol': symbol,
                     'category_id': cat_id,
@@ -1183,6 +1658,16 @@ def process_markets(app_data):
                     'leverage': cat_info.get('leverage', 7)
                 }
                 trades.append(new_trade)
+
+                # اگر این ورود بعد از پایانِ قفل ۲۴ ساعتهٔ استاپ باشد → علامت z در پیام
+                if coin_is_z(trades[:-1], symbol, current_ts, today_str):
+                    new_trade['release_entry'] = True
+
+                # اطلاعات حجم پیشنهادی مدیریت سرمایه (فقط اگر فعال باشد)
+                if CAPITAL_MANAGEMENT_ENABLED and cap_size:
+                    new_trade['cap_contracts'] = cap_size['contracts']
+                    new_trade['cap_margin'] = round(cap_size['margin_used'], 4)
+                    new_trade['cap_notional'] = round(cap_size['notional'], 4)
                 
                 cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == today_str])
                 global_entry_count = len([
@@ -1193,14 +1678,17 @@ def process_markets(app_data):
                 new_trade['cat_entry_num'] = cat_entry_count
                 new_trade['global_entry_num'] = global_entry_count
                 
+                coin_num = get_coin_day_number(trades, new_trade, today_str)
+                release_flag = bool(new_trade.get('release_entry'))
+                
                 msg_main = generate_entry_message(
                     trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
-                    entry_price, tp_price, stop_price, vol_str, current_date_str, global_entry_count
+                    entry_price, tp_price, stop_price, vol_str, current_date_str, coin_num, release_flag
                 )
                 
                 msg_cat = generate_entry_message(
                     trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
-                    entry_price, tp_price, stop_price, vol_str, current_date_str, cat_entry_count
+                    entry_price, tp_price, stop_price, vol_str, current_date_str, coin_num, release_flag
                 )
                 
                 bot_token = SELL_BOT_TOKEN if trade_type == 'short' else BUY_BOT_TOKEN
@@ -1423,7 +1911,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
         if stats['opening_today'] > 0:
             msg += f"محاسبات معاملات باز امروز : {pnl_word(stats['open_pnl_today'])}\n"
         else:
-            msg += "محاسبات معاملات باز امروز : 0 بدون معامله باز\n"
+            msg += "محاسبات معاملات باز امروز : 0 \n"
         msg += f"تعداد معاملات : {total_today_trades}\n"
         msg += f"tp : {stats['tp']}\n"
         msg += f"stop : {stats['stop']}\n"
