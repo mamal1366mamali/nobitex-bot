@@ -120,7 +120,8 @@ CATEGORIES = {
     }
 }
 
-TRADES_FILE = "trades.json"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+TRADES_FILE = os.path.join(SCRIPT_DIR, "trades.json")
 BASE_URL = 'https://futures.ourbit.com/api/v1/contract/kline'
 ORDERBOOK_URL = 'https://futures.ourbit.com/api/v1/contract/ticker'
 
@@ -327,12 +328,14 @@ def coin_is_z(trades, symbol, current_ts, today_str):
             return True
     return is_release_entry(trades, symbol, current_ts)
 
-def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num, release_flag=False):
+def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num=1, daily_count=0, release_flag=False):
     name = clean_symbol(symbol).lower()
     type_str = "فروش" if trade_type == 'short' else "خرید"
-    tail = " z" if release_flag else ""
+    head = f"{daily_count} {type_str} {coin_num}" if daily_count else f"{type_str} {coin_num}"
+    if release_flag:
+        head = f"{head} z"
     return (
-        f"{type_str} {coin_num}{tail}\n"
+        f"{head}\n"
         f"نام: {name}\n"
         f"دسته بندی رشد: {cat_name}\n"
         f"میزان رشد: +{growth:.2f} %\n"
@@ -1197,7 +1200,7 @@ def process_markets(app_data):
                     except ValueError:
                         entry_num_cat = 1
                 
-                exit_label_cat = f"{entry_num_cat} 1"
+                exit_label_cat = exit_label_global
                 
                 coin_num = get_coin_day_number(trades, trade, today_str)
                 
@@ -1284,11 +1287,10 @@ def process_markets(app_data):
                                 if coin_is_z(trades[:-1], symbol, current_ts, today_str):
                                     cascade_trade['release_entry'] = True
                                 
-                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and t.get('open_time') == today_str])
+                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
                                 global_entry_count = len([
                                     t for t in trades 
-                                    if t.get('open_time') == today_str 
-                                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == 'short'
+                                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
                                 ])
                                 cascade_trade['cat_entry_num'] = cat_entry_count
                                 cascade_trade['global_entry_num'] = global_entry_count
@@ -1297,11 +1299,13 @@ def process_markets(app_data):
                                 c_zflag = bool(cascade_trade.get('release_entry'))
                                 c_msg_main = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, c_coin_num, c_zflag
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
+                                    coin_num=c_coin_num, daily_count=global_entry_count, release_flag=c_zflag
                                 )
                                 c_msg_cat = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, c_coin_num, c_zflag
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
+                                    coin_num=c_coin_num, daily_count=global_entry_count, release_flag=c_zflag
                                 )
                                 
                                 send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], c_msg_main)
@@ -1365,11 +1369,10 @@ def process_markets(app_data):
                                 if coin_is_z(trades[:-1], symbol, current_ts, today_str):
                                     stop_cascade_trade['release_entry'] = True
 
-                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and t.get('open_time') == today_str])
+                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
                                 global_entry_count = len([
                                     t for t in trades
-                                    if t.get('open_time') == today_str
-                                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == 'short'
+                                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
                                 ])
                                 stop_cascade_trade['cat_entry_num'] = cat_entry_count
                                 stop_cascade_trade['global_entry_num'] = global_entry_count
@@ -1378,11 +1381,13 @@ def process_markets(app_data):
                                 s_zflag = bool(stop_cascade_trade.get('release_entry'))
                                 s_msg_main = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, s_coin_num, s_zflag
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
+                                    coin_num=s_coin_num, daily_count=global_entry_count, release_flag=s_zflag
                                 )
                                 s_msg_cat = generate_entry_message(
                                     'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str, s_coin_num, s_zflag
+                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
+                                    coin_num=s_coin_num, daily_count=global_entry_count, release_flag=s_zflag
                                 )
 
                                 send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], s_msg_main)
@@ -1669,11 +1674,10 @@ def process_markets(app_data):
                     new_trade['cap_margin'] = round(cap_size['margin_used'], 4)
                     new_trade['cap_notional'] = round(cap_size['notional'], 4)
                 
-                cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and t.get('open_time') == today_str])
+                cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
                 global_entry_count = len([
                     t for t in trades 
-                    if t.get('open_time') == today_str 
-                    and CATEGORIES.get(t.get('category_id', '20_30'), {}).get('trade_type', 'short') == trade_type
+                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
                 ])
                 new_trade['cat_entry_num'] = cat_entry_count
                 new_trade['global_entry_num'] = global_entry_count
@@ -1683,12 +1687,14 @@ def process_markets(app_data):
                 
                 msg_main = generate_entry_message(
                     trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
-                    entry_price, tp_price, stop_price, vol_str, current_date_str, coin_num, release_flag
+                    entry_price, tp_price, stop_price, vol_str, current_date_str,
+                    coin_num=coin_num, daily_count=global_entry_count, release_flag=release_flag
                 )
                 
                 msg_cat = generate_entry_message(
                     trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
-                    entry_price, tp_price, stop_price, vol_str, current_date_str, coin_num, release_flag
+                    entry_price, tp_price, stop_price, vol_str, current_date_str,
+                    coin_num=coin_num, daily_count=global_entry_count, release_flag=release_flag
                 )
                 
                 bot_token = SELL_BOT_TOKEN if trade_type == 'short' else BUY_BOT_TOKEN
