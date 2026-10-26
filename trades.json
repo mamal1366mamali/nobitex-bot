@@ -10757,6 +10757,27 @@
             "release_entry": true,
             "cat_entry_num": 6,
             "global_entry_num": 12
+        },
+        {
+            "symbol": "ERA_USDT",
+            "category_id": "30_40",
+            "growth": 35.43209876543209,
+            "low": 0.0729,
+            "high": 0.09873,
+            "entry": 0.08392,
+            "tp": 0.07133,
+            "stop": 0.09567,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1793027135,
+            "open_date_str": "1405 08 04 ساعت 15 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 7,
+            "global_entry_num": 13
         }
     ],
     "delist_last_check": 1792996244,
