@@ -10615,6 +10615,27 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 6
+        },
+        {
+            "symbol": "APR_USDT",
+            "category_id": "40_50",
+            "growth": 87.71389459274471,
+            "low": 0.02922,
+            "high": 0.05485,
+            "entry": 0.03726,
+            "tp": 0.03167,
+            "stop": 0.04248,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/04",
+            "open_timestamp": 1792995042,
+            "open_date_str": "1405 08 04 ساعت 06 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 7
         }
     ],
     "delist_last_check": 1792974336,
