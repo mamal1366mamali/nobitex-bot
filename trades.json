@@ -11143,6 +11143,28 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 6
+        },
+        {
+            "symbol": "IRYS_USDT",
+            "category_id": "30_40",
+            "growth": 33.71005455962589,
+            "low": 0.02566,
+            "high": 0.03431,
+            "entry": 0.02916,
+            "tp": 0.02479,
+            "stop": 0.03324,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/05",
+            "open_timestamp": 1793100035,
+            "open_date_str": "1405 08 05 ساعت 11 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "release_entry": true,
+            "cat_entry_num": 3,
+            "global_entry_num": 7
         }
     ],
     "delist_last_check": 1793083238,
