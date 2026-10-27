@@ -279,16 +279,20 @@ def calculate_long_pnl(entry, exit_price, leverage=7):
     pnl = ((exit_price - entry) / entry) * 100 * leverage
     return round(pnl, 2)
 
-def get_coin_day_number(trades, trade, today_str):
-    """شمارهٔ این معامله برای همین ارز در همین روز (۱، ۲، ۳ …)
-    ترتیب بر اساس زمان ورود؛ تی‌پی و استاپ هر دو شمرده می‌شوند."""
+def get_coin_day_number(trades, trade, today_str, status=None):
+    """شمارهٔ این معامله برای همین ارز در همین روز.
+    اگر status داده شود فقط معاملات همان نوع (tp یا stop) شمرده می‌شوند؛
+    یعنی تی‌پی‌ها در شمارش استاپ حساب نمی‌شوند و برعکس."""
     sym = (trade.get('symbol') or '').upper()
     day = []
     for t in trades:
         if (t.get('symbol') or '').upper() != sym:
             continue
-        if t.get('open_time') == today_str or t.get('close_time') == today_str:
-            day.append(t)
+        if not (t.get('open_time') == today_str or t.get('close_time') == today_str):
+            continue
+        if status is not None and str(t.get('status', '')).lower() != status:
+            continue
+        day.append(t)
     day.sort(key=lambda t: float(t.get('open_timestamp') or 0))
     for i, t in enumerate(day):
         if t is trade:
@@ -337,9 +341,7 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
     return (
         f"{head}\n"
         f"نام: {name}\n"
-        f"دسته بندی رشد: {cat_name}\n"
-        f"میزان رشد: +{growth:.2f} %\n"
-        f"درصد منفی: -{neg_percent} %\n"
+        f"دسته بندی رشد: {cat_name}  میزان رشد: +{growth:.2f} %\n"
         f"Entri: {fmt_price(entry)}\n"
         f"tp: {fmt_price(tp)}\n"
         f"stop: {fmt_price(stop)}\n"
@@ -391,7 +393,7 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
     else:
         msg = f"{status_fa}\n"
     msg += f"نام: {name}\n"
-    msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} % درصد منفی: -{neg_percent} %\n"
+    msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} %\n"
     if exit_type == "tp":
         msg += f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)}\n"
     else:
@@ -554,15 +556,12 @@ def get_symbol_stop_state(trades, symbol, current_ts):
     equality_required = 0 <= age <= 72 * 3600
     in_lock = age < 24 * 3600
 
-    if consec >= 2:
-        # دو استاپ پشت سر هم → قفل کامل ۲۴ ساعته
+    # اگر استاپ در دستهٔ ۱۰۰+ خورده باشد → قفل کامل تا فردا (بدون استثنای ۱۰۰+)
+    if str(closed[-1][2].get('category_id', '')) == '100_plus':
         return in_lock, False, equality_required
 
-    # یک استاپ: اگر ورودش از پشتبند (tp قبلی) بوده، آبشاری است و ادامهٔ فوری مجاز است
-    if is_cascade_trade(trades, closed[-1][2]):
-        return False, False, equality_required
-
-    # ورود اول استاپ خورده → قفل ۲۴ ساعته، در این مدت فقط دستهٔ ۱۰۰+ مجاز
+    # قانون جدید نزولی: هر استاپی (ورود اول یا بعد از tp) → قفل
+    # در مدت قفل فقط دستهٔ ۱۰۰+ مجاز است (اگر رشد از ۱۰۰٪ بگذرد)
     if in_lock:
         return True, True, equality_required
     return False, False, equality_required
@@ -1202,7 +1201,7 @@ def process_markets(app_data):
                 
                 exit_label_cat = exit_label_global
                 
-                coin_num = get_coin_day_number(trades, trade, today_str)
+                coin_num = get_coin_day_number(trades, trade, today_str, status=exit_type)
                 
                 msg_main = generate_exit_message(
                     exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
@@ -1311,93 +1310,10 @@ def process_markets(app_data):
                                 send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], c_msg_main)
                                 send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], c_msg_cat)
 
-                # اگر خروج با STOP بود و این معامله خودش «پشتبند» بود (بعد از یک tp یا stop باز شده):
-                # قفل ۲۴ ساعته ندارد؛ همان لحظه با همان قیمت استاپ، معاملهٔ دستهٔ پایین‌تر باز می‌شود
-                # (tp منفی ۱۵٪ و استاپ مثبت ۱۴٪ و اهرم ۷) و تا دستهٔ ۳۰-۴۰ ادامه می‌یابد
-                if (exit_type == 'stop' and trade_type == 'short'
-                        and is_cascade_trade(trades, trade)
-                        and not get_symbol_stop_state(trades, symbol, current_ts)[0]):
-                    cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
-                    if cat_id in cat_order:
-                        curr_idx = cat_order.index(cat_id)
-                        next_idx = curr_idx + 1
-                        next_cat_id = cat_order[next_idx] if next_idx < len(cat_order) else None
-                        # ۳۰-۴۰ آخرین دستهٔ مجاز این پشتبند است (۲۰-۳۰ غیرفعال و پایین‌تر نمی‌رویم)
-                        if next_cat_id and next_cat_id != '20_30':
-                            next_cat_info = CATEGORIES[next_cat_id]
-                            next_already_traded = any(
-                                t.get('symbol', '').upper() == symbol.upper()
-                                and t.get('category_id') == next_cat_id
-                                and t.get('status') == 'OPEN'
-                                for t in trades
-                            )
-                            tp_blocked_cats = get_tp_blocked_categories(trades, symbol, current_ts)
-                            # قیمت باید همان سطح استاپ باشد؛ اگر پایین‌تر رفته باشد معامله انجام نمی‌شود
-                            price_at_level = current_close >= exit_price * (1 - ENTRY_MATCH_TOL)
-                            if (not next_already_traded
-                                    and next_cat_info.get('enabled', True)
-                                    and next_cat_id not in tp_blocked_cats
-                                    and symbol.upper() not in delist_symbols
-                                    and price_at_level):
-                                next_entry = exit_price
-                                next_tp = round_price(next_entry * (1 - next_cat_info['tp_drop']))
-                                next_stop = round_price(next_entry * (1 + next_cat_info['stop_rise']))
-                                next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
-
-                                stop_cascade_trade = {
-                                    'symbol': symbol,
-                                    'category_id': next_cat_id,
-                                    'growth': trade.get('growth', growth),
-                                    'low': low_24h,
-                                    'high': high_24h,
-                                    'entry': next_entry,
-                                    'tp': next_tp,
-                                    'stop': next_stop,
-                                    'neg_pct': next_neg_pct,
-                                    'status': 'OPEN',
-                                    'open_time': today_str,
-                                    'open_timestamp': int(current_ts),
-                                    'open_date_str': current_date_str,
-                                    'close_time': '',
-                                    'close_price': 0.0,
-                                    'pnl': 0.0,
-                                    'leverage': next_cat_info.get('leverage', 7),
-                                    'leg': 'stop'
-                                }
-                                trades.append(stop_cascade_trade)
-
-                                if coin_is_z(trades[:-1], symbol, current_ts, today_str):
-                                    stop_cascade_trade['release_entry'] = True
-
-                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
-                                global_entry_count = len([
-                                    t for t in trades
-                                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
-                                ])
-                                stop_cascade_trade['cat_entry_num'] = cat_entry_count
-                                stop_cascade_trade['global_entry_num'] = global_entry_count
-
-                                s_coin_num = get_coin_day_number(trades, stop_cascade_trade, today_str)
-                                s_zflag = bool(stop_cascade_trade.get('release_entry'))
-                                s_msg_main = generate_entry_message(
-                                    'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
-                                    coin_num=s_coin_num, daily_count=global_entry_count, release_flag=s_zflag
-                                )
-                                s_msg_cat = generate_entry_message(
-                                    'short', symbol, next_cat_info['name_fa'], stop_cascade_trade['growth'], next_neg_pct,
-                                    low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
-                                    coin_num=s_coin_num, daily_count=global_entry_count, release_flag=s_zflag
-                                )
-
-                                send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], s_msg_main)
-                                send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], s_msg_cat)
-
-        # وضعیت قفل بعد از استاپ:
-        # - استاپ در ورود اول → قفل ۲۴ ساعته، فقط دستهٔ ۱۰۰+ مجاز
-        # - دو استاپ پشت سر هم → قفل کامل ۲۴ ساعته
-        # - استاپ بعد از tp (آبشاری) → ادامهٔ فوری مجاز است
-        # و برای ارزهای قفلی، قیمت ورود باید با قیمت بازار یکی باشد
+        # قانون قفل بعد از استاپ (نزولی و صعودی یکسان):
+        # - هر استاپی (ورود اول یا بعد از tp) → قفل ۲۴ ساعته
+        # - در مدت قفل فقط دستهٔ ۱۰۰+ مجاز است (اگر رشد از ۱۰۰٪ بگذرد)
+        # - بعد از ۲۴ ساعت: ورود فقط با تطابق قیمت با بازار
         locked, only_100plus, equality_required = get_symbol_stop_state(trades, symbol, current_ts)
         if locked and not only_100plus:
             continue
@@ -1739,9 +1655,8 @@ def cat_display_name(cat_id):
     return c_name
 
 
-def build_counts_block(cat_stats, week=False):
-    """بخش تعداد معاملات: جمع کل + دسته‌بندی‌ها از بیشترین به کمترین"""
-    # در گزارش روز فقط معاملات بازِ همان روز شمرده می‌شود (بازهای گذشته جدا نوشته می‌شوند)
+def build_counts_totals(cat_stats, week=False):
+    """بخش جمع کل: تعداد تمامی معاملات + tp + stop + open + بازهای روزهای گذشته"""
     def open_count(st):
         return st['opening'] if week else st.get('opening_today', st['opening'])
 
@@ -1757,7 +1672,7 @@ def build_counts_block(cat_stats, week=False):
     sum_open = sum(open_count(s) for s in cat_stats.values())
     sum_open_pnl = sum(open_pnl_of(s) for s in cat_stats.values())
 
-    label = ' هفته' if week else ' امروز'
+    label = ' هفته' if week else ''
     out = f"تعداد تمامی معاملات{label} {total_all}\n"
     out += f"tp {sum_tp}\n"
     out += f"stop {sum_stop}\n"
@@ -1784,14 +1699,28 @@ def build_counts_block(cat_stats, week=False):
 
             out += past_line + "\n"
 
+    return out
+
+
+def build_counts_categories(cat_stats, week=False):
+    """بخش دسته‌بندی‌ها: tp / stop / open هر دسته از بیشترین به کمترین"""
+    def open_count(st):
+        return st['opening'] if week else st.get('opening_today', st['opening'])
+
     ranked = [(cid, st) for cid, st in cat_stats.items()
               if (st['tp'] + st['stop'] + open_count(st)) > 0]
     ranked.sort(key=lambda x: (x[1]['tp'] + x[1]['stop'] + open_count(x[1])), reverse=True)
 
+    out = ''
     for cat_id, st in ranked:
         out += f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {open_count(st)}\n"
 
     return out
+
+
+def build_counts_block(cat_stats, week=False):
+    """بخش تعداد معاملات (جمع کل + دسته‌بندی‌ها) — برای گزارش هفتگی"""
+    return build_counts_totals(cat_stats, week) + build_counts_categories(cat_stats, week)
 
 
 def generate_and_send_daily_report(app_data, target_date=None):
@@ -1989,6 +1918,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
             total_today_str = "0 ٪"
 
         msg_rank = f"محاسبات معاملات امروز {total_today_str}\n"
+        msg_rank += build_counts_totals(cat_stats)
 
         if active_ranking:
             active_ranking.sort(key=lambda x: x[1]['closed_pnl'], reverse=True)
@@ -2002,7 +1932,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
 
                 msg_rank += f"دسته بندی {cat_display_name(cat_id)} {pnl_str}\n"
 
-        msg_rank += build_counts_block(cat_stats)
+        msg_rank += build_counts_categories(cat_stats)
 
         report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
         msg_rank += f"\nتاریخ {report_date_str}"
