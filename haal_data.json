@@ -15,7 +15,7 @@
         }
     ],
     "alert_counter": 8,
-    "last_daily_report_date": "1405/08/04",
+    "last_daily_report_date": "1405/08/05",
     "ref_cache": {
         "hour": 498077,
         "prices": {
@@ -779,12 +779,5 @@
             "ct": 0.16,
             "rlc": 0.5306
         }
-    },
-    "pending_report": {
-        "date": "1405/08/05",
-        "up": 467,
-        "down": 292,
-        "time_str": "1405 08 05 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/05"
+    }
 }
