@@ -11080,6 +11080,27 @@
             "leg": "tp",
             "cat_entry_num": 2,
             "global_entry_num": 3
+        },
+        {
+            "symbol": "US_USDT",
+            "category_id": "30_40",
+            "growth": 33.25106573928651,
+            "low": 0.004457,
+            "high": 0.005939,
+            "entry": 0.005048,
+            "tp": 0.004291,
+            "stop": 0.005755,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/05",
+            "open_timestamp": 1793094036,
+            "open_date_str": "1405 08 05 ساعت 09 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 4
         }
     ],
     "delist_last_check": 1793061337,
