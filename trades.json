@@ -7144,7 +7144,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 7,
-            "global_entry_num": 67
+            "global_entry_num": 67,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "ICNT_USDT",
@@ -8052,7 +8053,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 3,
-            "global_entry_num": 12
+            "global_entry_num": 12,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "BIRB_USDT",
@@ -8385,7 +8387,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 5
+            "global_entry_num": 5,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "BTW_USDT",
@@ -8526,7 +8529,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "IRYS_USDT",
@@ -8907,7 +8911,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 4,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "JCT_USDT",
@@ -9000,7 +9005,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 15
+            "global_entry_num": 15,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "AIINU_USDT",
@@ -9261,7 +9267,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 11
+            "global_entry_num": 11,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "WET_USDT",
@@ -9450,7 +9457,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 19
+            "global_entry_num": 19,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "KAT_USDT",
@@ -9495,7 +9503,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 6,
-            "global_entry_num": 21
+            "global_entry_num": 21,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "KAT_USDT",
@@ -9516,7 +9525,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 22
+            "global_entry_num": 22,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "BLEND_USDT",
@@ -9537,7 +9547,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 7,
-            "global_entry_num": 23
+            "global_entry_num": 23,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "WOO_USDT",
@@ -9558,7 +9569,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 8,
-            "global_entry_num": 24
+            "global_entry_num": 24,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "TREE_USDT",
@@ -9675,7 +9687,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 11,
-            "global_entry_num": 29
+            "global_entry_num": 29,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "IRYS_USDT",
@@ -10128,7 +10141,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 10
+            "global_entry_num": 10,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "BMT_USDT",
@@ -10245,7 +10259,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 5,
-            "global_entry_num": 15
+            "global_entry_num": 15,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "PREDICT_USDT",
@@ -10290,7 +10305,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 7,
-            "global_entry_num": 17
+            "global_entry_num": 17,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "DOS_USDT",
@@ -10335,7 +10351,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 9,
-            "global_entry_num": 19
+            "global_entry_num": 19,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "TAG_USDT",
@@ -10428,7 +10445,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 10,
-            "global_entry_num": 23
+            "global_entry_num": 23,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "JCT_USDT",
@@ -10473,7 +10491,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 4,
-            "global_entry_num": 25
+            "global_entry_num": 25,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "Q_USDT",
@@ -10518,7 +10537,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 1,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "ORDER_USDT",
@@ -10587,7 +10607,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "JCT_USDT",
@@ -10801,7 +10822,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 7,
-            "global_entry_num": 13
+            "global_entry_num": 13,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "DOOD_USDT",
@@ -10871,7 +10893,8 @@
             "leverage": 7,
             "leg": "tp",
             "cat_entry_num": 1,
-            "global_entry_num": 16
+            "global_entry_num": 16,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "TAG_USDT",
@@ -10943,7 +10966,8 @@
             "leg": "tp",
             "release_entry": true,
             "cat_entry_num": 9,
-            "global_entry_num": 19
+            "global_entry_num": 19,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "NEX_USDT",
@@ -10964,7 +10988,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 10,
-            "global_entry_num": 20
+            "global_entry_num": 20,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "Q_USDT",
@@ -11010,7 +11035,8 @@
             "leverage": 7,
             "leg": "tp",
             "cat_entry_num": 11,
-            "global_entry_num": 22
+            "global_entry_num": 22,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "DOOD_USDT",
@@ -11082,7 +11108,8 @@
             "leverage": 7,
             "leg": "tp",
             "cat_entry_num": 2,
-            "global_entry_num": 3
+            "global_entry_num": 3,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "US_USDT",
@@ -11103,7 +11130,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "RITUAL_USDT",
@@ -11124,7 +11152,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 5
+            "global_entry_num": 5,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "NIL_USDT",
@@ -11145,29 +11174,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 6
-        },
-        {
-            "symbol": "IRYS_USDT",
-            "category_id": "30_40",
-            "growth": 33.71005455962589,
-            "low": 0.02566,
-            "high": 0.03431,
-            "entry": 0.02916,
-            "tp": 0.02479,
-            "stop": 0.03324,
-            "neg_pct": 15,
-            "status": "OPEN",
-            "open_time": "1405/08/05",
-            "open_timestamp": 1793100035,
-            "open_date_str": "1405 08 05 ساعت 11 : 20 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
-            "leverage": 7,
-            "release_entry": true,
-            "cat_entry_num": 3,
-            "global_entry_num": 7
+            "global_entry_num": 6,
+            "last_seen_ts": 1793109332
         },
         {
             "symbol": "JCT_USDT",
@@ -11189,6 +11197,28 @@
             "leverage": 7,
             "release_entry": true,
             "cat_entry_num": 1,
+            "global_entry_num": 8,
+            "last_seen_ts": 1793109332
+        },
+        {
+            "symbol": "AGT_USDT",
+            "category_id": "30_40",
+            "growth": 30.09796806966617,
+            "low": 0.05512,
+            "high": 0.07171,
+            "entry": 0.06095,
+            "tp": 0.05181,
+            "stop": 0.06948,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/05",
+            "open_timestamp": 1793109332,
+            "open_date_str": "1405 08 05 ساعت 13 : 55 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
             "global_entry_num": 8
         }
     ],
