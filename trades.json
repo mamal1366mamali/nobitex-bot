@@ -11168,6 +11168,28 @@
             "release_entry": true,
             "cat_entry_num": 3,
             "global_entry_num": 7
+        },
+        {
+            "symbol": "JCT_USDT",
+            "category_id": "40_50",
+            "growth": 46.35048772283888,
+            "low": 0.005946,
+            "high": 0.008702,
+            "entry": 0.007397,
+            "tp": 0.006287,
+            "stop": 0.008433,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/05",
+            "open_timestamp": 1793108134,
+            "open_date_str": "1405 08 05 ساعت 13 : 35 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "release_entry": true,
+            "cat_entry_num": 1,
+            "global_entry_num": 8
         }
     ],
     "delist_last_check": 1793083238,
