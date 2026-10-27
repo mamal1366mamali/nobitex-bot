@@ -156,6 +156,35 @@ def load_data():
             pass
     return {"last_report_date": "", "trades": []}
 
+# معاملات بازی که باید یک‌بار حذف شوند: (نماد، تاریخ ورود، قیمت ورود)
+BAD_OPEN_TRADES = [
+    ("IRYS_USDT", "1405/08/05", 0.02916),
+]
+
+def remove_bad_open_trades(trades):
+    """حذف معامله(های) بازِ مشخص‌شده؛ پس از حذف دیگر در فایل نمی‌مانند و تکرار نمی‌شود."""
+    if not BAD_OPEN_TRADES:
+        return trades
+    out = []
+    for t in trades:
+        if t.get('status') == 'OPEN':
+            sym = (t.get('symbol') or '').upper()
+            day = str(t.get('open_time') or '')
+            try:
+                entry = float(t.get('entry') or 0)
+            except Exception:
+                entry = 0.0
+            bad = False
+            for s, d, p in BAD_OPEN_TRADES:
+                if sym == s and day == d and abs(entry - p) < 1e-9:
+                    bad = True
+                    break
+            if bad:
+                print(f"removed bad open trade: {sym} {day} {entry}")
+                continue
+        out.append(t)
+    return out
+
 def save_data(data):
     with open(TRADES_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -270,6 +299,51 @@ def get_candles(symbol, resolution=60, num_candles=24):
     except Exception:
         pass
     return None
+
+def first_touch_after(symbol, tp_price, stop_price, start_utc_ts, trade_type='short'):
+    """ترتیب واقعی برخورد قیمت با tp و stop با کندل‌های ۱ دقیقه‌ای.
+    خروجی: 'tp' یا 'stop' یا None (اگر هیچ‌کدام نخورده باشد)"""
+    try:
+        url = f"{BASE_URL}/{symbol}?interval=Min1&limit=1440"
+        res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15).json()
+        data = res.get('data') or {}
+        times = data.get('time') or []
+        highs = data.get('high') or []
+        lows = data.get('low') or []
+        tp_ts = None
+        st_ts = None
+        for i in range(min(len(times), len(highs), len(lows))):
+            try:
+                ts = float(times[i])
+                if ts > 1e11:
+                    ts /= 1000.0
+                if ts < start_utc_ts:
+                    continue
+                hi = float(highs[i])
+                lo = float(lows[i])
+            except Exception:
+                continue
+            if trade_type == 'short':
+                hit_tp = lo <= tp_price
+                hit_st = hi >= stop_price
+            else:
+                hit_tp = hi >= tp_price
+                hit_st = lo <= stop_price
+            if hit_tp and tp_ts is None:
+                tp_ts = ts
+            if hit_st and st_ts is None:
+                st_ts = ts
+            if tp_ts is not None and st_ts is not None:
+                break
+        if tp_ts is None and st_ts is None:
+            return None
+        if st_ts is None:
+            return 'tp'
+        if tp_ts is None:
+            return 'stop'
+        return 'tp' if tp_ts <= st_ts else 'stop'
+    except Exception:
+        return None
 
 def calculate_short_pnl(entry, exit_price, leverage=7):
     pnl = ((entry - exit_price) / entry) * 100 * leverage
@@ -523,47 +597,43 @@ def get_symbol_stop_state(trades, symbol, current_ts):
     خروجی: (locked, only_100plus, equality_required)
     - locked           : تا ۲۴ ساعت هیچ معامله‌ای مجاز نیست
     - only_100plus     : در مدت قفل، فقط دستهٔ ۱۰۰+ مجاز است
-    - equality_required: قیمت ورود باید با قیمت بازار یکی باشد"""
+    - equality_required: قیمت ورود باید با قیمت بازار یکی باشد
+
+    ملاک، زمان «آخرین استاپ» این ارز است (تی‌پی‌های بعد از استاپ قفل را باز نمی‌کنند)."""
     sym = symbol.upper()
-    closed = []
+    last_ts = 0.0
+    last_cat = ''
     for t in trades:
         if t.get('symbol', '').upper() != sym:
             continue
-        st = str(t.get('status', '')).lower()
-        if st not in ('tp', 'stop', 'closed'):
+        if str(t.get('status', '')).lower() != 'stop':
             continue
         try:
             ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
         except Exception:
             ts = 0.0
-        closed.append((ts, st, t))
-    if not closed:
-        return False, False, False
-    closed.sort(key=lambda x: x[0])
+        if ts > last_ts:
+            last_ts = ts
+            last_cat = str(t.get('category_id') or '')
 
-    # تعداد استاپ‌های پشت سر هم از آخرین معاملهٔ بسته‌شده
-    consec = 0
-    for ts, st, t in reversed(closed):
-        if st == 'stop':
-            consec += 1
-        else:
-            break
-    if consec == 0:
+    if last_ts <= 0:
         return False, False, False
 
-    last_ts = closed[-1][0]
     age = current_ts - last_ts
-    equality_required = 0 <= age <= 72 * 3600
+    if age < 0:
+        return False, False, False
+
+    equality_required = age <= 72 * 3600
     in_lock = age < 24 * 3600
 
-    # اگر استاپ در دستهٔ ۱۰۰+ خورده باشد → قفل کامل تا فردا (بدون استثنای ۱۰۰+)
-    if str(closed[-1][2].get('category_id', '')) == '100_plus':
-        return in_lock, False, equality_required
+    # استاپ در دستهٔ ۱۰۰+ → قفل کامل تا فردا (بدون استثنای ۱۰۰+)
+    if in_lock and last_cat == '100_plus':
+        return True, False, True
 
     # قانون جدید نزولی: هر استاپی (ورود اول یا بعد از tp) → قفل
     # در مدت قفل فقط دستهٔ ۱۰۰+ مجاز است (اگر رشد از ۱۰۰٪ بگذرد)
     if in_lock:
-        return True, True, equality_required
+        return True, True, True
     return False, False, equality_required
 
 def price_returned_to_level(df, since_ts_utc, level):
@@ -1160,6 +1230,19 @@ def process_markets(app_data):
 
                     
             if exit_type:
+                # اگر در فاصلهٔ خوابِ گیت‌هاب هم tp و هم stop رد شده باشند،
+                # ترتیب واقعی برخورد را از کندل‌های ۱ دقیقه‌ای می‌گیریم
+                # (این درخواست فقط برای معاملاتی زده می‌شود که همین حالا خروج می‌خورند)
+                try:
+                    start_iran = float(trade.get('last_seen_ts') or trade.get('open_timestamp') or current_ts)
+                except Exception:
+                    start_iran = float(current_ts)
+                real_order = first_touch_after(
+                    symbol, trade['tp'], trade['stop'], start_iran - 12600, trade_type)
+                if real_order and real_order != exit_type:
+                    exit_type = real_order
+                    exit_price = trade['tp'] if real_order == 'tp' else trade['stop']
+
                 trade['status'] = exit_type
                 trade['close_time'] = today_str
                 trade['close_timestamp'] = int(current_ts)
@@ -1309,6 +1392,10 @@ def process_markets(app_data):
                                 
                                 send_telegram_message(SELL_BOT_TOKEN, [PERSONAL_ID, next_cat_info['entry_channel']], c_msg_main)
                                 send_telegram_message(SELL_BOT_TOKEN, [next_cat_info['report_channel']], c_msg_cat)
+
+            # آخرین زمانی که این معاملهٔ باز چک شد (برای تشخیص ترتیب tp/stop بعد از خوابِ ربات)
+            if trade.get('status') == 'OPEN':
+                trade['last_seen_ts'] = int(current_ts)
 
         # قانون قفل بعد از استاپ (نزولی و صعودی یکسان):
         # - هر استاپی (ورود اول یا بعد از tp) → قفل ۲۴ ساعته
@@ -2040,6 +2127,13 @@ def generate_and_send_weekly_report(app_data):
 
 if __name__ == '__main__':
     app_data = load_data()
+
+    # حذف یک‌بارهٔ معاملهٔ بازِ اشتباه (دستور کاربر): فقط همان معامله، بدون اثر روی بقیه
+    try:
+        app_data['trades'] = remove_bad_open_trades(app_data.get('trades', []))
+    except Exception as e:
+        print(f"purge error: {e}")
+
     try:
         app_data = process_markets(app_data)
 
