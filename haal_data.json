@@ -1,5 +1,5 @@
 {
-    "last_update_id": 645610982,
+    "last_update_id": 645610984,
     "alerts": [
         {
             "symbol": "a",
@@ -12,9 +12,21 @@
             "alert_num": 5,
             "chat_id": 114669886,
             "created_at": 1792379128
+        },
+        {
+            "symbol": "apr",
+            "tag": "دسته z",
+            "entry": 0.03317,
+            "tp": 0.02692,
+            "stop": 0.0361,
+            "trade_type": "short",
+            "leverage": 7,
+            "alert_num": 8,
+            "chat_id": 114669886,
+            "created_at": 1793081741
         }
     ],
-    "alert_counter": 7,
+    "alert_counter": 8,
     "last_daily_report_date": "1405/08/04",
     "ref_cache": {
         "hour": 498077,
