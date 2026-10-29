@@ -15,7 +15,7 @@
         }
     ],
     "alert_counter": 8,
-    "last_daily_report_date": "1405/08/06",
+    "last_daily_report_date": "1405/08/07",
     "ref_cache": {
         "hour": 498135,
         "prices": {
@@ -773,12 +773,5 @@
             "dna": 0.185,
             "apld": 19.61
         }
-    },
-    "pending_report": {
-        "date": "1405/08/07",
-        "up": 474,
-        "down": 279,
-        "time_str": "1405 08 07 ساعت 19 : 20 دقیقه"
-    },
-    "pending_report_date": "1405/08/07"
+    }
 }
