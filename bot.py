@@ -789,6 +789,9 @@ ENTRY_MATCH_TOL = 0.005
 # شمارش مثبت/منفی بر اساس ۲۴ ساعت واقعی: کلوز الان نسبت به کلوز ۲۴ ساعت قبل.
 # یک‌بار در ساعت محاسبه و در trades.json ذخیره می‌شود تا سیگنال‌ها معطل نشن.
 MARKET_STATE_MAX_AGE = 3600
+# حداقل پوشش: اگر کمتر از این نسبت از ارزها حساب شوند، عدد ناقص است و نمایش داده نمی‌شود
+MARKET_MIN_COVERAGE = 0.80
+HAAL_DATA_URL = "https://raw.githubusercontent.com/mamal1366mamali/nobitex-bot/main/haal_data.json"
 _MARKET_STATE = {'up': 0, 'down': 0, 'ts': 0.0}
 _MARKET_CTX = {'app_data': None, 'overview': None}
 
@@ -805,19 +808,26 @@ def _ref_24h_pair(pair, tries=2, sleep_base=0.3):
             times = d.get("time") or []
             closes = d.get("close") or []
             best = None
+            first = None
             for ts, c in zip(times, closes):
                 try:
                     t = float(ts)
+                    cv = float(c)
                 except Exception:
                     continue
                 if t > 1e11:
                     t /= 1000.0
+                if first is None and cv > 0:
+                    first = cv
                 if t <= target:
-                    best = float(c)
+                    best = cv
                 else:
                     break
             if best and best > 0:
                 return best
+            # ارزهای تازه‌لیست‌شده که ۲۴ ساعت سابقه ندارند: قدیمی‌ترین کندل موجود
+            if first and first > 0:
+                return first
         except Exception:
             pass
         if i < tries - 1:
@@ -838,6 +848,44 @@ def _fetch_refs_24h(pairs, workers=12, tries=2, sleep_base=0.3):
         pass
     return out
 
+def _fetch_refs_staged(pairs):
+    """چند مرحله تلاش: اول پرسرعت، بعد آهسته‌تر برای ارزهایی که جواب ندادند
+    (صرافی درخواست‌های هم‌زمان زیاد را محدود می‌کند؛ با تلاش دوباره تقریباً همه شمرده می‌شوند)"""
+    refs = {}
+    missing = list(pairs)
+    for workers, tries, pause in ((10, 2, 0.4), (6, 3, 0.8), (3, 4, 1.5)):
+        if not missing:
+            break
+        got = _fetch_refs_24h(missing, workers=workers, tries=tries, sleep_base=pause)
+        refs.update(got)
+        missing = [p for p in missing if not refs.get(p)]
+    return refs
+
+def _haal_refs(now):
+    """مراجع ۲۴ ساعتهٔ ربات حال بازار، اگر مربوط به همین ساعت باشد
+    (اول فایل محلی، اگر ناقص بود نسخهٔ گیت‌هاب) — این‌طوری بیشتر وقت‌ها بدون درخواست حساب می‌شود"""
+    hour = int(now // 3600)
+    out = {}
+    try:
+        with open('haal_data.json', encoding='utf-8') as f:
+            rc = (json.load(f) or {}).get('ref_cache') or {}
+        if int(rc.get('hour') or 0) == hour:
+            out = {str(k).upper(): v for k, v in (rc.get('prices') or {}).items()}
+    except Exception:
+        pass
+    if len(out) > 300:
+        return out
+    try:
+        r = requests.get(HAAL_DATA_URL, timeout=20)
+        rc = (r.json() or {}).get('ref_cache') or {}
+        if int(rc.get('hour') or 0) == hour:
+            remote = {str(k).upper(): v for k, v in (rc.get('prices') or {}).items()}
+            if len(remote) > len(out):
+                out = remote
+    except Exception:
+        pass
+    return out
+
 def build_market_trend_line(up_count, down_count):
     total = up_count + down_count
     if total <= 0:
@@ -848,6 +896,22 @@ def build_market_trend_line(up_count, down_count):
     if up_count * 3 >= total * 2:
         return f"صعودی {up_pct} %"
     return f"رنج {up_pct} %"
+
+def _cached_state_ok(cached):
+    """آیا عدد حال بازارِ ذخیره‌شده قابل اعتماد است؟ (پوشش کافی داشته باشد)"""
+    try:
+        up = int(cached.get('up') or 0)
+        down = int(cached.get('down') or 0)
+        if up + down <= 0:
+            return False
+        total = int(cached.get('total') or 0)
+        counted = int(cached.get('counted') or 0)
+        if total > 0:
+            return counted >= total * MARKET_MIN_COVERAGE
+        # ذخیره‌های قدیمی که تعداد کل را ندارند
+        return (up + down) >= 500
+    except Exception:
+        return False
 
 def ensure_market_state():
     """حال بازار را (در صورت کهنه بودن) حساب می‌کند؛ حداکثر یک‌بار در ساعت"""
@@ -862,7 +926,7 @@ def ensure_market_state():
     cached = app_data.get('market_state') or {}
     try:
         if cached and (now - float(cached.get('ts') or 0)) < MARKET_STATE_MAX_AGE:
-            if int(cached.get('up') or 0) + int(cached.get('down') or 0) > 0:
+            if _cached_state_ok(cached):
                 _MARKET_STATE = {
                     'up': int(cached.get('up') or 0),
                     'down': int(cached.get('down') or 0),
@@ -876,22 +940,15 @@ def ensure_market_state():
     if not overview:
         return _MARKET_STATE
 
-    refs = {}
-    try:
-        with open('haal_data.json', encoding='utf-8') as f:
-            hd = json.load(f)
-        rc = hd.get('ref_cache') or {}
-        if int(rc.get('hour') or 0) == int(now // 3600):
-            refs = {str(k).upper(): v for k, v in (rc.get('prices') or {}).items()}
-    except Exception:
-        refs = {}
+    total = len(overview)
+    refs = _haal_refs(now)
 
     def _key(sym):
         return sym.split('_')[0].upper()
 
     missing = [s for s in overview.keys() if not refs.get(_key(s))]
     if missing:
-        got = _fetch_refs_24h(missing)
+        got = _fetch_refs_staged(missing)
         for s, v in got.items():
             refs[_key(s)] = v
 
@@ -910,9 +967,22 @@ def ensure_market_state():
         elif last < float(ref):
             down += 1
 
+    counted = up + down
+
+    # اگر بخش زیادی از ارزها حساب نشده باشند، عدد ناقص و گمراه‌کننده است:
+    # یا از مقدار قبلی استفاده می‌شود یا دو خط حال بازار نمایش داده نمی‌شود
+    if total > 0 and counted < total * MARKET_MIN_COVERAGE:
+        print(f"market state incomplete: {counted}/{total}")
+        prev_up = int(cached.get('up') or 0)
+        prev_down = int(cached.get('down') or 0)
+        if prev_up + prev_down > 0:
+            _MARKET_STATE = {'up': prev_up, 'down': prev_down, 'ts': float(cached.get('ts') or 0)}
+            return _MARKET_STATE
+        return {'up': 0, 'down': 0, 'ts': 0.0}
+
     _MARKET_STATE = {'up': up, 'down': down, 'ts': now}
     if isinstance(app_data, dict):
-        app_data['market_state'] = {'up': up, 'down': down, 'ts': now}
+        app_data['market_state'] = {'up': up, 'down': down, 'ts': now, 'total': total, 'counted': counted}
     return _MARKET_STATE
 
 def market_state_block():
