@@ -97,19 +97,34 @@ def get_market_data():
     return prices, stats_data
 
 def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
-    """کلوز ۲۴ ساعت قبل از کندل ساعتی"""
+    """کلوز دقیقِ ۲۴ ساعت قبل (بر اساس کندل ۵ دقیقه‌ای)"""
+    target = time.time() - 24 * 3600
     for i in range(tries):
         try:
             r = requests.get(
-                f"{OURBIT_KLINE_URL}/{pair}?interval=Min60&limit=25",
+                f"{OURBIT_KLINE_URL}/{pair}?interval=Min5&limit=300",
                 headers={"User-Agent": "Mozilla/5.0"},
                 timeout=20
             )
             res = r.json()
             d = res.get("data") or {}
+            times = d.get("time") if isinstance(d, dict) else None
             closes = d.get("close") if isinstance(d, dict) else None
-            if closes and len(closes) >= 25:
-                return float(closes[-25])
+            if times and closes:
+                best = None
+                for ts, c in zip(times, closes):
+                    try:
+                        t = float(ts)
+                    except Exception:
+                        continue
+                    if t > 1e11:
+                        t /= 1000.0
+                    if t <= target:
+                        best = float(c)
+                    else:
+                        break
+                if best and best > 0:
+                    return best
         except Exception:
             pass
         if i < tries - 1:
@@ -400,10 +415,10 @@ def main():
             "keyboard": [
                 [{"text": "قیمت لحظه ای 💰"}],
                 [{"text": "حال بازار 📊"}],
-                [{"text": "چارت 📊"}],
                 [{"text": "بیشترین رشد و افت 📈📉"}],
                 [{"text": "هشدار قیمتی 🔔"}],
-                [{"text": "لیست هشدارهای قیمتی 📝"}]
+                [{"text": "لیست هشدارهای قیمتی 📝"}],
+                [{"text": "چارت 📊"}]
             ],
             "resize_keyboard": True
         }
