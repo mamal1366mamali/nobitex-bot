@@ -1,19 +1,6 @@
 {
     "last_update_id": 645611030,
-    "alerts": [
-        {
-            "symbol": "a",
-            "tag": "فروش سی چهل درصد",
-            "entry": 0.08964,
-            "tp": 0.08182,
-            "stop": 0.1111,
-            "trade_type": "short",
-            "leverage": 7,
-            "alert_num": 5,
-            "chat_id": 114669886,
-            "created_at": 1792379128
-        }
-    ],
+    "alerts": [],
     "alert_counter": 8,
     "last_daily_report_date": "1405/08/07",
     "ref_cache": {
