@@ -12457,7 +12457,8 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 4
+            "global_entry_num": 4,
+            "last_seen_ts": 1793446836
         },
         {
             "symbol": "INTW_USDT",
@@ -12479,7 +12480,31 @@
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 5
+            "global_entry_num": 5,
+            "last_seen_ts": 1793446836
+        },
+        {
+            "symbol": "IDOL_USDT",
+            "category_id": "60_70",
+            "growth": 98.36866827472389,
+            "low": 0.015754,
+            "high": 0.031251,
+            "leg": null,
+            "entry": 0.02276,
+            "tp": 0.01935,
+            "stop": 0.02595,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/09",
+            "open_timestamp": 1793446836,
+            "open_date_str": "1405 08 09 ساعت 11 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "release_entry": true,
+            "cat_entry_num": 1,
+            "global_entry_num": 6
         }
     ],
     "delist_last_check": 1793431851,
