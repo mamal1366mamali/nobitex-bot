@@ -12458,7 +12458,7 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 4,
-            "last_seen_ts": 1793449860
+            "last_seen_ts": 1793450135
         },
         {
             "symbol": "INTW_USDT",
@@ -12481,7 +12481,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 5,
-            "last_seen_ts": 1793449860
+            "last_seen_ts": 1793450135
         },
         {
             "symbol": "IDOL_USDT",
@@ -12531,7 +12531,8 @@
             "leg": "tp",
             "release_entry": true,
             "cat_entry_num": 1,
-            "global_entry_num": 7
+            "global_entry_num": 7,
+            "last_seen_ts": 1793450135
         }
     ],
     "delist_last_check": 1793431851,
