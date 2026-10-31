@@ -12467,8 +12467,8 @@
         {
             "symbol": "COW_USDT",
             "category_id": "30_40",
-            "growth": 33.62831858407079,
-            "low": 0.113,
+            "growth": 32.1084864391951,
+            "low": 0.1143,
             "high": 0.151,
             "leg": null,
             "entry": 0.1283,
@@ -12477,8 +12477,8 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793492735,
-            "open_date_str": "1405 08 10 ساعت 00 : 25 دقیقه",
+            "open_timestamp": 1793493055,
+            "open_date_str": "1405 08 10 ساعت 00 : 30 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
@@ -12512,11 +12512,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 460,
-        "down": 304,
-        "ts": 1793476854.478055,
+        "up": 458,
+        "down": 302,
+        "ts": 1793480459.9950364,
         "total": 766,
-        "counted": 764
+        "counted": 760
     },
     "report_start_ts": 1793446539
 }
