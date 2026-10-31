@@ -12465,6 +12465,29 @@
             "duration_str": "50 دقیقه"
         },
         {
+            "symbol": "AIN_USDT",
+            "category_id": "50_60",
+            "growth": 69.34888354920001,
+            "low": 0.17063,
+            "high": 0.28896,
+            "leg": null,
+            "entry": 0.2321,
+            "tp": 0.1973,
+            "stop": 0.2646,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/10",
+            "open_timestamp": 1793491530,
+            "open_date_str": "1405 08 10 ساعت 00 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "release_entry": true,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
+        },
+        {
             "symbol": "COW_USDT",
             "category_id": "30_40",
             "growth": 33.62831858407079,
@@ -12477,14 +12500,14 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793491244,
-            "open_date_str": "1405 08 10 ساعت 00 : 00 دقیقه",
+            "open_timestamp": 1793491530,
+            "open_date_str": "1405 08 10 ساعت 00 : 05 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 2
         }
     ],
     "delist_last_check": 1793475056,
