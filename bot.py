@@ -167,9 +167,10 @@ BAD_OPEN_TRADES = [
 
 # شروع تازه (درخواست کاربر): حذف معاملات باز + صفر شدن گزارش روز و هفته از این لحظه
 # فقط یک بار اجرا می‌شود (تا وقتی report_start_ts در حافظه ثبت نشده باشد).
-RESET_REPORTS_ONCE = True
+RESET_REPORTS_ONCE = False
 
 def remove_bad_open_trades(trades):
+    return [t for t in trades if str(t.get('status')) != 'OPEN']
     """حذف معامله(های) بازِ مشخص‌شده؛ پس از حذف دیگر در فایل نمی‌مانند و تکرار نمی‌شود."""
     if not BAD_OPEN_TRADES:
         return trades
@@ -417,13 +418,12 @@ def coin_is_z(trades, symbol, current_ts, today_str):
 def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num=1, daily_count=0, release_flag=False):
     name = clean_symbol(symbol).lower()
     type_str = "فروش" if trade_type == 'short' else "خرید"
-    # شمارشگر «۱» نمایش داده نمی‌شود: اولین معاملهٔ روز فقط «فروش» است
-    parts = []
-    if daily_count and int(daily_count) > 1:
-        parts.append(str(int(daily_count)))
-    parts.append(type_str)
+    # شمارشگر «۱» نمایش داده نمی‌شود: اولین معامله فقط کلمه، از معامله دوم عدد بعد از کلمه می‌آید
+    parts = [type_str]
     if coin_num and int(coin_num) > 1:
         parts.append(str(int(coin_num)))
+    elif daily_count and int(daily_count) > 1:
+        parts.append(str(int(daily_count)))
     head = " ".join(parts)
     if release_flag:
         head = f"{head} z"
@@ -473,15 +473,15 @@ def format_shamsi_from_timestamp(ts):
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type, coin_num=1, release_flag=False):
     name = clean_symbol(symbol).lower()
     status_fa = str(exit_type)
-    # شمارشگر «۱» نمایش داده نمی‌شود: اولین tp یا اولین stop فقط با همان کلمه
+    # شمارشگر «۱» نمایش داده نمی‌شود: اولین خروج فقط کلمه، از خروج دوم عدد بعد از کلمه می‌آید
+    parts = [status_fa]
     if coin_num and int(coin_num) > 1:
-        status_fa = f"{status_fa} {int(coin_num)}"
+        parts.append(str(int(coin_num)))
+    elif daily_count and int(daily_count) > 1:
+        parts.append(str(int(daily_count)))
     if release_flag:
-        status_fa = f"{status_fa} z"
-    if daily_count and int(daily_count) > 1:
-        msg = f"{int(daily_count)} {status_fa}\n"
-    else:
-        msg = f"{status_fa}\n"
+        parts.append("z")
+    msg = f"{' '.join(parts)}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} %\n"
     if exit_type == "tp":
@@ -759,8 +759,9 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
 
     # قلهٔ جدید دیگر مجوز نمی‌دهد (به درخواست کاربر حذف شد)
     # فقط رشد ۱۰۰٪ یا بیشتر همهٔ دسته‌ها را باز می‌کند
-    # ۳۰-۴۰ و ۴۰-۵۰ ممنوع تا پایان بازهٔ ۷۲ ساعته
-    return False, False, equality_required, equality_required
+    # ۳۰-۴۰ و ۴۰-۵۰ بعد از استاپ همیشه ممنوع هستند - حتی بعد از ۷۲ ساعت
+    # ارزهای z نباید در دسته‌های پایین وارد شوند
+    return False, False, equality_required, True
 
 def price_returned_to_level(df, since_ts_utc, level):
     """آیا قیمت بعد از زمان داده‌شده (ثانیه UTC) دوباره به این سطح رسیده است؟"""
