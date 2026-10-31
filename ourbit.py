@@ -18,8 +18,13 @@ DATA_FILE = "ourbit_data.json"
 OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
 OURBIT_KLINE_URL = "https://futures.ourbit.com/api/v1/contract/kline"
 
-# هر ۲ ساعت یک بار = هر ۱۲۰ دقیقه
-REPORT_INTERVAL_MINUTES = 120
+# ساعت‌هایی که باید گزارش ارسال شود (به وقت ایران)
+# از نیمه شب هر ۲ ساعت یک‌بار: 0، 2، 4، 6، 8، 10، 12، 14، 16، 18، 20، 22
+REPORT_HOURS = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
+
+# حداکثر دقیقه‌ای که هنوز "سر ساعت" حساب می‌شود
+# (چون cron هر ۵ دقیقه اجرا می‌شه، دقیقه 0 تا 4 قابل قبوله)
+REPORT_WINDOW_MINUTES = 5
 
 
 def send_telegram_message(text):
@@ -201,23 +206,27 @@ def build_market_status_line(up_count, down_count):
 
 
 def should_send_report(data, iran_time):
-    """بررسی اینکه آیا وقت ارسال گزارش ۲ ساعته رسیده یا نه"""
-    # دقیقه کلی روز (0 تا 1439)
-    minute_of_day = iran_time.hour * 60 + iran_time.minute
-
-    # هر ۱۲۰ دقیقه یک slot داریم: 0-119, 120-239, 240-359, ...
-    current_slot = minute_of_day // REPORT_INTERVAL_MINUTES
-
-    last_slot = data.get("last_report_slot", -1)
-    last_date = data.get("last_report_date", "")
+    """بررسی اینکه آیا وقت ارسال گزارش سر ساعت رسیده یا نه"""
+    current_hour = iran_time.hour
+    current_minute = iran_time.minute
 
     iran_date_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime("%Y/%m/%d")
 
-    # اگر روز جدید شد، slot را ریست کن
-    if last_date != iran_date_str:
-        last_slot = -1
+    # فقط سر ساعت‌های مشخص و در پنج دقیقه اول
+    if current_hour not in REPORT_HOURS:
+        return False, current_hour, iran_date_str
 
-    return current_slot != last_slot, current_slot, iran_date_str
+    if current_minute >= REPORT_WINDOW_MINUTES:
+        return False, current_hour, iran_date_str
+
+    # بررسی اینکه برای این ساعت و این روز قبلاً ارسال نشده باشد
+    last_hour = data.get("last_report_hour", -1)
+    last_date = data.get("last_report_date", "")
+
+    if last_date == iran_date_str and last_hour == current_hour:
+        return False, current_hour, iran_date_str
+
+    return True, current_hour, iran_date_str
 
 
 def main():
@@ -225,7 +234,7 @@ def main():
 
     iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
 
-    should_report, current_slot, today_str = should_send_report(data, iran_time)
+    should_report, current_hour, today_str = should_send_report(data, iran_time)
 
     if not should_report:
         print("هنوز وقت ارسال گزارش نرسیده.")
@@ -269,8 +278,8 @@ def main():
     send_telegram_message(msg)
     print(f"گزارش حال بازار ارسال شد: {trend}")
 
-    # ذخیره slot فعلی تا دوباره ارسال نشه
-    data["last_report_slot"] = current_slot
+    # ذخیره ساعت فعلی تا دوباره ارسال نشه
+    data["last_report_hour"] = current_hour
     data["last_report_date"] = today_str
     save_data(data)
 
