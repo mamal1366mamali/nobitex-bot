@@ -12465,6 +12465,28 @@
             "duration_str": "50 دقیقه"
         },
         {
+            "symbol": "ESPORTS_USDT",
+            "category_id": "40_50",
+            "growth": 45.86841729698871,
+            "low": 0.007007,
+            "high": 0.010221,
+            "leg": null,
+            "entry": 0.008688,
+            "tp": 0.007385,
+            "stop": 0.009904,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/10",
+            "open_timestamp": 1793499037,
+            "open_date_str": "1405 08 10 ساعت 02 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 1
+        },
+        {
             "symbol": "COW_USDT",
             "category_id": "30_40",
             "growth": 31.762652705061083,
@@ -12477,14 +12499,14 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793498737,
-            "open_date_str": "1405 08 10 ساعت 02 : 05 دقیقه",
+            "open_timestamp": 1793499037,
+            "open_date_str": "1405 08 10 ساعت 02 : 10 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 1
+            "global_entry_num": 2
         }
     ],
     "delist_last_check": 1793475056,
