@@ -161,7 +161,13 @@ def load_data():
 # معاملات بازی که باید یک‌بار حذف شوند: (نماد، تاریخ ورود، قیمت ورود)
 BAD_OPEN_TRADES = [
     ("IRYS_USDT", "1405/08/05", 0.02916),
+    ("BEAT_USDT", "1405/08/07", 0.0979),
+    ("ON_USDT", "1405/08/08", 0.2156),
 ]
+
+# شروع تازه (درخواست کاربر): حذف معاملات باز + صفر شدن گزارش روز و هفته از این لحظه
+# فقط یک بار اجرا می‌شود (تا وقتی report_start_ts در حافظه ثبت نشده باشد).
+RESET_REPORTS_ONCE = True
 
 def remove_bad_open_trades(trades):
     """حذف معامله(های) بازِ مشخص‌شده؛ پس از حذف دیگر در فایل نمی‌مانند و تکرار نمی‌شود."""
@@ -411,19 +417,25 @@ def coin_is_z(trades, symbol, current_ts, today_str):
 def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num=1, daily_count=0, release_flag=False):
     name = clean_symbol(symbol).lower()
     type_str = "فروش" if trade_type == 'short' else "خرید"
-    head = f"{daily_count} {type_str} {coin_num}" if daily_count else f"{type_str} {coin_num}"
+    # شمارشگر «۱» نمایش داده نمی‌شود: اولین معاملهٔ روز فقط «فروش» است
+    parts = []
+    if daily_count and int(daily_count) > 1:
+        parts.append(str(int(daily_count)))
+    parts.append(type_str)
+    if coin_num and int(coin_num) > 1:
+        parts.append(str(int(coin_num)))
+    head = " ".join(parts)
     if release_flag:
         head = f"{head} z"
     return (
         f"{head}\n"
         f"نام: {name}\n"
         f"دسته بندی رشد: {cat_name}  میزان رشد: +{growth:.2f} %\n"
-        f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)} stop: {fmt_price(stop)}\n"
         f"تاریخ: {date_str}\n"
         f"{market_state_block()}"
+        f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)} stop: {fmt_price(stop)}\n"
         f"حجم: {vol}\n"
-        f"low: {fmt_price(low)}\n"
-        f"hi: {fmt_price(high)}"
+        f"low: {fmt_price(low)} hi: {fmt_price(high)}"
     )
 
 def calculate_duration_str(start_ts, end_ts):
@@ -460,26 +472,29 @@ def format_shamsi_from_timestamp(ts):
 
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type, coin_num=1, release_flag=False):
     name = clean_symbol(symbol).lower()
-    status_fa = f"{exit_type} {coin_num}"
+    status_fa = str(exit_type)
+    # شمارشگر «۱» نمایش داده نمی‌شود: اولین tp یا اولین stop فقط با همان کلمه
+    if coin_num and int(coin_num) > 1:
+        status_fa = f"{status_fa} {int(coin_num)}"
     if release_flag:
         status_fa = f"{status_fa} z"
-    if daily_count:
-        msg = f"{daily_count} {status_fa}\n"
+    if daily_count and int(daily_count) > 1:
+        msg = f"{int(daily_count)} {status_fa}\n"
     else:
         msg = f"{status_fa}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} %\n"
     if exit_type == "tp":
-        msg += f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)}\n"
+        entry_line = f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)}\n"
     else:
-        msg += f"Entri: {fmt_price(entry)} stop: {fmt_price(stop)}\n"
+        entry_line = f"Entri: {fmt_price(entry)} stop: {fmt_price(stop)}\n"
     msg += f"شروع: {start_date_str}\n"
     msg += f"پایان: {end_date_str}\n"
     msg += f"مدت {duration_str}\n"
     msg += market_state_block()
+    msg += entry_line
     msg += f"حجم: {vol}\n"
-    msg += f"low: {fmt_price(low)}\n"
-    msg += f"hi: {fmt_price(high)}"
+    msg += f"low: {fmt_price(low)} hi: {fmt_price(high)}"
     return msg
 
 def get_valid_categories(growth):
@@ -555,6 +570,69 @@ def get_tp_blocked_categories(trades, symbol, current_ts):
             blocked.add(cat)
     return blocked
 
+def entry_level_cat_name(entry_price, low_24h, cat_id):
+    """نام دستهٔ نمایشی بر اساس رشدِ نقطهٔ ورود نسبت به کف ۲۴ ساعته.
+    مثال: رشد ۹۳٪ و ورود ۱۵٪ زیر سقف → رشد نقطهٔ ورود ۶۴٪ → «۶۰ الی ۷۰».
+    برای دستهٔ ۱۰۰+ همان «۱۰۰+» می‌ماند (چون اهرم و درصدها متفاوت است)."""
+    try:
+        if cat_id == '100_plus':
+            return CATEGORIES['100_plus']['name_fa']
+        e = float(entry_price or 0)
+        lo = float(low_24h or 0)
+        if e > 0 and lo > 0:
+            g = (e - lo) / lo * 100.0
+            if g >= 100:
+                cid = '90_100'
+            else:
+                cid = get_category_for_growth(g)
+            if cid in CATEGORIES:
+                return CATEGORIES[cid]['name_fa']
+    except Exception:
+        pass
+    return CATEGORIES.get(cat_id, {}).get('name_fa', '')
+
+# حداکثر تعداد tp هر زنجیره، بر اساس دستهٔ شروع زنجیره
+CATEGORY_TP_CAP = {
+    '30_40': 1, '40_50': 1,
+    '50_60': 2, '60_70': 2,
+    '70_80': 3, '80_90': 3, '90_100': 3,
+    '100_plus': 2,
+}
+
+def get_chain_info(trades, symbol, trade):
+    """(طول زنجیره تا این معامله، دستهٔ شروع زنجیره)"""
+    lst = [t for t in trades
+           if (t.get('symbol') or '').upper() == symbol.upper()
+           and str(t.get('open_time')) == str(trade.get('open_time'))]
+    lst.sort(key=lambda x: float(x.get('open_timestamp') or 0))
+    try:
+        i = lst.index(trade)
+    except ValueError:
+        return 1, trade.get('category_id')
+    j = i
+    while j > 0 and lst[j].get('leg') == 'tp':
+        j -= 1
+    return i - j + 1, lst[j].get('category_id')
+
+def cascade_bump(start_cat, step):
+    """ضریب بالاتر بودن نقطهٔ ورود پشتبند از tp معاملهٔ قبلی.
+    step = شمارهٔ ورود جدید در زنجیره (۲ = ورود دوم، ۳ = ورود سوم).
+    ورود دوم در ۴۰-۵۰/۵۰-۶۰/۶۰-۷۰ و ورود سوم در ۷۰-۸۰/۸۰-۹۰/۹۰-۱۰۰ → ۱۰٪
+    بقیه → ۵٪"""
+    if start_cat in ('40_50', '50_60', '60_70') and step == 2:
+        return 1.10
+    if start_cat in ('70_80', '80_90', '90_100') and step == 3:
+        return 1.10
+    return 1.05
+
+def chain_cap_reached(trades, symbol, trade):
+    """آیا زنجیرهٔ این ارز به سقف tp خود رسیده است؟"""
+    n, start_cat = get_chain_info(trades, symbol, trade)
+    cap = CATEGORY_TP_CAP.get(start_cat)
+    if cap is None:
+        return False
+    return n >= cap
+
 def is_cascade_trade(trades, trade):
     """آیا این معامله در «پشتبند» معاملهٔ قبلی باز شده (نه ورود اول)؟
     پشتبند یعنی نقطهٔ ورودش برابر tp یا stop یک معاملهٔ قبلیِ همان ارز است."""
@@ -619,14 +697,13 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
     - only_100plus     : (دیگر استفاده نمی‌شود؛ برای سازگاری نگه داشته شده)
     - equality_required: قیمت ورود باید با قیمت بازار یکی باشد
     - block_low        : بعد از پایان قفل فقط ۵۰-۶۰ و بالاتر مجاز است
-                         (۳۰-۴۰ و ۴۰-۵۰ ممنوع) تا قلهٔ جدید زده شود
+                         (۳۰-۴۰ و ۴۰-۵۰ ممنوع) تا پایان بازهٔ ۷۲ ساعته
 
     قوانین:
     ۱) همان روزِ استاپ: اگر رشد به بالای ۱۰۰٪ برسد → همهٔ دسته‌ها مجاز
        (ورود منفی ۲۵٪، tp ۲۵٪، stop ۲۵٪ و اهرم ۴ برای همهٔ دسته‌ها)
     ۲) بعد از ۲۴ ساعت: ۳۰-۴۰ و ۴۰-۵۰ ممنوع، فقط ۵۰-۶۰ و بالاتر
-    ۳) قلهٔ جدید = سقفی که «بعد از پایان قفل» زده شده (نه سقف همان روز استاپ)
-       → همهٔ دسته‌ها مجاز
+    ۳) قلهٔ جدید دیگر مجوز نمی‌دهد؛ فقط رشد ۱۰۰٪ یا بیشتر همهٔ دسته‌ها را باز می‌کند
 
     ملاک، زمان «آخرین استاپ» این ارز است (تی‌پی‌های بعد از استاپ قفل را باز نمی‌کنند)."""
     sym = symbol.upper()
@@ -680,11 +757,9 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
     except Exception:
         pass
 
-    # قلهٔ جدیدِ بعد از پایان قفل (نه سقف همان روز استاپ) → همهٔ دسته‌ها مجاز
-    if post_lock_new_peak(df, last_ts, last_high):
-        return False, False, equality_required, False
-
-    # بدون قلهٔ جدید: ۳۰-۴۰ و ۴۰-۵۰ ممنوع تا پایان بازهٔ ۷۲ ساعته
+    # قلهٔ جدید دیگر مجوز نمی‌دهد (به درخواست کاربر حذف شد)
+    # فقط رشد ۱۰۰٪ یا بیشتر همهٔ دسته‌ها را باز می‌کند
+    # ۳۰-۴۰ و ۴۰-۵۰ ممنوع تا پایان بازهٔ ۷۲ ساعته
     return False, False, equality_required, equality_required
 
 def price_returned_to_level(df, since_ts_utc, level):
@@ -986,17 +1061,14 @@ def ensure_market_state():
     return _MARKET_STATE
 
 def market_state_block():
-    """دو خط حال بازار برای انتهای پیام سیگنال"""
+    """یک خط حال بازار برای انتهای پیام سیگنال"""
     st = ensure_market_state()
     up = int(st.get('up') or 0)
     down = int(st.get('down') or 0)
     trend = build_market_trend_line(up, down)
     if not trend:
         return ""
-    return (
-        f"روند بازار {trend}\n"
-        f"تعداد ارزهای مثبت {up} تعداد ارزهای منفی {down}\n"
-    )
+    return f"روند بازار {trend} تعداد ارزهای مثبت {up} تعداد ارزهای منفی {down}\n"
 
 # ---------- پایش اعلانات «حذف ارز» در صرافی ----------
 DELIST_SECTION_URL = "https://www.ourbit.com/support/categories/360000254192"
@@ -1553,14 +1625,14 @@ def process_markets(app_data):
                 coin_num = get_coin_day_number(trades, trade, today_str, status=exit_type)
                 
                 msg_main = generate_exit_message(
-                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
+                    exit_type, symbol, entry_level_cat_name(trade['entry'], trade['low'], cat_id), trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
                     vol_str, start_date_str, end_date_str, duration_str, exit_label_global, trade_type, coin_num,
                     bool(trade.get('release_entry'))
                 )
                 
                 msg_cat = generate_exit_message(
-                    exit_type, symbol, cat_info['name_fa'], trade['growth'], neg_pct, 
+                    exit_type, symbol, entry_level_cat_name(trade['entry'], trade['low'], cat_id), trade['growth'], neg_pct, 
                     trade['low'], trade['high'], trade['entry'], trade['tp'], trade['stop'], 
                     vol_str, start_date_str, end_date_str, duration_str, exit_label_cat, trade_type, coin_num,
                     bool(trade.get('release_entry'))
@@ -1573,16 +1645,17 @@ def process_markets(app_data):
                 if exit_type == 'tp' and trade_type == 'short':
                     cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40", "20_30"]
                     if cat_id in cat_order:
-                        # ارز +۱۰۰٪: بعد از TP در دسته ۱۰۰+، دسته بعدی = دسته‌ای که رشد الان در آن است
-                        # (مثلاً رشد به ۷۰-۸۰ رسیده → همان دسته، با tp ۱۵٪ و stop ۱۴٪ و اهرم ۷)
+                        # ارز +۱۰۰٪: اگر رشد هنوز بالای ۱۰۰ باشد → پشتبند در خود دسته ۱۰۰+
+                        # (ورود دوم ۵٪ بالاتر از tp قبلی، tp و stop هر دو ۲۵٪، اهرم ۴)
+                        # وگرنه دسته‌ای که رشد الان در آن است (۱۵٪ / ۱۴٪)
                         if cat_id == '100_plus':
-                            next_cat_id = get_category_for_growth(growth)
+                            next_cat_id = '100_plus' if growth >= 100 else get_category_for_growth(growth)
                         else:
                             curr_idx = cat_order.index(cat_id)
                             next_idx = curr_idx + 1
                             next_cat_id = cat_order[next_idx] if next_idx < len(cat_order) else None
 
-                        if next_cat_id and next_cat_id != '100_plus':
+                        if next_cat_id:
                             
                             # بررسی اینکه دسته بعدی در ۲۴ ساعت گذشته یا امروز معامله نشده باشد
                             next_already_traded = any(
@@ -1606,7 +1679,7 @@ def process_markets(app_data):
 
                             # درصدهای tp و stop همان درصدهای خود دسته هستند (۱۵٪ / ۱۴٪)
                             # اگر ارز بعد از استاپ بالای ۱۰۰٪ است → همهٔ دسته‌ها با شرایط ۱۰۰+ (۲۵٪/۲۵٪/اهرم ۴)
-                            c_plus100 = bool(_c_eq and growth >= 100)
+                            c_plus100 = bool((_c_eq and growth >= 100) or next_cat_id == '100_plus')
                             if c_plus100:
                                 c_tp_drop = 0.25
                                 c_stop_rise = 0.25
@@ -1616,8 +1689,15 @@ def process_markets(app_data):
 
                             if (not next_already_traded and next_cat_enabled
                                     and next_cat_id not in tp_blocked_cats
+                                    and not chain_cap_reached(trades, symbol, trade)
                                     and not (c_block_low and next_cat_id in ('30_40', '40_50'))):
-                                next_entry = exit_price  # نقطه ورود = تی‌پی معامله قبلی
+                                # نقطهٔ ورودِ پشتبند بالاتر از نقطهٔ تی‌پی معاملهٔ قبلی:
+                                # ۱۰٪ برای زنجیره‌های شروع‌شده در ۵۰-۶۰ و ۶۰-۷۰ (که ریزش
+                                # به کف ۲۴ ساعته نزدیک است) و ۵٪ برای بقیه
+                                # tp و stop مثل همیشه از خودِ نقطهٔ ورود حساب می‌شوند
+                                _chain_n, _chain_cat = get_chain_info(trades, symbol, trade)
+                                _bump = cascade_bump(_chain_cat, _chain_n + 1)
+                                next_entry = round_price(exit_price * _bump)
                                 next_tp = round_price(next_entry * (1 - c_tp_drop))
                                 next_stop = round_price(next_entry * (1 + c_stop_rise))
                                 next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
@@ -1625,9 +1705,11 @@ def process_markets(app_data):
                                 cascade_trade = {
                                     'symbol': symbol,
                                     'category_id': next_cat_id,
+                                    # کف/سقف/رشد همان معاملهٔ اول زنجیره حفظ می‌شود
+                                    # (کف ۲۴ ساعتهٔ لحظه‌ای ملاک نیست)
                                     'growth': trade.get('growth', growth),
-                                    'low': low_24h,
-                                    'high': high_24h,
+                                    'low': trade.get('low', low_24h),
+                                    'high': trade.get('high', high_24h),
                                     'entry': next_entry,
                                     'tp': next_tp,
                                     'stop': next_stop,
@@ -1658,12 +1740,12 @@ def process_markets(app_data):
                                 c_coin_num = get_coin_day_number(trades, cascade_trade, today_str)
                                 c_zflag = bool(cascade_trade.get('release_entry'))
                                 c_msg_main = generate_entry_message(
-                                    'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
+                                    'short', symbol, entry_level_cat_name(next_entry, cascade_trade['low'], next_cat_id), cascade_trade['growth'], next_neg_pct,
                                     low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
                                     coin_num=c_coin_num, daily_count=global_entry_count, release_flag=c_zflag
                                 )
                                 c_msg_cat = generate_entry_message(
-                                    'short', symbol, next_cat_info['name_fa'], cascade_trade['growth'], next_neg_pct,
+                                    'short', symbol, entry_level_cat_name(next_entry, cascade_trade['low'], next_cat_id), cascade_trade['growth'], next_neg_pct,
                                     low_24h, high_24h, next_entry, next_tp, next_stop, vol_str, current_date_str,
                                     coin_num=c_coin_num, daily_count=global_entry_count, release_flag=c_zflag
                                 )
@@ -1705,6 +1787,7 @@ def process_markets(app_data):
         )
 
         for cat_id in valid_cats:
+            cascade_src = None
             # بعد از پایان قفل ۲۴ ساعته: ۳۰-۴۰ و ۴۰-۵۰ ممنوع؛ فقط ۵۰-۶۰ و بالاتر
             # (مگر اینکه بعد از استاپ قلهٔ جدید زده باشد)
             if block_low and cat_id in ('30_40', '40_50'):
@@ -1895,6 +1978,10 @@ def process_markets(app_data):
                         else:
                             last_sub = prev_sub_trades[-1]
                             if last_sub.get('status') == 'tp':
+                                # سقف tp زنجیره بر اساس دستهٔ شروع
+                                if chain_cap_reached(trades, symbol, last_sub):
+                                    continue
+                                cascade_src = last_sub
                                 last_cat = last_sub.get('category_id')
                                 if last_cat == '100_plus':
                                     # زنجیرهٔ ارز +۱۰۰٪: دسته جدید = دسته‌ای که رشد الان در آن است
@@ -1905,7 +1992,11 @@ def process_markets(app_data):
                                     last_cat_idx = cat_order.index(last_cat)
                                     if current_cat_idx != last_cat_idx + 1:
                                         continue
-                                entry_price = round_price(float(last_sub['tp']))
+                                # ورود پشتبند: ۱۰٪ بالاتر از tp برای زنجیره‌های
+                                # شروع‌شده در ۵۰-۶۰ و ۶۰-۷۰، و ۵٪ برای بقیه
+                                _cn2, _start_cat = get_chain_info(trades, symbol, last_sub)
+                                _bump2 = cascade_bump(_start_cat, _cn2 + 1)
+                                entry_price = round_price(float(last_sub['tp']) * _bump2)
                                 tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
                                 stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
                                 neg_pct = drop_to_percent(cat_info['entry_drop'])
@@ -1939,9 +2030,11 @@ def process_markets(app_data):
                 new_trade = {
                     'symbol': symbol,
                     'category_id': cat_id,
-                    'growth': growth,
-                    'low': low_24h,
-                    'high': high_24h,
+                    # در پشتبند، کف/سقف/رشد همان معاملهٔ اول زنجیره حفظ می‌شود
+                    'growth': (cascade_src.get('growth', growth) if cascade_src else growth),
+                    'low': (cascade_src.get('low', low_24h) if cascade_src else low_24h),
+                    'high': (cascade_src.get('high', high_24h) if cascade_src else high_24h),
+                    'leg': ('tp' if cascade_src else None),
                     'entry': entry_price,
                     'tp': tp_price,
                     'stop': stop_price,
@@ -1979,13 +2072,13 @@ def process_markets(app_data):
                 release_flag = bool(new_trade.get('release_entry'))
                 
                 msg_main = generate_entry_message(
-                    trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
+                    trade_type, symbol, entry_level_cat_name(entry_price, low_24h, cat_id), growth, neg_pct, low_24h, high_24h, 
                     entry_price, tp_price, stop_price, vol_str, current_date_str,
                     coin_num=coin_num, daily_count=global_entry_count, release_flag=release_flag
                 )
                 
                 msg_cat = generate_entry_message(
-                    trade_type, symbol, cat_info['name_fa'], growth, neg_pct, low_24h, high_24h, 
+                    trade_type, symbol, entry_level_cat_name(entry_price, low_24h, cat_id), growth, neg_pct, low_24h, high_24h, 
                     entry_price, tp_price, stop_price, vol_str, current_date_str,
                     coin_num=coin_num, daily_count=global_entry_count, release_flag=release_flag
                 )
@@ -2050,7 +2143,10 @@ def build_counts_totals(cat_stats, week=False):
     sum_open_pnl = sum(open_pnl_of(s) for s in cat_stats.values())
 
     label = ' هفته' if week else ''
-    out = f"تعداد تمامی معاملات{label} {total_all}\n"
+    out = ''
+    if week:
+        out += f"محاسبات معاملات این هفته {pnl_word((sum_tp - sum_stop) * 100)}\n"
+    out += f"تعداد تمامی معاملات{label} {total_all}\n"
     out += f"tp {sum_tp}\n"
     out += f"stop {sum_stop}\n"
     out += f"open {sum_open} {pnl_word(sum_open_pnl)}\n"
@@ -2090,7 +2186,10 @@ def build_counts_categories(cat_stats, week=False):
 
     out = ''
     for cat_id, st in ranked:
-        out += f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {open_count(st)}\n"
+        line = f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {open_count(st)}"
+        if week:
+            line += f" {pnl_word((st['tp'] - st['stop']) * 100)}"
+        out += line + "\n"
 
     return out
 
@@ -2104,6 +2203,8 @@ def generate_and_send_daily_report(app_data, target_date=None):
     if not target_date:
         target_date = today_str
     trades = app_data.get('trades', [])
+    # گزارش از لحظهٔ شروع تازه (اگر ثبت شده باشد) — قبل از آن شمرده نمی‌شود
+    report_start_ts = int(app_data.get('report_start_ts') or 0)
     
     cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'opening_today': 0, 'opening_past': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'open_pnl_today': 0.0, 'open_pnl_past': 0.0, 'oldest_open_date': None, 'oldest_open_ts': 0, 'closed_strings': [], 'open_strings': [], 'excel': []} for cat in CATEGORIES.keys()}
     all_excel_data = []
@@ -2161,7 +2262,8 @@ def generate_and_send_daily_report(app_data, target_date=None):
             all_excel_data.append(row)
             
         elif t['status'] in ['tp', 'stop']:
-            if t.get('close_time') == target_date:
+            close_ts_d = float(t.get('close_timestamp') or 0)
+            if t.get('close_time') == target_date and close_ts_d >= report_start_ts:
                 # سود/ضرر رُند: هر tp = +۱۰۰٪ و هر stop = -۱۰۰٪
                 trade_pnl = 100.0 if t['status'] == 'tp' else -100.0
                 stats['closed_pnl'] += trade_pnl
@@ -2193,6 +2295,9 @@ def generate_and_send_daily_report(app_data, target_date=None):
             cid = '20_30'
         close_time = t.get('close_time') or ''
         if not close_time or not hist_start_date:
+            continue
+        # معاملات قبل از شروع تازه در گزارش شمرده نمی‌شوند
+        if float(t.get('close_timestamp') or 0) < report_start_ts:
             continue
         if close_time < hist_start_date or close_time > target_date:
             continue
@@ -2323,6 +2428,8 @@ def generate_and_send_weekly_report(app_data):
     trades = app_data.get('trades', [])
     current_ts = iran_time.timestamp()
     seven_days_ago_ts = current_ts - (7 * 86400)
+    # گزارش از لحظهٔ شروع تازه (اگر ثبت شده باشد)
+    report_start_ts = int(app_data.get('report_start_ts') or 0)
     
     cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0, 'strings': []} for cat in CATEGORIES.keys()}
 
@@ -2360,10 +2467,13 @@ def generate_and_send_weekly_report(app_data):
             stats['strings'].append(f"{name} : opening {pnl_str}")
             
         elif t['status'] in ['tp', 'stop']:
-            close_ts = t.get('close_timestamp', 0)
-            if close_ts >= seven_days_ago_ts:
-                stats['closed_pnl'] += t['pnl']
-                pnl_str = f"+{t['pnl']:.2f} %" if t['pnl'] > 0 else f"{t['pnl']:.2f} %"
+            close_ts = float(t.get('close_timestamp') or 0)
+            if close_ts >= seven_days_ago_ts and close_ts >= report_start_ts:
+                # مثل گزارش روز: هر tp = +۱۰۰٪ و هر stop = -۱۰۰٪
+                trade_pnl = 100.0 if t['status'] == 'tp' else -100.0
+                stats['closed_pnl'] += trade_pnl
+                pnl_int = int(trade_pnl)
+                pnl_str = f"+{pnl_int} %" if pnl_int > 0 else f"{pnl_int} %"
                 
                 if t['status'] == 'tp':
                     stats['tp'] += 1
@@ -2371,6 +2481,12 @@ def generate_and_send_weekly_report(app_data):
                 else:
                     stats['stop'] += 1
                     stats['strings'].append(f"{name} stop {pnl_str}")
+
+    # جمع‌بندی هفتگی در ابتدای گزارش: محاسبات کل، تعدادها و دسته‌بندی‌ها
+    weekly_counts = build_counts_block(cat_stats, week=True)
+    if weekly_counts:
+        weekly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], weekly_counts)
 
     total_all_transactions = 0
     for cat_id, stats in cat_stats.items():
@@ -2381,7 +2497,7 @@ def generate_and_send_weekly_report(app_data):
             continue
             
         cat_info = CATEGORIES[cat_id]
-        closed_pnl_str = f"+{stats['closed_pnl']:.2f} %" if stats['closed_pnl'] > 0 else f"{stats['closed_pnl']:.2f} %"
+        closed_pnl_str = f"+{int(stats['closed_pnl'])} %" if stats['closed_pnl'] > 0 else f"{int(stats['closed_pnl'])} %"
         open_pnl_str = f"+{stats['open_pnl']:.2f} %" if stats['open_pnl'] > 0 else f"{stats['open_pnl']:.2f} %"
 
         msg = f"گزارش هفتگی\nمیزان رشد مثبت {cat_info['name_fa'].replace('+','')}\n"
@@ -2409,14 +2525,19 @@ def generate_and_send_weekly_report(app_data):
         chats = list(set(chats))
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
 
-    # جمع‌بندی هفتگی: تعداد کل معاملات و دسته‌بندی‌ها از بیشترین به کمترین
-    weekly_counts = build_counts_block(cat_stats, week=True)
-    if weekly_counts:
-        weekly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
-        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], weekly_counts)
-
 if __name__ == '__main__':
     app_data = load_data()
+
+    # شروع تازه (درخواست کاربر): معاملات باز حذف می‌شوند و گزارش‌ها از این لحظه صفر می‌شوند
+    # (معاملات بسته‌شده می‌مانند تا قفل‌های tp/stop و قوانین دست‌نخورده بمانند)
+    if RESET_REPORTS_ONCE and not app_data.get('report_start_ts'):
+        trades = app_data.get('trades') or []
+        kept = [t for t in trades if str(t.get('status')) != 'OPEN']
+        removed = len(trades) - len(kept)
+        app_data['trades'] = kept
+        app_data['report_start_ts'] = int(iran_time.timestamp())
+        save_data(app_data)
+        print(f"open trades removed: {removed} | reports start now")
 
     # حذف یک‌بارهٔ معاملهٔ بازِ اشتباه (دستور کاربر): فقط همان معامله، بدون اثر روی بقیه
     try:
