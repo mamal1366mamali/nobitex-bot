@@ -1,4 +1,5 @@
-name: Run Ourbit Bot
+name: Run Ourbit Bot - Haal Bazaar Reporter
+
 on:
   repository_dispatch:
     types: [run-ourbit-roshd]
@@ -25,7 +26,7 @@ jobs:
         run: |
           pip install requests jdatetime pandas
 
-      - name: Run Ourbit bot
+      - name: Run Ourbit bot (Haal Bazaar Reporter)
         env:
           ROSHD_BOT_TOKEN: ${{ secrets.ROSHD_BOT_TOKEN }}
         run: python ourbit.py
