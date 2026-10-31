@@ -12463,6 +12463,28 @@
             "close_timestamp": 1793449860,
             "close_date_str": "1405 08 09 ساعت 12 : 31 دقیقه",
             "duration_str": "50 دقیقه"
+        },
+        {
+            "symbol": "COW_USDT",
+            "category_id": "30_40",
+            "growth": 33.62831858407079,
+            "low": 0.113,
+            "high": 0.151,
+            "leg": null,
+            "entry": 0.1283,
+            "tp": 0.1091,
+            "stop": 0.1463,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/09",
+            "open_timestamp": 1793489450,
+            "open_date_str": "1405 08 09 ساعت 23 : 30 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 2,
+            "global_entry_num": 5
         }
     ],
     "delist_last_check": 1793475056,
@@ -12490,11 +12512,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 557,
-        "down": 203,
-        "ts": 1793465740.247572,
+        "up": 460,
+        "down": 304,
+        "ts": 1793476854.478055,
         "total": 766,
-        "counted": 760
+        "counted": 764
     },
     "report_start_ts": 1793446539
 }
