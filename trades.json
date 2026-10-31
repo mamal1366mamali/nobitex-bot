@@ -12477,8 +12477,8 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/09",
-            "open_timestamp": 1793470642,
-            "open_date_str": "1405 08 09 ساعت 18 : 17 دقیقه",
+            "open_timestamp": 1793470849,
+            "open_date_str": "1405 08 09 ساعت 18 : 20 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
@@ -12512,11 +12512,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 454,
-        "down": 310,
-        "ts": 1793454643.5167336,
+        "up": 443,
+        "down": 320,
+        "ts": 1793458251.133349,
         "total": 766,
-        "counted": 764
+        "counted": 763
     },
     "report_start_ts": 1793446539
 }
