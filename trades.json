@@ -12475,17 +12475,20 @@
             "tp": 0.009562,
             "stop": 0.01283,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/08/10",
             "open_timestamp": 1793523938,
             "open_date_str": "1405 08 10 ساعت 09 : 05 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/10",
+            "close_price": 0.009562,
+            "pnl": 105.03,
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1,
-            "last_seen_ts": 1793527532
+            "last_seen_ts": 1793527532,
+            "close_timestamp": 1793527839,
+            "close_date_str": "1405 08 10 ساعت 10 : 10 دقیقه",
+            "duration_str": "1 ساعت و 5 دقیقه"
         },
         {
             "symbol": "UAI_USDT",
@@ -12534,7 +12537,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793527532
+            "last_seen_ts": 1793527839
         }
     ],
     "delist_last_check": 1793496933,
