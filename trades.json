@@ -12485,7 +12485,7 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1,
-            "last_seen_ts": 1793527244
+            "last_seen_ts": 1793527532
         },
         {
             "symbol": "UAI_USDT",
@@ -12498,17 +12498,20 @@
             "tp": 0.2411,
             "stop": 0.3234,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/08/10",
             "open_timestamp": 1793523938,
             "open_date_str": "1405 08 10 ساعت 09 : 05 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/10",
+            "close_price": 0.2411,
+            "pnl": 105.11,
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 2,
-            "last_seen_ts": 1793527244
+            "last_seen_ts": 1793527244,
+            "close_timestamp": 1793527532,
+            "close_date_str": "1405 08 10 ساعت 10 : 05 دقیقه",
+            "duration_str": "59 دقیقه"
         },
         {
             "symbol": "COW_USDT",
@@ -12531,7 +12534,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793527244
+            "last_seen_ts": 1793527532
         }
     ],
     "delist_last_check": 1793496933,
@@ -12559,11 +12562,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 439,
-        "down": 317,
-        "ts": 1793510739.4921677,
+        "up": 423,
+        "down": 335,
+        "ts": 1793514935.5760138,
         "total": 766,
-        "counted": 756
+        "counted": 758
     },
     "report_start_ts": 1793523938,
     "fresh_start_id": "fresh_start_1405_08_11"
