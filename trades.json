@@ -12485,7 +12485,7 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1,
-            "last_seen_ts": 1793525454
+            "last_seen_ts": 1793525730
         },
         {
             "symbol": "UAI_USDT",
@@ -12508,7 +12508,7 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 2,
-            "last_seen_ts": 1793525454
+            "last_seen_ts": 1793525730
         },
         {
             "symbol": "COW_USDT",
@@ -12531,7 +12531,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793525454
+            "last_seen_ts": 1793525730
         }
     ],
     "delist_last_check": 1793496933,
