@@ -19,8 +19,8 @@ OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
 OURBIT_KLINE_URL = "https://futures.ourbit.com/api/v1/contract/kline"
 
 # ساعت‌هایی که باید گزارش ارسال شود (به وقت ایران)
-# از نیمه شب هر ۲ ساعت یک‌بار: 0، 2، 4، 6، 8، 10، 12، 14، 16، 18، 20، 22
-REPORT_HOURS = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
+# هر ۱ ساعت یک‌بار سر ساعت: ۲۴ ساعت شبانه‌روز (ساعت ۰ تا ۲۳)
+REPORT_HOURS = set(range(24))
 
 # حداکثر دقیقه‌ای که هنوز "سر ساعت" حساب می‌شود
 # (چون cron هر ۵ دقیقه اجرا می‌شه، دقیقه 0 تا 4 قابل قبوله)
