@@ -419,13 +419,18 @@ def coin_is_z(trades, symbol, current_ts, today_str):
 def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, date_str, coin_num=1, daily_count=0, release_flag=False):
     name = clean_symbol(symbol).lower()
     type_str = "فروش" if trade_type == 'short' else "خرید"
-    # شمارشگر «۱» نمایش داده نمی‌شود: اولین معامله فقط کلمه، از معامله دوم عدد بعد از کلمه می‌آید
-    parts = [type_str]
+    
+    parts = []
+    # ترتیب شمارش پیام‌های امروز (۱، ۲، ۳، ...) قبل از کلمه می‌آید
+    if daily_count and int(daily_count) >= 1:
+        parts.append(str(int(daily_count)))
+    parts.append(type_str)
+    # برای این ارز: معامله اول بدون عدد است و از معامله دوم به بعد عدد بعد از کلمه می‌آید (مثل: فروش 2)
     if coin_num and int(coin_num) > 1:
         parts.append(str(int(coin_num)))
-    head = " ".join(parts)
     if release_flag:
-        head = f"{head} z"
+        parts.append("z")
+    head = " ".join(parts)
     return (
         f"{head}\n"
         f"نام: {name}\n"
@@ -472,8 +477,13 @@ def format_shamsi_from_timestamp(ts):
 def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low, high, entry, tp, stop, vol, start_date_str, end_date_str, duration_str, daily_count, trade_type, coin_num=1, release_flag=False):
     name = clean_symbol(symbol).lower()
     status_fa = str(exit_type)
-    # شمارشگر «۱» نمایش داده نمی‌شود: اولین خروج فقط کلمه، از خروج دوم عدد بعد از کلمه می‌آید
-    parts = [status_fa]
+    
+    parts = []
+    # ترتیب شمارش پیام‌های امروز (۱، ۲، ۳، ...) قبل از کلمه می‌آید
+    if daily_count and int(daily_count) >= 1:
+        parts.append(str(int(daily_count)))
+    parts.append(status_fa)
+    # برای این ارز: خروج اول بدون عدد است و از خروج دوم به بعد عدد بعد از کلمه می‌آید (مثل: tp 2)
     if coin_num and int(coin_num) > 1:
         parts.append(str(int(coin_num)))
     if release_flag:
@@ -1597,7 +1607,7 @@ def process_markets(app_data):
                 
                 exit_label_cat = exit_label_global
                 
-                coin_num = get_coin_day_number(trades, trade, today_str, status=exit_type)
+                coin_num = trade.get('coin_trade_num') or get_coin_day_number(trades, trade, today_str, status=None)
                 
                 msg_main = generate_exit_message(
                     exit_type, symbol, entry_level_cat_name(trade['entry'], trade['low'], cat_id), trade['growth'], neg_pct, 
@@ -1711,6 +1721,7 @@ def process_markets(app_data):
                                 cascade_trade['global_entry_num'] = global_entry_count
                                 
                                 c_coin_num = get_coin_day_number(trades, cascade_trade, today_str)
+                                cascade_trade['coin_trade_num'] = c_coin_num
                                 c_zflag = bool(cascade_trade.get('release_entry'))
                                 c_msg_main = generate_entry_message(
                                     'short', symbol, entry_level_cat_name(next_entry, cascade_trade['low'], next_cat_id), cascade_trade['growth'], next_neg_pct,
@@ -2041,6 +2052,7 @@ def process_markets(app_data):
                 new_trade['global_entry_num'] = global_entry_count
                 
                 coin_num = get_coin_day_number(trades, new_trade, today_str)
+                new_trade['coin_trade_num'] = coin_num
                 release_flag = bool(new_trade.get('release_entry'))
                 
                 msg_main = generate_entry_message(
