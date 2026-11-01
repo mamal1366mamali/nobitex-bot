@@ -12537,7 +12537,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793570137
+            "last_seen_ts": 1793570454
         },
         {
             "symbol": "ESPORTS_USDT",
@@ -12587,7 +12587,8 @@
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 5,
-            "coin_trade_num": 1
+            "coin_trade_num": 1,
+            "last_seen_ts": 1793570454
         }
     ],
     "delist_last_check": 1793540443,
