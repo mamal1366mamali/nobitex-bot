@@ -12465,28 +12465,6 @@
             "duration_str": "50 دقیقه"
         },
         {
-            "symbol": "AKE_USDT",
-            "category_id": "50_60",
-            "growth": 57.86523553965415,
-            "low": 0.008385,
-            "high": 0.013237,
-            "leg": null,
-            "entry": 0.01125,
-            "tp": 0.009562,
-            "stop": 0.01283,
-            "neg_pct": 15,
-            "status": "OPEN",
-            "open_time": "1405/08/10",
-            "open_timestamp": 1793523043,
-            "open_date_str": "1405 08 10 ساعت 08 : 50 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
-            "leverage": 7,
-            "cat_entry_num": 1,
-            "global_entry_num": 1
-        },
-        {
             "symbol": "UAI_USDT",
             "category_id": "30_40",
             "growth": 36.02281988590056,
@@ -12499,14 +12477,14 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793523043,
-            "open_date_str": "1405 08 10 ساعت 08 : 50 دقیقه",
+            "open_timestamp": 1793523334,
+            "open_date_str": "1405 08 10 ساعت 08 : 55 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 1,
-            "global_entry_num": 2
+            "global_entry_num": 1
         },
         {
             "symbol": "COW_USDT",
@@ -12521,14 +12499,14 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793523043,
-            "open_date_str": "1405 08 10 ساعت 08 : 50 دقیقه",
+            "open_timestamp": 1793523334,
+            "open_date_str": "1405 08 10 ساعت 08 : 55 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
             "leverage": 7,
             "cat_entry_num": 2,
-            "global_entry_num": 3
+            "global_entry_num": 2
         }
     ],
     "delist_last_check": 1793496933,
@@ -12556,9 +12534,9 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 384,
-        "down": 372,
-        "ts": 1793507139.0590138,
+        "up": 439,
+        "down": 317,
+        "ts": 1793510739.4921677,
         "total": 766,
         "counted": 756
     },
