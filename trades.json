@@ -12537,7 +12537,7 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793575237
+            "last_seen_ts": 1793575535
         },
         {
             "symbol": "ESPORTS_USDT",
@@ -12588,7 +12588,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793575237
+            "last_seen_ts": 1793575535
         },
         {
             "symbol": "ON_USDT",
@@ -12616,6 +12616,29 @@
             "close_timestamp": 1793574642,
             "close_date_str": "1405 08 10 ساعت 23 : 10 دقیقه",
             "duration_str": "15 دقیقه"
+        },
+        {
+            "symbol": "JCT_USDT",
+            "category_id": "50_60",
+            "growth": 55.466351829988184,
+            "low": 0.004235,
+            "high": 0.006584,
+            "leg": null,
+            "entry": 0.005596,
+            "tp": 0.004757,
+            "stop": 0.006379,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/10",
+            "open_timestamp": 1793575535,
+            "open_date_str": "1405 08 10 ساعت 23 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 3,
+            "global_entry_num": 7,
+            "coin_trade_num": 1
         }
     ],
     "delist_last_check": 1793562337,
@@ -12643,11 +12666,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 265,
-        "down": 496,
-        "ts": 1793562047.4092,
+        "up": 292,
+        "down": 468,
+        "ts": 1793562940.013025,
         "total": 766,
-        "counted": 761
+        "counted": 760
     },
     "report_start_ts": 1793523938,
     "fresh_start_id": "fresh_start_1405_08_11"
