@@ -12477,8 +12477,8 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793523646,
-            "open_date_str": "1405 08 10 ساعت 09 : 00 دقیقه",
+            "open_timestamp": 1793523938,
+            "open_date_str": "1405 08 10 ساعت 09 : 05 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
@@ -12499,8 +12499,8 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793523646,
-            "open_date_str": "1405 08 10 ساعت 09 : 00 دقیقه",
+            "open_timestamp": 1793523938,
+            "open_date_str": "1405 08 10 ساعت 09 : 05 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
@@ -12521,8 +12521,8 @@
             "neg_pct": 15,
             "status": "OPEN",
             "open_time": "1405/08/10",
-            "open_timestamp": 1793523646,
-            "open_date_str": "1405 08 10 ساعت 09 : 00 دقیقه",
+            "open_timestamp": 1793523938,
+            "open_date_str": "1405 08 10 ساعت 09 : 05 دقیقه",
             "close_time": "",
             "close_price": 0.0,
             "pnl": 0.0,
@@ -12562,5 +12562,6 @@
         "total": 766,
         "counted": 756
     },
-    "report_start_ts": 1793446539
+    "report_start_ts": 1793523938,
+    "fresh_start_id": "fresh_start_1405_08_11"
 }
