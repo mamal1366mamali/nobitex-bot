@@ -12537,7 +12537,30 @@
             "leverage": 7,
             "cat_entry_num": 2,
             "global_entry_num": 3,
-            "last_seen_ts": 1793528438
+            "last_seen_ts": 1793528733
+        },
+        {
+            "symbol": "ESPORTS_USDT",
+            "category_id": "70_80",
+            "growth": 78.38563754594287,
+            "low": 0.007074,
+            "high": 0.012619,
+            "leg": null,
+            "entry": 0.01073,
+            "tp": 0.009121,
+            "stop": 0.01223,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/10",
+            "open_timestamp": 1793528733,
+            "open_date_str": "1405 08 10 ساعت 10 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 1,
+            "global_entry_num": 4,
+            "coin_trade_num": 1
         }
     ],
     "delist_last_check": 1793496933,
