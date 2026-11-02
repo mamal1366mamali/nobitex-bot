@@ -12619,7 +12619,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "APR_USDT",
@@ -12724,7 +12724,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "RUNE_USDT",
@@ -12748,7 +12748,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "IDOL_USDT",
@@ -12799,7 +12799,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "LSK_USDT",
@@ -12823,7 +12823,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "UAI_USDT",
@@ -12863,18 +12863,21 @@
             "tp": 0.1465,
             "stop": 0.1964,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/08/11",
             "open_timestamp": 1793623242,
             "open_date_str": "1405 08 11 ساعت 12 : 40 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/11",
+            "close_price": 0.1465,
+            "pnl": 104.82,
             "leverage": 7,
             "cat_entry_num": 6,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643639,
+            "close_timestamp": 1793643937,
+            "close_date_str": "1405 08 11 ساعت 18 : 25 دقیقه",
+            "duration_str": "5 ساعت و 44 دقیقه"
         },
         {
             "symbol": "SOPH_USDT",
@@ -12898,7 +12901,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         },
         {
             "symbol": "CAT_USDT",
@@ -12922,7 +12925,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793643639
+            "last_seen_ts": 1793643937
         }
     ],
     "delist_last_check": 1793627442,
@@ -12950,9 +12953,9 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 202,
-        "down": 561,
-        "ts": 1793624466.082051,
+        "up": 194,
+        "down": 569,
+        "ts": 1793631342.0744605,
         "total": 766,
         "counted": 763
     },
