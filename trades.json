@@ -12619,7 +12619,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793598043
+            "last_seen_ts": 1793598335
         },
         {
             "symbol": "APR_USDT",
@@ -12632,18 +12632,21 @@
             "tp": 0.05565,
             "stop": 0.07464,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/08/11",
             "open_timestamp": 1793592332,
             "open_date_str": "1405 08 11 ساعت 04 : 05 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/11",
+            "close_price": 0.05565,
+            "pnl": 104.99,
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793598043
+            "last_seen_ts": 1793598043,
+            "close_timestamp": 1793598335,
+            "close_date_str": "1405 08 11 ساعت 05 : 45 دقیقه",
+            "duration_str": "1 ساعت و 40 دقیقه"
         },
         {
             "symbol": "JCT_USDT",
@@ -12667,7 +12670,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 3,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793598043
+            "last_seen_ts": 1793598335
         },
         {
             "symbol": "ON_USDT",
@@ -12691,7 +12694,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793598043
+            "last_seen_ts": 1793598335
         },
         {
             "symbol": "FLOCK_USDT",
@@ -12715,7 +12718,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793598043
+            "last_seen_ts": 1793598335
         }
     ],
     "delist_last_check": 1793584242,
@@ -12743,11 +12746,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 322,
-        "down": 439,
-        "ts": 1793579734.2232559,
+        "up": 383,
+        "down": 380,
+        "ts": 1793585738.1631248,
         "total": 766,
-        "counted": 761
+        "counted": 763
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
