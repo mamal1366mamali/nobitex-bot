@@ -166,7 +166,7 @@ BAD_OPEN_TRADES = [
 ]
 
 # شروع تازه (درخواست کاربر): حذف معاملات باز + صفر شدن گزارش روز و هفته از این لحظه
-FRESH_START_ID = "fresh_start_1405_08_11"
+FRESH_START_ID = "fresh_start_1405_08_12"
 
 def remove_bad_open_trades(trades):
     """حذف معامله(های) بازِ مشخص‌شده؛ پس از حذف دیگر در فایل نمی‌مانند و تکرار نمی‌شود."""
@@ -383,9 +383,9 @@ def get_coin_day_number(trades, trade, today_str, status=None):
             return i + 1
     return 1
 
-def is_release_entry(trades, symbol, current_ts, lock_hours=24, window_hours=72):
+def is_release_entry(trades, symbol, current_ts, lock_hours=24, window_hours=48):
     """آیا این ورود، ورودِ بعد از پایانِ قفل ۲۴ ساعتهٔ استاپ است؟ (علامت z)
-    یعنی ارز قبلاً قفل شده بود و بعد از یک روز دوباره معامله می‌شود."""
+    یعنی ارز قبلاً قفل شده بود و بعد از یک روز دوباره معامله می‌شود (تا نهایتاً ۲ روز)."""
     sym = symbol.upper()
     last_stop = 0.0
     for t in trades:
@@ -546,9 +546,7 @@ def get_category_for_growth(growth_val):
 CAT_ORDER = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40"]
 
 def get_tp_blocked_categories(trades, symbol, current_ts):
-    """دسته‌هایی که برای این ارز تا ۲۴ ساعت بعد از TP ممنوع هستند.
-    قانون: بعد از TP در یک دسته، همان دسته و تمام دسته‌های بالاتر تا ۲۴ ساعت ممنوع‌اند
-    و معامله فقط در دسته‌های پایین‌تر مجاز است."""
+    """دسته‌هایی که برای این ارز در ۲۴ ساعت اخیر تی‌پی داشته‌اند و نباید در همان دسته ورود تکراری اولیه باز شود."""
     blocked = set()
     for t in trades:
         if t.get('symbol', '').upper() != symbol.upper():
@@ -568,11 +566,7 @@ def get_tp_blocked_categories(trades, symbol, current_ts):
             in_24h = (t.get('close_time') == today_str)
         if not in_24h:
             continue
-        idx = CAT_ORDER.index(cat)
-        # دسته‌های بالاتر ممنوع می‌شوند
-        blocked.update(CAT_ORDER[:idx])
-        # استثنا: tp در دسته ۱۰۰+ خودِ دسته ۱۰۰+ را ممنوع نمی‌کند
-        # (اگر قیمت بعد از tp دوباره به نقطه ورود برگردد، معامله مجدد مجاز است)
+        # فقط همان دسته مسدود می‌شود تا در همان روز دوباره ورود اولیه تکراری نزند (استثنا: 100_plus)
         if cat != '100_plus':
             blocked.add(cat)
     return blocked
@@ -592,8 +586,7 @@ CATEGORY_TP_CAP = {
 def get_chain_info(trades, symbol, trade):
     """(طول زنجیره تا این معامله، دستهٔ شروع زنجیره)"""
     lst = [t for t in trades
-           if (t.get('symbol') or '').upper() == symbol.upper()
-           and str(t.get('open_time')) == str(trade.get('open_time'))]
+           if (t.get('symbol') or '').upper() == symbol.upper()]
     lst.sort(key=lambda x: float(x.get('open_timestamp') or 0))
     try:
         i = lst.index(trade)
@@ -677,19 +670,17 @@ def post_lock_new_peak(df, stop_ts_iran, last_high):
 def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None, df=None):
     """وضعیت قفلِ بعد از استاپ برای این ارز.
     خروجی: (locked, only_100plus, equality_required, block_low)
-    - locked           : تا ۲۴ ساعت هیچ معامله‌ای مجاز نیست
+    - locked           : تا ۲۴ ساعت هیچ معامله‌ای مجاز نیست (مگر رشد بالای ۱۰۰٪)
     - only_100plus     : (دیگر استفاده نمی‌شود؛ برای سازگاری نگه داشته شده)
-    - equality_required: قیمت ورود باید با قیمت بازار یکی باشد
-    - block_low        : بعد از پایان قفل فقط ۵۰-۶۰ و بالاتر مجاز است
-                         (۳۰-۴۰ و ۴۰-۵۰ ممنوع) تا پایان بازهٔ ۷۲ ساعته
+    - equality_required: تطابق قیمت ورود با بازار (در بازه ۲۴ تا ۴۸ ساعت)
+    - block_low        : در بازه ۲۴ تا ۴۸ ساعت، اگر رشد زیر ۵۰ درصد باشد ۳۰-۴۰ و ۴۰-۵۰ ممنوع است.
+                         بعد از ۴۸ ساعت این محدودیت کاملاً برداشته می‌شود و ارز عادی می‌شود.
 
     قوانین:
-    ۱) همان روزِ استاپ: اگر رشد به بالای ۱۰۰٪ برسد → همهٔ دسته‌ها مجاز
-       (ورود منفی ۲۵٪، tp ۲۵٪، stop ۲۵٪ و اهرم ۴ برای همهٔ دسته‌ها)
-    ۲) بعد از ۲۴ ساعت: ۳۰-۴۰ و ۴۰-۵۰ ممنوع، فقط ۵۰-۶۰ و بالاتر
-    ۳) قلهٔ جدید دیگر مجوز نمی‌دهد؛ فقط رشد ۱۰۰٪ یا بیشتر همهٔ دسته‌ها را باز می‌کند
-
-    ملاک، زمان «آخرین استاپ» این ارز است (تی‌پی‌های بعد از استاپ قفل را باز نمی‌کنند)."""
+    ۱) تا ۲۴ ساعت بعد از استاپ: قفل کامل (مگر رشد ۱۰۰٪ یا بیشتر باشد).
+    ۲) بین ۲۴ تا ۴۸ ساعت (روز بعد): با نشانه z خروجی می‌دهد؛ اگر رشد بالای ۵۰٪ باشد همه دسته‌ها مجازند،
+       و اگر رشد زیر ۵۰٪ باشد ۳۰-۴۰ و ۴۰-۵۰ در این مدت مسدود هستند.
+    ۳) بعد از ۴۸ ساعت (حداکثر ۲ روز): تمام محدودیت‌های استاپ کاملاً تمام شده و ارز به شکل طبیعی به چرخه بازمی‌گردد."""
     sym = symbol.upper()
     last_ts = 0.0
     last_cat = ''
@@ -718,14 +709,18 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
     if age < 0:
         return False, False, False, False
 
-    equality_required = age <= 72 * 3600
+    # بعد از ۴۸ ساعت: محدودیت استاپ تمام شده و ارز به صورت کاملاً طبیعی در تمام دسته‌ها معامله می‌شود
+    if age >= 48 * 3600:
+        return False, False, False, False
 
-    # ---------- قفل ۲۴ ساعته ----------
+    equality_required = True
+
+    # ---------- قفل ۲۴ ساعته (روز اول بعد از استاپ) ----------
     if age < 24 * 3600:
-        # استاپ در دستهٔ ۱۰۰+ → قفل کامل تا فردا
+        # استاپ در دستهٔ ۱۰۰+ → قفل کامل تا ۲۴ ساعت
         if last_cat == '100_plus':
             return True, False, True, False
-        # همان روز رشد به بالای ۱۰۰٪ رسید → همهٔ دسته‌ها مجاز
+        # همان روز رشد به بالای ۱۰۰٪ رسید → مجاز
         try:
             if growth is not None and float(growth) >= 100:
                 return False, False, True, False
@@ -733,18 +728,15 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
             pass
         return True, False, True, False
 
-    # ---------- بعد از ۲۴ ساعت ----------
-    # رشد بالای ۱۰۰٪ → همهٔ دسته‌ها مجاز
+    # ---------- بین ۲۴ تا ۴۸ ساعت (روز دوم بعد از استاپ - فاز z) ----------
     try:
-        if growth is not None and float(growth) >= 100:
+        # اگر اختلاف بیشترین و کمترین قیمت بیشتر از دسته ۵۰ درصدی باشد (رشد >= ۵۰٪)، همه دسته‌ها مجازند
+        if growth is not None and float(growth) >= 50:
             return False, False, equality_required, False
     except Exception:
         pass
 
-    # قلهٔ جدید دیگر مجوز نمی‌دهد (به درخواست کاربر حذف شد)
-    # فقط رشد ۱۰۰٪ یا بیشتر همهٔ دسته‌ها را باز می‌کند
-    # ۳۰-۴۰ و ۴۰-۵۰ بعد از استاپ همیشه ممنوع هستند - حتی بعد از ۷۲ ساعت
-    # ارزهای z نباید در دسته‌های پایین وارد شوند
+    # در غیر این صورت تا پایان ۴۸ ساعت دسته‌های ۳۰-۴۰ و ۴۰-۵۰ موقتاً مسدود می‌مانند
     return False, False, equality_required, True
 
 def price_returned_to_level(df, since_ts_utc, level):
@@ -1654,16 +1646,10 @@ def process_markets(app_data):
                             next_cat_info = CATEGORIES[next_cat_id]
                             next_cat_enabled = next_cat_info.get('enabled', True)
 
-                            # قانون ۲۴ ساعته: دسته‌ای که ۲۴ ساعت اخیر در آن TP خورده (و بالاترها) ممنوع است
-                            tp_blocked_cats = get_tp_blocked_categories(trades, symbol, current_ts)
-
-                            # قانون قفل بعد از استاپ: در بازهٔ بعد از قفل، ۳۰-۴۰ و ۴۰-۵۰ ممنوع
-                            # (مگر قلهٔ جدید زده باشد) — پشتبند هم از همین قانون تبعیت می‌کند
-                            _c_locked, _c_only, _c_eq, c_block_low = get_symbol_stop_state(
-                                trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df)
-
                             # درصدهای tp و stop همان درصدهای خود دسته هستند (۱۵٪ / ۱۴٪)
                             # اگر ارز بعد از استاپ بالای ۱۰۰٪ است → همهٔ دسته‌ها با شرایط ۱۰۰+ (۲۵٪/۲۵٪/اهرم ۴)
+                            _c_locked, _c_only, _c_eq, _c_blow = get_symbol_stop_state(
+                                trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df)
                             c_plus100 = bool((_c_eq and growth >= 100) or next_cat_id == '100_plus')
                             if c_plus100:
                                 c_tp_drop = 0.25
@@ -1672,10 +1658,9 @@ def process_markets(app_data):
                                 c_tp_drop = next_cat_info['tp_drop']
                                 c_stop_rise = next_cat_info['stop_rise']
 
+                            # در پشتبند تی‌پی، محدودیت‌های استاپ و بلاک ۲۴ ساعته مانع نمی‌شوند و تنها شرط، سقف تی‌پی همان دسته است
                             if (not next_already_traded and next_cat_enabled
-                                    and next_cat_id not in tp_blocked_cats
-                                    and not chain_cap_reached(trades, symbol, trade)
-                                    and not (c_block_low and next_cat_id in ('30_40', '40_50'))):
+                                    and not chain_cap_reached(trades, symbol, trade)):
                                 # نقطهٔ ورودِ پشتبند: ۵٪ بالاتر از نقطهٔ تی‌پی معاملهٔ قبلی
                                 # tp و stop مثل همیشه از خودِ نقطهٔ ورود حساب می‌شوند
                                 _chain_n, _chain_cat = get_chain_info(trades, symbol, trade)
@@ -1712,11 +1697,13 @@ def process_markets(app_data):
                                 if coin_is_z(trades[:-1], symbol, current_ts, today_str):
                                     cascade_trade['release_entry'] = True
                                 
-                                cat_entry_count = len([t for t in trades if t.get('category_id') == next_cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
-                                global_entry_count = len([
-                                    t for t in trades 
-                                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
-                                ])
+                                today_trades = [t for t in trades if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')]
+                                existing_global = [int(t['global_entry_num']) for t in today_trades if t.get('global_entry_num') is not None]
+                                global_entry_count = (max(existing_global) + 1) if existing_global else len(today_trades)
+                                
+                                existing_cat = [int(t['cat_entry_num']) for t in today_trades if t.get('category_id') == next_cat_id and t.get('cat_entry_num') is not None]
+                                cat_entry_count = (max(existing_cat) + 1) if existing_cat else 1
+
                                 cascade_trade['cat_entry_num'] = cat_entry_count
                                 cascade_trade['global_entry_num'] = global_entry_count
                                 
@@ -2043,11 +2030,13 @@ def process_markets(app_data):
                     new_trade['cap_margin'] = round(cap_size['margin_used'], 4)
                     new_trade['cap_notional'] = round(cap_size['notional'], 4)
                 
-                cat_entry_count = len([t for t in trades if t.get('category_id') == cat_id and (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')])
-                global_entry_count = len([
-                    t for t in trades 
-                    if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')
-                ])
+                today_trades = [t for t in trades if (t.get('open_time') or '').replace(' ', '/') == today_str.replace(' ', '/')]
+                existing_global = [int(t['global_entry_num']) for t in today_trades if t.get('global_entry_num') is not None]
+                global_entry_count = (max(existing_global) + 1) if existing_global else len(today_trades)
+                
+                existing_cat = [int(t['cat_entry_num']) for t in today_trades if t.get('category_id') == cat_id and t.get('cat_entry_num') is not None]
+                cat_entry_count = (max(existing_cat) + 1) if existing_cat else 1
+
                 new_trade['cat_entry_num'] = cat_entry_count
                 new_trade['global_entry_num'] = global_entry_count
                 
