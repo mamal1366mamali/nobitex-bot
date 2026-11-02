@@ -1936,11 +1936,11 @@ def process_markets(app_data):
                             # دسته ۲۰ تا ۳۰ هرگز با رشد ۲۰-۳۰ درصدی باز نمی‌شود؛ فقط پشتبندِ دستهٔ بالایی
                             if cat_id == '20_30':
                                 continue
-                            if cat_id == valid_cats[0]:
-                                entry_price = round_price(high_24h * (1 - entry_drop))
-                            else:
-                                target_ratio = cat_targets.get(cat_id, 1.30)
-                                entry_price = round_price(low_24h * target_ratio * (1 - entry_drop))
+                            # ورود اول به معامله فقط در بالاترین دسته مجاز رشد (دسته قله) مجاز است
+                            # دسته‌های پایین‌تر فقط به صورت پشتبند آبشاری (فروش ۲ و فروش ۳) بعد از TP باز می‌شوند
+                            if cat_id != valid_cats[0]:
+                                continue
+                            entry_price = round_price(high_24h * (1 - entry_drop))
 
                             tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
                             stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
