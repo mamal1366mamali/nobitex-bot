@@ -12619,7 +12619,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793622045
         },
         {
             "symbol": "APR_USDT",
@@ -12724,7 +12724,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793622045
         },
         {
             "symbol": "RUNE_USDT",
@@ -12748,7 +12748,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793622045
         },
         {
             "symbol": "IDOL_USDT",
@@ -12761,18 +12761,21 @@
             "tp": 0.01969,
             "stop": 0.0264,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/08/11",
             "open_timestamp": 1793603443,
             "open_date_str": "1405 08 11 ساعت 07 : 10 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/11",
+            "close_price": 0.0264,
+            "pnl": -97.93,
             "leverage": 7,
             "cat_entry_num": 4,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793621741,
+            "close_timestamp": 1793622045,
+            "close_date_str": "1405 08 11 ساعت 12 : 20 دقیقه",
+            "duration_str": "5 ساعت و 10 دقیقه"
         },
         {
             "symbol": "BEAM_USDT",
@@ -12796,7 +12799,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793622045
         },
         {
             "symbol": "LSK_USDT",
@@ -12820,7 +12823,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793621741
+            "last_seen_ts": 1793622045
         },
         {
             "symbol": "UAI_USDT",
@@ -12875,11 +12878,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 233,
-        "down": 530,
-        "ts": 1793605541.7832818,
+        "up": 235,
+        "down": 529,
+        "ts": 1793609446.2539256,
         "total": 766,
-        "counted": 763
+        "counted": 764
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
