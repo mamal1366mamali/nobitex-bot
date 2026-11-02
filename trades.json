@@ -12619,7 +12619,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "APR_USDT",
@@ -12724,7 +12724,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "RUNE_USDT",
@@ -12748,7 +12748,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "IDOL_USDT",
@@ -12799,7 +12799,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "LSK_USDT",
@@ -12823,7 +12823,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "UAI_USDT",
@@ -12901,7 +12901,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
         },
         {
             "symbol": "CAT_USDT",
@@ -12925,7 +12925,30 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793646052
+            "last_seen_ts": 1793646353
+        },
+        {
+            "symbol": "HUMA_USDT",
+            "category_id": "30_40",
+            "growth": 31.01528673676769,
+            "low": 0.022634,
+            "high": 0.029654,
+            "leg": null,
+            "entry": 0.02521,
+            "tp": 0.02143,
+            "stop": 0.02874,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/11",
+            "open_timestamp": 1793646353,
+            "open_date_str": "1405 08 11 ساعت 19 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 9,
+            "global_entry_num": 14,
+            "coin_trade_num": 1
         }
     ],
     "delist_last_check": 1793627442,
@@ -12953,11 +12976,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 194,
-        "down": 569,
-        "ts": 1793631342.0744605,
+        "up": 236,
+        "down": 524,
+        "ts": 1793633761.4117603,
         "total": 766,
-        "counted": 763
+        "counted": 760
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
