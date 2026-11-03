@@ -12727,7 +12727,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "RUNE_USDT",
@@ -12740,18 +12740,21 @@
             "tp": 0.4694,
             "stop": 0.6295,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "stop",
             "open_time": "1405/08/11",
             "open_timestamp": 1793600730,
             "open_date_str": "1405 08 11 ساعت 06 : 25 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/12",
+            "close_price": 0.6295,
+            "pnl": -97.99,
             "leverage": 7,
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733345,
+            "close_timestamp": 1793733651,
+            "close_date_str": "1405 08 12 ساعت 19 : 20 دقیقه",
+            "duration_str": "1 روز و 12 ساعت و 55 دقیقه"
         },
         {
             "symbol": "IDOL_USDT",
@@ -12910,7 +12913,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "CAT_USDT",
@@ -12934,7 +12937,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "HUMA_USDT",
@@ -12985,7 +12988,7 @@
             "cat_entry_num": 10,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "LITE_USDT",
@@ -13090,7 +13093,7 @@
             "cat_entry_num": 14,
             "global_entry_num": 19,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "IDOL_USDT",
@@ -13195,7 +13198,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "ZCAT_USDT",
@@ -13219,7 +13222,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 5,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793733345,
+            "last_seen_ts": 1793733651,
             "delist_ts": 1793775600.0,
             "delist_announce_title": "4 Futures Pairs to be Delisted on Ourbit Futures (November 4)"
         },
@@ -13299,7 +13302,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "TRUTH_USDT",
@@ -13323,7 +13326,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         },
         {
             "symbol": "BTW_USDT",
@@ -13347,7 +13350,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793733345
+            "last_seen_ts": 1793733651
         }
     ],
     "delist_last_check": 1793715042,
@@ -13377,11 +13380,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 232,
-        "down": 533,
-        "ts": 1793716266.4200165,
+        "up": 305,
+        "down": 455,
+        "ts": 1793721054.4312916,
         "total": 766,
-        "counted": 765
+        "counted": 760
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
