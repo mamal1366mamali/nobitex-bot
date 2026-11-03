@@ -12727,7 +12727,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "RUNE_USDT",
@@ -12913,7 +12913,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "CAT_USDT",
@@ -12937,7 +12937,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "HUMA_USDT",
@@ -12988,7 +12988,7 @@
             "cat_entry_num": 10,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "LITE_USDT",
@@ -13093,7 +13093,7 @@
             "cat_entry_num": 14,
             "global_entry_num": 19,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "IDOL_USDT",
@@ -13187,18 +13187,21 @@
             "tp": 0.04019,
             "stop": 0.0539,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/08/12",
             "open_timestamp": 1793696455,
             "open_date_str": "1405 08 12 ساعت 09 : 00 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/08/12",
+            "close_price": 0.04019,
+            "pnl": 104.97,
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793745958,
+            "close_timestamp": 1793746257,
+            "close_date_str": "1405 08 12 ساعت 22 : 50 دقیقه",
+            "duration_str": "13 ساعت و 50 دقیقه"
         },
         {
             "symbol": "ZCAT_USDT",
@@ -13222,7 +13225,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 5,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793745958,
+            "last_seen_ts": 1793746257,
             "delist_ts": 1793775600.0,
             "delist_announce_title": "4 Futures Pairs to be Delisted on Ourbit Futures (November 4)"
         },
@@ -13302,7 +13305,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "TRUTH_USDT",
@@ -13326,7 +13329,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "BTW_USDT",
@@ -13350,7 +13353,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "RITUAL_USDT",
@@ -13374,7 +13377,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         },
         {
             "symbol": "MAGMA_USDT",
@@ -13398,7 +13401,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793745958
+            "last_seen_ts": 1793746257
         }
     ],
     "delist_last_check": 1793715042,
@@ -13428,11 +13431,11 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 480,
-        "down": 278,
-        "ts": 1793731260.0146801,
+        "up": 510,
+        "down": 253,
+        "ts": 1793733667.2642617,
         "total": 766,
-        "counted": 758
+        "counted": 763
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
