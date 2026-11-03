@@ -12727,7 +12727,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "RUNE_USDT",
@@ -12913,7 +12913,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "CAT_USDT",
@@ -12937,7 +12937,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "HUMA_USDT",
@@ -12988,7 +12988,7 @@
             "cat_entry_num": 10,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "LITE_USDT",
@@ -13093,7 +13093,7 @@
             "cat_entry_num": 14,
             "global_entry_num": 19,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "IDOL_USDT",
@@ -13225,7 +13225,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 5,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793748944,
+            "last_seen_ts": 1793749255,
             "delist_ts": 1793775600.0,
             "delist_announce_title": "4 Futures Pairs to be Delisted on Ourbit Futures (November 4)"
         },
@@ -13305,7 +13305,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "TRUTH_USDT",
@@ -13329,7 +13329,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "BTW_USDT",
@@ -13353,7 +13353,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "RITUAL_USDT",
@@ -13377,7 +13377,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
         },
         {
             "symbol": "MAGMA_USDT",
@@ -13401,41 +13401,64 @@
             "cat_entry_num": 6,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793748944
+            "last_seen_ts": 1793749255
+        },
+        {
+            "symbol": "AGT_USDT",
+            "category_id": "100_plus",
+            "growth": 121.42599927979833,
+            "low": 0.02777,
+            "high": 0.06149,
+            "leg": null,
+            "entry": 0.04612,
+            "tp": 0.03459,
+            "stop": 0.05765,
+            "neg_pct": 25,
+            "status": "OPEN",
+            "open_time": "1405/08/12",
+            "open_timestamp": 1793749255,
+            "open_date_str": "1405 08 12 ساعت 23 : 40 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 4,
+            "cat_entry_num": 2,
+            "global_entry_num": 13,
+            "coin_trade_num": 1
         }
     ],
-    "delist_last_check": 1793715042,
+    "delist_last_check": 1793736655,
     "delist_seen_ids": [
-        "17827791513811",
-        "17827791513858",
-        "17827791513895",
-        "17827791513916",
-        "17827791513891",
-        "17827791513836",
-        "17827791513812",
-        "17827791513768",
-        "17827791513822",
-        "17827791513783",
-        "17827791513878",
-        "17827791513857",
-        "17827791513787",
-        "17827791513879",
         "17827791513415",
         "17827791513790",
-        "17827791513782",
-        "17827791513853",
-        "17827791513917",
-        "17827791513854",
+        "17827791513812",
         "17827791513896",
-        "17827791513828"
+        "17827791513857",
+        "17827791513853",
+        "17827791513768",
+        "17827791513782",
+        "17827791513783",
+        "17827791513891",
+        "17827791513854",
+        "17827791513836",
+        "17827791513917",
+        "17827791513878",
+        "17827791513828",
+        "17827791513822",
+        "17827791513916",
+        "17827791513895",
+        "17827791513858",
+        "17827791513879",
+        "17827791513787",
+        "17827791513811"
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 510,
-        "down": 253,
-        "ts": 1793733667.2642617,
+        "up": 508,
+        "down": 257,
+        "ts": 1793736657.0067353,
         "total": 766,
-        "counted": 763
+        "counted": 765
     },
     "report_start_ts": 1793592332,
     "fresh_start_id": "fresh_start_1405_08_12"
