@@ -12727,7 +12727,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "RUNE_USDT",
@@ -12913,7 +12913,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "CAT_USDT",
@@ -12937,7 +12937,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "HUMA_USDT",
@@ -12988,7 +12988,7 @@
             "cat_entry_num": 10,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "LITE_USDT",
@@ -13093,7 +13093,7 @@
             "cat_entry_num": 14,
             "global_entry_num": 19,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "IDOL_USDT",
@@ -13335,7 +13335,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "BTW_USDT",
@@ -13359,7 +13359,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "RITUAL_USDT",
@@ -13410,7 +13410,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "AGT_USDT",
@@ -13434,7 +13434,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "HOT_USDT",
@@ -13458,7 +13458,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "JCT_USDT",
@@ -13509,7 +13509,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 3,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "ICNT_USDT",
@@ -13533,7 +13533,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         },
         {
             "symbol": "ZCAT_USDT",
@@ -13583,33 +13583,33 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793792741
+            "last_seen_ts": 1793793042
         }
     ],
-    "delist_last_check": 1793758542,
+    "delist_last_check": 1793780442,
     "delist_seen_ids": [
-        "17827791513812",
-        "17827791513854",
-        "17827791513828",
-        "17827791513787",
         "17827791513916",
-        "17827791513879",
         "17827791513853",
-        "17827791513836",
-        "17827791513895",
-        "17827791513783",
+        "17827791513790",
+        "17827791513917",
         "17827791513896",
+        "17827791513782",
+        "17827791513879",
+        "17827791513857",
+        "17827791513891",
+        "17827791513822",
+        "17827791513415",
+        "17827791513787",
+        "17827791513828",
+        "17827791513812",
+        "17827791513783",
+        "17827791513854",
+        "17827791513895",
         "17827791513811",
         "17827791513768",
-        "17827791513790",
-        "17827791513415",
-        "17827791513891",
+        "17827791513836",
         "17827791513858",
-        "17827791513857",
-        "17827791513878",
-        "17827791513822",
-        "17827791513782",
-        "17827791513917"
+        "17827791513878"
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
