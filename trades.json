@@ -12727,7 +12727,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "RUNE_USDT",
@@ -12913,7 +12913,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "CAT_USDT",
@@ -12937,7 +12937,7 @@
             "cat_entry_num": 8,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "HUMA_USDT",
@@ -12988,7 +12988,7 @@
             "cat_entry_num": 10,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "LITE_USDT",
@@ -13338,7 +13338,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 9,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "BTW_USDT",
@@ -13416,7 +13416,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "AGT_USDT",
@@ -13467,7 +13467,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "JCT_USDT",
@@ -13545,7 +13545,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "ZCAT_USDT",
@@ -13623,7 +13623,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 7,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "AKE_USDT",
@@ -13673,7 +13673,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 9,
             "coin_trade_num": 2,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "HUMA_USDT",
@@ -13697,7 +13697,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
         },
         {
             "symbol": "UP_USDT",
@@ -13721,7 +13721,30 @@
             "cat_entry_num": 5,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1793818847
+            "last_seen_ts": 1793819139
+        },
+        {
+            "symbol": "BMT_USDT",
+            "category_id": "30_40",
+            "growth": 30.471584038694093,
+            "low": 0.02481,
+            "high": 0.03237,
+            "leg": null,
+            "entry": 0.02751,
+            "tp": 0.02338,
+            "stop": 0.03136,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/08/13",
+            "open_timestamp": 1793819139,
+            "open_date_str": "1405 08 13 ساعت 19 : 05 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 6,
+            "global_entry_num": 12,
+            "coin_trade_num": 1
         }
     ],
     "delist_last_check": 1793802338,
@@ -13751,9 +13774,9 @@
     ],
     "last_weekly_report_date": "1405/08/08",
     "market_state": {
-        "up": 602,
-        "down": 159,
-        "ts": 1793805090.5305245,
+        "up": 584,
+        "down": 177,
+        "ts": 1793806540.832752,
         "total": 762,
         "counted": 761
     },
