@@ -135,28 +135,25 @@ time_str = iran_time.strftime('%H : %M')
 current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
 
 def load_data():
-    if os.path.exists(TRADES_FILE):
-        try:
-            with open(TRADES_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                all_trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
-                
-                # برای هر symbol و دسته فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
-                seen_open = set()
-                deduped = []
-                for t in reversed(all_trades):
-                    if t.get('status') == 'OPEN':
-                        key = (t.get('symbol', '').upper(), t.get('category_id'))
-                        if key not in seen_open:
-                            seen_open.add(key)
-                            deduped.append(t)
-                    else:
+    if os.path.exists(TRADES_FILE) and os.path.getsize(TRADES_FILE) > 0:
+        with open(TRADES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            all_trades = [t for t in data.get('trades', []) if t.get('symbol', '').endswith('_USDT')]
+            
+            # برای هر symbol و دسته فقط آخرین OPEN رو نگه‌دار (تکراری‌ها حذف)
+            seen_open = set()
+            deduped = []
+            for t in reversed(all_trades):
+                if t.get('status') == 'OPEN':
+                    key = (t.get('symbol', '').upper(), t.get('category_id'))
+                    if key not in seen_open:
+                        seen_open.add(key)
                         deduped.append(t)
-                deduped.reverse()
-                data['trades'] = deduped
-                return data
-        except Exception:
-            pass
+                else:
+                    deduped.append(t)
+            deduped.reverse()
+            data['trades'] = deduped
+            return data
     return {"last_report_date": "", "trades": []}
 
 # معاملات بازی که باید یک‌بار حذف شوند: (نماد، تاریخ ورود، قیمت ورود)
@@ -1577,21 +1574,66 @@ def process_markets(app_data):
             
             exit_type = None
             exit_price = None
+
+            # بررسی برخورد قیمت لحظه‌ای (close) و همچنین سقف و کف (high / low) در زمان خاموشی ربات با tp یا stop
+            try:
+                start_iran_check = float(trade.get('last_seen_ts') or trade.get('open_timestamp') or current_ts)
+            except Exception:
+                start_iran_check = float(current_ts)
+            start_utc_check = start_iran_check - 12600
+
+            candle_low_hit = current_close
+            candle_high_hit = current_close
+            try:
+                if 'time' in df.columns:
+                    c_times = df['time'].astype(float)
+                    if float(c_times.max()) > 1e11:
+                        c_times = c_times / 1000.0
+                    # کندل ساعتی جاری که بازهٔ زمان خاموشی را پوشش می‌دهد
+                    c_mask = (c_times + 3600) >= start_utc_check
+                    if bool(c_mask.any()):
+                        # برای کندل‌هایی که قبل از باز شدن معامله شروع شده‌اند، فقط اگر کل کندل بعد از باز شدن معامله است از سقف/کف ساعتی مستقیم استفاده کن
+                        open_utc_ts = float(trade.get('open_timestamp') or current_ts) - 12600
+                        after_open_mask = c_times >= open_utc_ts
+                        if bool(after_open_mask.any()):
+                            candle_low_hit = min(candle_low_hit, float(df.loc[after_open_mask, 'low'].min()))
+                            candle_high_hit = max(candle_high_hit, float(df.loc[after_open_mask, 'high'].max()))
+            except Exception:
+                pass
             
             if trade_type == 'short':
-                if current_close <= trade['tp']:
+                if current_close <= trade['tp'] or candle_low_hit <= trade['tp']:
                     exit_type = 'tp'
                     exit_price = trade['tp']
-                elif current_close >= trade['stop']:
+                elif current_close >= trade['stop'] or candle_high_hit >= trade['stop']:
                     exit_type = 'stop'
                     exit_price = trade['stop']
             else: # long
-                if current_close >= trade['tp']:
+                if current_close >= trade['tp'] or candle_high_hit >= trade['tp']:
                     exit_type = 'tp'
                     exit_price = trade['tp']
-                elif current_close <= trade['stop']:
+                elif current_close <= trade['stop'] or candle_low_hit <= trade['stop']:
                     exit_type = 'stop'
                     exit_price = trade['stop']
+
+            # اگر در کندل ساعتی جاری (که قبل از باز شدن معامله شروع شده) یا در فاصلهٔ خاموشی ۵ دقیقه‌ای،
+            # سقف یا کف کندل به tp یا stop نزدیک/برخورد کرده ولی از روی کندل ۱ ساعته مشخص نبود، با کندل ۱ دقیقه‌ای دقیق چک کن
+            if exit_type is None:
+                try:
+                    last_c_low = float(df['low'].iloc[-1])
+                    last_c_high = float(df['high'].iloc[-1])
+                    possible_touch = (
+                        (last_c_low <= trade['tp'] or last_c_high >= trade['stop'])
+                        if trade_type == 'short'
+                        else (last_c_high >= trade['tp'] or last_c_low <= trade['stop'])
+                    )
+                    if possible_touch:
+                        touch_res = first_touch_after(symbol, trade['tp'], trade['stop'], start_utc_check, trade_type)
+                        if touch_res in ('tp', 'stop'):
+                            exit_type = touch_res
+                            exit_price = trade['tp'] if touch_res == 'tp' else trade['stop']
+                except Exception:
+                    pass
 
             # ارزی که اعلان حذف دارد: ۳ ساعت مانده به زمان حذف با قیمت بازار بسته می‌شود
             if exit_type is None and trade.get('delist_ts') is not None:
@@ -2706,19 +2748,6 @@ if __name__ == '__main__':
         raise
 
     try:
-        # شروع تازه (درخواست کاربر): حذف معاملات باز + صفر شدن گزارش روز و هفته از این لحظه
-        # فقط یک بار در اولین اجرای بعد از آپلود انجام می‌شود
-        current_stage = "بخش تنظیمات شروع تازه و پاکسازی اولیه (Fresh Start)"
-        if app_data.get('fresh_start_id') != FRESH_START_ID:
-            trades = app_data.get('trades') or []
-            kept = [t for t in trades if str(t.get('status')) != 'OPEN']
-            removed = len(trades) - len(kept)
-            app_data['trades'] = kept
-            app_data['report_start_ts'] = int(iran_time.timestamp())
-            app_data['fresh_start_id'] = FRESH_START_ID
-            save_data(app_data)
-            print(f"fresh start executed: {removed} open trades removed | reports start from now")
-
         # حذف یک‌بارهٔ معاملهٔ بازِ اشتباه (دستور کاربر): فقط همان معامله، بدون اثر روی بقیه
         try:
             current_stage = "بخش حذف معاملات باز مشخص‌شده (remove_bad_open_trades)"
