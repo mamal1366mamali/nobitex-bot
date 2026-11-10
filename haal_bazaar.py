@@ -168,7 +168,7 @@ def get_market_data():
                             "lastPrice": last_price,
                             "amount24": amount_24
                         }
-                    except:
+                    except Exception:
                         pass
     except Exception as e:
         print(f"Error fetching market data from Ourbit Futures: {e}")
@@ -250,12 +250,18 @@ def get_true_24h_counts(stats_data, data, force=False):
     for sym, item in stats_data.items():
         ref = refs.get(sym)
         last = item.get("lastPrice", 0) or 0
-        if not ref or last <= 0:
-            continue
-        if last > ref:
-            up += 1
-        elif last < ref:
-            down += 1
+        if ref and last > 0:
+            if last > ref:
+                up += 1
+            elif last < ref:
+                down += 1
+        else:
+            # پشتیبان در صورت عدم دریافت کندل ۵ دقیقه‌ای برای یک ارز
+            chg = item.get("dayChange", 0) or 0
+            if chg > 0:
+                up += 1
+            elif chg < 0:
+                down += 1
 
     return up, down, len(refs)
 
@@ -344,7 +350,7 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
         if len(df) == 0:
             return f"داده‌ای برای {sym} یافت نشد"
     except Exception:
-        return f"خطا در پردازش داده‌ها"
+        return "خطا در پردازش داده‌ها"
         
     df = df.tail(500).reset_index(drop=True)
     df['open'] = df['open'].astype(float)
@@ -393,6 +399,8 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
         match_idx = len(df) - 1
 
     def get_candle_time_range(ts, tf):
+        if ts > 1e11:
+            ts = ts / 1000.0
         iran_dt = datetime.utcfromtimestamp(ts) + timedelta(hours=3, minutes=30)
         h = iran_dt.hour
         m = iran_dt.minute
@@ -429,8 +437,7 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
         p_str = format_candle_price(p, target_str_clean)
         lines.append(f"{p_str} {time_range_str}")
         
-    return "
-".join(lines)
+    return "\n".join(lines)
 
 def check_is_chart(raw_text, msg_obj):
     if raw_text.startswith("چارت") or "برای دریافت چارت" in msg_obj.get("reply_to_message", {}).get("text", ""):
@@ -490,8 +497,10 @@ def main():
             }
 
             if text == "/start":
-                msg = "سلام! به دستیار حال بازار و هشدار قیمت خوش آمدید.
-برای دریافت قیمت لحظه‌ای، فقط نام ارز را به تنهایی بفرستید (مثلا xrp یا btc)."
+                msg = (
+                    "سلام! به دستیار حال بازار و هشدار قیمت خوش آمدید.\n"
+                    "برای دریافت قیمت لحظه‌ای، فقط نام ارز را به تنهایی بفرستید (مثلا xrp یا btc)."
+                )
                 send_message(chat_id, msg, keyboard)
                 
             elif text in ["قیمت لحظه ای 💰", "قیمت لحظه ای"]:
@@ -516,11 +525,11 @@ def main():
                 if total > 0:
                     trend = build_market_status_line(up_count, down_count)
                     if trend:
-                        msg = (f"روند بازار {trend}
-"
-                               f"تعداد ارزهای مثبت {up_count}
-"
-                               f"تعداد ارزهای منفی {down_count}")
+                        msg = (
+                            f"روند بازار {trend}\n"
+                            f"تعداد ارزهای مثبت {up_count}\n"
+                            f"تعداد ارزهای منفی {down_count}"
+                        )
                         send_message(chat_id, msg, keyboard)
                     
             elif text in ["بیشترین رشد و افت 📈📉", "بیشترین رشد و افت", "بیشترین رشد", "بیشترین افت"]:
@@ -537,8 +546,7 @@ def main():
                     c = int(round(item.get("dayChange", 0)))
                     c_sign = "+" if c > 0 else ""
                     top_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
-                top_msg = "
-".join(top_lines)
+                top_msg = "\n".join(top_lines)
                 
                 sorted_by_drop = sorted(stats_data.items(), key=lambda x: x[1].get("dayChange", 0))
                 bottom_10 = sorted_by_drop[:10]
@@ -549,29 +557,18 @@ def main():
                     c = int(round(item.get("dayChange", 0)))
                     c_sign = "+" if c > 0 else ""
                     bottom_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
-                bottom_msg = "
-".join(bottom_lines)
+                bottom_msg = "\n".join(bottom_lines)
 
-                msg = f"بیشترین رشد:
-{top_msg}
-
-بیشترین افت:
-{bottom_msg}"
+                msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
                 send_message(chat_id, msg, keyboard)
                 
             elif text in ["هشدار قیمتی 🔔", "هشدار قیمتی", "هشدار قیمت 🔔"]:
                 msg = (
-                    "لطفا نام ارز، نشانه متنی، قیمت tp و قیمت stop را وارد نمایید.
-"
-                    "(قیمت ورود به صورت خودکار برابر با قیمت لحظه‌ای بازار ثبت می‌شود)
-
-"
-                    "مثال‌ها:
-"
-                    "xrp 2.51 0.4
-"
-                    "xrp فروش اهرم 7 2.51 0.4
-"
+                    "لطفا نام ارز، نشانه متنی، قیمت tp و قیمت stop را وارد نمایید.\n"
+                    "(قیمت ورود به صورت خودکار برابر با قیمت لحظه‌ای بازار ثبت می‌شود)\n\n"
+                    "مثال‌ها:\n"
+                    "xrp 2.51 0.4\n"
+                    "xrp فروش اهرم 7 2.51 0.4\n"
                     "btc لانگ اهرم 10 98000 91000"
                 )
                 force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp فروش اهرم 7 2.51 0.4"}
@@ -583,9 +580,7 @@ def main():
                     send_message(chat_id, "شما هیچ هشدار فعالی ندارید.", keyboard)
                 else:
                     my_alerts = my_alerts[::-1]
-                    msg = f"تعداد هشدارهای فعال: {len(my_alerts)}
-
-"
+                    msg = f"تعداد هشدارهای فعال: {len(my_alerts)}\n\n"
                     for i, a in enumerate(my_alerts, 1):
                         sym = a['symbol'].lower()
                         tag = a.get('tag', '')
@@ -596,12 +591,12 @@ def main():
                         entry = 0.0
                         try:
                             entry = float(a.get("entry", 0) or 0)
-                        except:
+                        except Exception:
                             pass
                         if entry == 0 and tag and str(tag).replace('.', '').isdigit():
                             try:
                                 entry = float(tag)
-                            except:
+                            except Exception:
                                 pass
                             
                         if close_price == 0:
@@ -648,25 +643,16 @@ def main():
                             pnl_str = "سود + 0٪"
                         
                         msg += (
-                            f"{i}- نام: {sym}  نشانه: {tag_display}
-"
-                            f"قیمت: {fmt_price(close_price)}  entri: {fmt_price(entry)}
-"
-                            f"تیپی: {fmt_price(a['tp'])}  استاپ: {fmt_price(a['stop'])}
-"
-                            f"{pnl_str}
-
-"
+                            f"{i}- نام: {sym}  نشانه: {tag_display}\n"
+                            f"قیمت: {fmt_price(close_price)}  entri: {fmt_price(entry)}\n"
+                            f"تیپی: {fmt_price(a['tp'])}  استاپ: {fmt_price(a['stop'])}\n"
+                            f"{pnl_str}\n\n"
                         )
                     
-                    msg += "راهنمای حذف:
-"
-                    msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.
-"
-                    msg += "مثال:
-"
-                    msg += "11 (حذف کل لیست)
-"
+                    msg += "راهنمای حذف:\n"
+                    msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.\n"
+                    msg += "مثال:\n"
+                    msg += "11 (حذف کل لیست)\n"
                     msg += "1 btc (حذف فقط ارز btc)"
                     send_message(chat_id, msg, keyboard)
 
@@ -697,25 +683,14 @@ def main():
 
             elif text in ["چارت 📊", "چارت", "chart"]:
                 guide_msg = (
-                    "برای دریافت چارت، 4 بخش زیر را با فاصله وارد نمایید:
-
-"
-                    "1 نام ارز
-"
-                    "2 تایم فریم (15 ، 30 ، 1 ، 2 ، 4)
-"
-                    "3 قیمت مد نظر (مبدأ)
-"
-                    "4 کد 0 برای کمترین قیمت یا 9 برای بیشترین قیمت
-
-"
-                    "سیستم به طور خودکار از قیمت مبدأ تا زمان فعلی کندل‌ها را خروجی می‌دهد.
-
-"
-                    "مثال:
-"
-                    "btc 1 65000 0
-"
+                    "برای دریافت چارت، 4 بخش زیر را با فاصله وارد نمایید:\n\n"
+                    "1 نام ارز\n"
+                    "2 تایم فریم (15 ، 30 ، 1 ، 2 ، 4)\n"
+                    "3 قیمت مد نظر (مبدأ)\n"
+                    "4 کد 0 برای کمترین قیمت یا 9 برای بیشترین قیمت\n\n"
+                    "سیستم به طور خودکار از قیمت مبدأ تا زمان فعلی کندل‌ها را خروجی می‌دهد.\n\n"
+                    "مثال:\n"
+                    "btc 1 65000 0\n"
                     "eth 4 2500 9"
                 )
                 force_reply_markup = {"force_reply": True, "input_field_placeholder": "btc 1 65000 0"}
@@ -727,8 +702,7 @@ def main():
                     chart_res = process_chart_request(parts[0], parts[1], parts[2], parts[3])
                     send_message(chat_id, chart_res, keyboard)
                 else:
-                    send_message(chat_id, "فرمت دستور چارت اشتباه است! لطفاً به این شکل بفرستید:
-btc 1 65000 0", keyboard)
+                    send_message(chat_id, "فرمت دستور چارت اشتباه است! لطفاً به این شکل بفرستید:\nbtc 1 65000 0", keyboard)
 
             elif text.startswith("هشدار") or (
                 ("قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", ""))
@@ -806,24 +780,17 @@ btc 1 65000 0", keyboard)
                         tag_display = tag if tag else "بدون نشانه"
                         type_display = "شورت (فروش)" if trade_type == "short" else "لانگ (خرید)"
                         confirm_msg = (
-                            f"✅ هشدار با موفقیت ثبت شد!
-
-"
-                            f"نام: {sym.upper()}  نوع: {type_display}
-"
-                            f"نشانه: {tag_display}
-"
-                            f"entri: {fmt_price(entry)}
-"
+                            f"✅ هشدار با موفقیت ثبت شد!\n\n"
+                            f"نام: {sym.upper()}  نوع: {type_display}\n"
+                            f"نشانه: {tag_display}\n"
+                            f"entri: {fmt_price(entry)}\n"
                             f"تیپی: {fmt_price(tp)}  استاپ: {fmt_price(stop)}"
                         )
                         send_message(chat_id, confirm_msg, keyboard)
                     else:
                         send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
                 else:
-                    send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.
-مثال:
-xrp 2.51 0.4", keyboard)
+                    send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.\nمثال:\nxrp 2.51 0.4", keyboard)
                     
             else:
                 sym = text.replace('usdt', '').strip()
@@ -838,22 +805,16 @@ xrp 2.51 0.4", keyboard)
                     
                     sign = "+" if day_change > 0 else ""
                     msg = (
-                        f"نام {sym}
-"
-                        f"قیمت {fmt_price(price_now)}
-"
-                        f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %
-"
-                        f"کمترین قیمت {fmt_price(day_low)}
-"
-                        f"بیشترین قیمت {fmt_price(day_high)}
-"
+                        f"نام {sym}\n"
+                        f"قیمت {fmt_price(price_now)}\n"
+                        f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %\n"
+                        f"کمترین قیمت {fmt_price(day_low)}\n"
+                        f"بیشترین قیمت {fmt_price(day_high)}\n"
                         f"حجم {vol_str}"
                     )
                     send_message(chat_id, msg, keyboard)
                 else:
-                    send_message(chat_id, "دستور یا نام ارز پیدا نشد.
-برای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
+                    send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
 
         if max_id > last_id:
             data["last_update_id"] = max_id
@@ -938,8 +899,7 @@ xrp 2.51 0.4", keyboard)
                     f"{pnl_text}"
                 )
                 send_message(ALERT_CHANNEL, msg_alert)
-                send_message(alert["chat_id"], f"هشدار فعال شد:
-{msg_alert}")
+                send_message(alert["chat_id"], f"هشدار فعال شد:\n{msg_alert}")
             else:
                 remaining_alerts.append(alert)
                 
@@ -987,13 +947,9 @@ xrp 2.51 0.4", keyboard)
                 trend = build_market_status_line(up_count, down_count)
                 if trend:
                     daily_report_msg = (
-                        f"حال بازار {trend}
-"
-                        f"تعداد ارزهای مثبت {up_count}
-"
-                        f"تعداد ارزهای منفی {down_count}
-
-"
+                        f"حال بازار {trend}\n"
+                        f"تعداد ارزهای مثبت {up_count}\n"
+                        f"تعداد ارزهای منفی {down_count}\n\n"
                         f"تاریخ {pending.get('time_str', current_date_str)}"
                     )
                     send_message(CHANNEL_REPORT_MAIN, daily_report_msg)
@@ -1009,15 +965,10 @@ xrp 2.51 0.4", keyboard)
                 hourly_trend = build_market_status_line(up_hourly, down_hourly)
                 if hourly_trend:
                     hourly_msg = (
-                        f"گزارش ساعتی حال بازار
-"
-                        f"روند بازار {hourly_trend}
-"
-                        f"تعداد ارزهای مثبت {up_hourly}
-"
-                        f"تعداد ارزهای منفی {down_hourly}
-
-"
+                        f"گزارش ساعتی حال بازار\n"
+                        f"روند بازار {hourly_trend}\n"
+                        f"تعداد ارزهای مثبت {up_hourly}\n"
+                        f"تعداد ارزهای منفی {down_hourly}\n\n"
                         f"تاریخ {current_date_str}"
                     )
                     send_message(CHANNEL_REPORT_MAIN, hourly_msg)
@@ -1035,13 +986,9 @@ xrp 2.51 0.4", keyboard)
                     roshd_trend = build_market_status_line(up_roshd, down_roshd)
                     if roshd_trend:
                         roshd_msg = (
-                            f"حال بازار {roshd_trend}
-"
-                            f"تعداد ارزهای مثبت {up_roshd}
-"
-                            f"تعداد ارزهای منفی {down_roshd}
-
-"
+                            f"حال بازار {roshd_trend}\n"
+                            f"تعداد ارزهای مثبت {up_roshd}\n"
+                            f"تعداد ارزهای منفی {down_roshd}\n\n"
                             f"تاریخ {shamsi_date} ساعت {time_str}"
                         )
                         send_roshd_message(roshd_msg)
@@ -1057,8 +1004,7 @@ xrp 2.51 0.4", keyboard)
 
     except Exception as e:
         tb_str = traceback.format_exc()
-        print(f"Error occurred:
-{tb_str}")
+        print(f"Error occurred:\n{tb_str}")
         send_error_to_channels(str(e), tb_str, stage_hint=current_stage)
         raise
 
