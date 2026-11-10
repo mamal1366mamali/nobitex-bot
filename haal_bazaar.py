@@ -9,20 +9,85 @@ from datetime import datetime, timedelta
 import jdatetime
 import pandas as pd
 import warnings
+import traceback
 
 warnings.filterwarnings('ignore')
 
-# Config
+# Config for Haal Bazaar Bot
 BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN", "")
 ALERT_CHANNEL = "-1004462898426"
 CHANNEL_REPORT_MAIN = "-1004304608564"
+
+# Config for Roshd / Ourbit Hourly Channel Bot
+ROSHD_BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN", "")
+ROSHD_CHANNEL_ID = "-1003961062602"
+
+PERSONAL_ID = "114669886"
+CHANNEL_EXIT_MAIN = "-1004415777827"
+CHANNEL_SELL_MAIN = "-1004290922830"
 DATA_FILE = "haal_data.json"
 
 # Ourbit API (Futures)
 OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
 OURBIT_KLINE_URL = "https://futures.ourbit.com/api/v1/contract/kline"
 
+REPORT_HOURS = set(range(24))
+REPORT_WINDOW_MINUTES = 5
+
+iran_time_global = datetime.utcnow() + timedelta(hours=3, minutes=30)
+current_date_str_global = f"{jdatetime.datetime.fromgregorian(datetime=iran_time_global).strftime('%Y %m %d')} ساعت {iran_time_global.strftime('%H : %M')} دقیقه"
+
+def detect_failed_part(err_title, err_details, stage_hint=""):
+    tb = (err_details or "").lower()
+    err = (err_title or "").lower()
+    
+    if stage_hint:
+        failed_part = stage_hint
+    elif "get_market_data" in tb:
+        failed_part = "بخش دریافت اطلاعات بازار از صرافی اوربیت (get_market_data)"
+    elif "get_true_24h_counts" in tb or "_kline_ref_24h" in tb:
+        failed_part = "بخش محاسبه مقادیر ۲۴ ساعته و روند بازار (get_true_24h_counts)"
+    elif "process_chart_request" in tb:
+        failed_part = "بخش پردازش و ترسیم چارت (process_chart_request)"
+    elif "send_message" in tb:
+        failed_part = "بخش ارتباط و ارسال پیام به تلگرام (send_message)"
+    elif "get_updates" in tb:
+        failed_part = "بخش دریافت پیام‌ها از تلگرام (get_updates)"
+    else:
+        failed_part = "بخش اجرای اصلی ربات حال بازار و اوربیت (Main Execution)"
+
+    if "timeout" in err or "connection" in err or "requests" in tb or "read timed out" in err or "max retries" in err:
+        explanation = "این خطا به دلیل کندی اینترنت سرور یا عدم پاسخگویی موقت سرور صرافی/تلگرام رخ داده است."
+    elif "jsondecodeerror" in err or "expecting value" in err:
+        explanation = "این خطا به دلیل پاسخ ناقص یا غیرمجاز از سمت صرافی یا خرابی ساختار فایل JSON رخ داده است."
+    elif "keyerror" in err or "indexerror" in err or "typeerror" in err or "valueerror" in err:
+        explanation = "این خطا به دلیل تغییر ساختار داده‌های دریافتی یا نبودن یک مقدار مورد انتظار در محاسبات کد رخ داده است."
+    else:
+        explanation = "این خطا در حین اجرای دستورات داخلی فایل پایتون (haal_bazaar.py) رخ داده است."
+
+    return failed_part, explanation
+
+def send_error_to_channels(err_title, err_details, stage_hint=""):
+    failed_part, explanation = detect_failed_part(err_title, err_details, stage_hint)
+    msg = (
+        f"⚠️ گزارش خطا در اجرای ربات (haal_bazaar.py)\n"
+        f"ربات: Haal Bazaar & Ourbit Hourly Bot\n"
+        f"زمان: {current_date_str_global}\n"
+        f"بخش دارای خطا: {failed_part}\n"
+        f"توضیح: {explanation}\n"
+        f"نوع خطا: {err_title}\n\n"
+        f"جزئیات فنی خطا:\n{err_details}"
+    )
+    if len(msg) > 4000:
+        msg = msg[:4000] + "\n...(ادامه خطا کوتاه شد)"
+    
+    send_message(PERSONAL_ID, msg)
+    send_message(CHANNEL_SELL_MAIN, msg)
+    send_message(CHANNEL_EXIT_MAIN, msg)
+
 def send_message(chat_id, text, reply_markup=None):
+    if not BOT_TOKEN:
+        return
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     if reply_markup:
@@ -32,7 +97,20 @@ def send_message(chat_id, text, reply_markup=None):
     except Exception:
         pass
 
+def send_roshd_message(text):
+    token = ROSHD_BOT_TOKEN if ROSHD_BOT_TOKEN else BOT_TOKEN
+    if not token:
+        return
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": ROSHD_CHANNEL_ID, "text": text}
+    try:
+        requests.post(url, json=payload, timeout=10)
+    except Exception:
+        pass
+
 def get_updates(offset=None):
+    if not BOT_TOKEN:
+        return []
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
     params = {"timeout": 10}
     if offset:
@@ -97,7 +175,6 @@ def get_market_data():
     return prices, stats_data
 
 def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
-    """کلوز دقیقِ ۲۴ ساعت قبل (بر اساس کندل ۵ دقیقه‌ای)"""
     target = time.time() - 24 * 3600
     for i in range(tries):
         try:
@@ -132,7 +209,6 @@ def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
     return None
 
 def _fetch_refs(syms, workers, tries, sleep_base):
-    """گرفتن مرجع ۲۴ ساعته برای لیستی از ارزها"""
     if not syms:
         return {}
     pairs = [f"{s.upper()}_USDT" for s in syms]
@@ -148,8 +224,6 @@ def _fetch_refs(syms, workers, tries, sleep_base):
     return out
 
 def get_true_24h_counts(stats_data, data, force=False):
-    """شمارش مثبت/منفی بر اساس ۲۴ ساعت واقعی: کلوز الان نسبت به کلوز ۲۴ ساعت قبل.
-    مرجع هر ساعت یک‌بار محاسبه و در haal_data.json کش می‌شود تا دکمهٔ دستی سریع باشد."""
     hour_key = int(time.time() // 3600)
     cache = data.get("ref_cache") or {}
     if force or cache.get("hour") != hour_key:
@@ -160,8 +234,6 @@ def get_true_24h_counts(stats_data, data, force=False):
     syms = list(stats_data.keys())
     missing = [s for s in syms if not refs.get(s)]
 
-    # چند مرحله تلاش: اول پرسرعت، بعد آهسته‌تر برای ارزهایی که جواب ندادند
-    # (صرافی درخواست‌های هم‌زمان زیاد را محدود می‌کند؛ با تلاش دوباره تقریباً همه شمرده می‌شوند)
     for workers, tries, pause in ((12, 2, 0.3), (6, 3, 0.8), (3, 4, 1.5)):
         if not missing:
             break
@@ -191,9 +263,7 @@ def build_market_status_line(up_count, down_count):
     total = up_count + down_count
     if total <= 0:
         return None
-    # عدد = درصد ارزهای صعودی (مثبت)
     up_pct = int(round((up_count / total) * 100))
-    # مرزها: زیر ۳۳ نزولی، ۳۳ تا ۶۶ رنج، ۶۶ به بالا صعودی
     if up_count * 3 <= total:
         return f"نزولی {up_pct} %"
     elif up_count * 3 >= total * 2:
@@ -283,7 +353,6 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
     df['close'] = df['close'].astype(float)
     df['time'] = df['time'].astype(int)
     
-    # تجمیع کندل‌ها برای تایم‌فریم ۲ ساعته
     if mult == 2:
         agg_rows = []
         for i in range(0, len(df), 2):
@@ -316,9 +385,7 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
         target_val = 0.0
 
     price_col = 'low' if is_min else 'high'
-    prefix = 'low' if is_min else 'high'
 
-    # پیدا کردن نزدیک‌ترین کندل به قیمت ورودی مبدأ
     if len(df) > 0 and target_val > 0:
         diff = (df[price_col] - target_val).abs()
         match_idx = int(diff.idxmin())
@@ -353,7 +420,6 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
             
         return f"{start_dt.strftime('%H : %M')} تا {end_dt.strftime('%H : %M')}"
 
-    # استخراج کندل‌ها از نقطه تطابق مبدأ تا زمان فعلی (آخرین کندل دیتافریم)
     lines = []
     for idx in range(match_idx, len(df)):
         row = df.loc[idx]
@@ -363,7 +429,8 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
         p_str = format_candle_price(p, target_str_clean)
         lines.append(f"{p_str} {time_range_str}")
         
-    return "\n".join(lines)
+    return "
+".join(lines)
 
 def check_is_chart(raw_text, msg_obj):
     if raw_text.startswith("چارت") or "برای دریافت چارت" in msg_obj.get("reply_to_message", {}).get("text", ""):
@@ -373,558 +440,627 @@ def check_is_chart(raw_text, msg_obj):
         valid_tfs = ['15', '15m', '30', '30m', '1', '1h', '2', '2h', '4', '4h']
         tf = tokens[1].lower().strip()
         last_tok = tokens[3].strip()
-        # شرط قطعی چارت:
-        # ۱. توکن دوم حتماً یکی از تایم‌فریم‌های معتبر باشد
-        # ۲. توکن چهارم دقیقاً و فقط کاراکتر مجزای "0" یا "9" باشد (با فاصله قبل از آن)
         if tf in valid_tfs and last_tok in ["0", "9"]:
             return True
     return False
 
 def main():
-    # Load data
-    data = {"last_update_id": 0, "alerts": [], "alert_counter": 0}
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                loaded = json.load(f)
-                if isinstance(loaded, dict):
-                    data.update(loaded)
-        except Exception:
-            pass
-    
-    prices, stats_data = get_market_data()
-
-    # Process new messages
-    last_id = data.get("last_update_id", 0)
-    updates = get_updates(offset=last_id + 1)
-    
-    max_id = last_id
-    for update in updates:
-        update_id = update.get("update_id", 0)
-        if update_id > max_id:
-            max_id = update_id
+    current_stage = "بخش بارگذاری اولیه اطلاعات (load data)"
+    try:
+        data = {"last_update_id": 0, "alerts": [], "alert_counter": 0}
+        if os.path.exists(DATA_FILE):
+            try:
+                with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, dict):
+                        data.update(loaded)
+            except Exception:
+                pass
         
-        message = update.get("message", {})
-        chat_id = message.get("chat", {}).get("id")
-        text = message.get("text", "").strip().lower()
+        current_stage = "بخش دریافت داده‌های بازار (get_market_data)"
+        prices, stats_data = get_market_data()
+
+        current_stage = "بخش پردازش پیام‌های تلگرام (get_updates)"
+        last_id = data.get("last_update_id", 0)
+        updates = get_updates(offset=last_id + 1)
         
-        if not text or not chat_id:
-            continue
-
-        keyboard = {
-            "keyboard": [
-                [{"text": "قیمت لحظه ای 💰"}],
-                [{"text": "حال بازار 📊"}],
-                [{"text": "بیشترین رشد و افت 📈📉"}],
-                [{"text": "هشدار قیمتی 🔔"}],
-                [{"text": "لیست هشدارهای قیمتی 📝"}],
-                [{"text": "چارت 📊"}]
-            ],
-            "resize_keyboard": True
-        }
-
-        if text == "/start":
-            msg = "سلام! به دستیار حال بازار و هشدار قیمت خوش آمدید.\nبرای دریافت قیمت لحظه‌ای، فقط نام ارز را به تنهایی بفرستید (مثلا xrp یا btc)."
-            send_message(chat_id, msg, keyboard)
+        max_id = last_id
+        for update in updates:
+            update_id = update.get("update_id", 0)
+            if update_id > max_id:
+                max_id = update_id
             
-        elif text in ["قیمت لحظه ای 💰", "قیمت لحظه ای"]:
-            msg = "لطفا نام ارز مورد نظر را بنویسید (مثلاً xrp):"
-            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp"}
-            send_message(chat_id, msg, force_reply_markup)
+            message = update.get("message", {})
+            chat_id = message.get("chat", {}).get("id")
+            text = message.get("text", "").strip().lower()
             
-        elif text in ["حال بازار 📊", "حال بازار"]:
-            if not stats_data:
-                send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
-                continue
-            
-            up_count = 0
-            down_count = 0
-
-            # محاسبهٔ خودمان: کلوز الان نسبت به کلوز ۲۴ ساعت قبل (به درصد تابلو کاری ندارد)
-            up_count, down_count, covered = get_true_24h_counts(stats_data, data)
-
-            # اگر داده ناقص بود، یک بار دیگر با گرفتن مجدد قیمت‌ها تلاش کن
-            if (up_count + down_count) == 0:
-                up_count, down_count, covered = get_true_24h_counts(stats_data, data, force=True)
-
-            if (up_count + down_count) == 0:
-                send_message(chat_id, "دریافت قیمت‌ها انجام نشد. لطفاً چند لحظه بعد دوباره بزنید.", keyboard)
+            if not text or not chat_id:
                 continue
 
-            total = up_count + down_count
-            if total > 0:
-                trend = build_market_status_line(up_count, down_count)
-                if trend:
-                    msg = (f"روند بازار {trend}\n"
-                           f"تعداد ارزهای مثبت {up_count}\n"
-                           f"تعداد ارزهای منفی {down_count}")
-                    send_message(chat_id, msg, keyboard)
+            keyboard = {
+                "keyboard": [
+                    [{"text": "قیمت لحظه ای 💰"}],
+                    [{"text": "حال بازار 📊"}],
+                    [{"text": "بیشترین رشد و افت 📈📉"}],
+                    [{"text": "هشدار قیمتی 🔔"}],
+                    [{"text": "لیست هشدارهای قیمتی 📝"}],
+                    [{"text": "چارت 📊"}]
+                ],
+                "resize_keyboard": True
+            }
+
+            if text == "/start":
+                msg = "سلام! به دستیار حال بازار و هشدار قیمت خوش آمدید.
+برای دریافت قیمت لحظه‌ای، فقط نام ارز را به تنهایی بفرستید (مثلا xrp یا btc)."
+                send_message(chat_id, msg, keyboard)
                 
-        elif text in ["بیشترین رشد و افت 📈📉", "بیشترین رشد و افت", "بیشترین رشد", "بیشترین افت"]:
-            if not stats_data:
-                send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
-                continue
-            
-            sorted_by_growth = sorted(stats_data.items(), key=lambda x: x[1].get("growth", 0), reverse=True)
-            top_20 = sorted_by_growth[:20]
-            
-            top_lines = []
-            for sym, item in top_20:
-                g = int(round(item.get("growth", 0)))
-                c = int(round(item.get("dayChange", 0)))
-                c_sign = "+" if c > 0 else ""
-                top_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
-            top_msg = "\n".join(top_lines)
-            
-            sorted_by_drop = sorted(stats_data.items(), key=lambda x: x[1].get("dayChange", 0))
-            bottom_10 = sorted_by_drop[:10]
-            
-            bottom_lines = []
-            for sym, item in bottom_10:
-                g = int(round(item.get("growth", 0)))
-                c = int(round(item.get("dayChange", 0)))
-                c_sign = "+" if c > 0 else ""
-                bottom_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
-            bottom_msg = "\n".join(bottom_lines)
+            elif text in ["قیمت لحظه ای 💰", "قیمت لحظه ای"]:
+                msg = "لطفا نام ارز مورد نظر را بنویسید (مثلاً xrp):"
+                force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp"}
+                send_message(chat_id, msg, force_reply_markup)
+                
+            elif text in ["حال بازار 📊", "حال بازار"]:
+                if not stats_data:
+                    send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
+                    continue
+                
+                up_count, down_count, covered = get_true_24h_counts(stats_data, data)
+                if (up_count + down_count) == 0:
+                    up_count, down_count, covered = get_true_24h_counts(stats_data, data, force=True)
 
-            msg = f"بیشترین رشد:\n{top_msg}\n\nبیشترین افت:\n{bottom_msg}"
-            send_message(chat_id, msg, keyboard)
-            
-        elif text in ["هشدار قیمتی 🔔", "هشدار قیمتی", "هشدار قیمت 🔔"]:
-            msg = (
-                "لطفا نام ارز، نشانه متنی، قیمت tp و قیمت stop را وارد نمایید.\n"
-                "(قیمت ورود به صورت خودکار برابر با قیمت لحظه‌ای بازار ثبت می‌شود)\n\n"
-                "مثال‌ها:\n"
-                "xrp 2.51 0.4\n"
-                "xrp فروش اهرم 7 2.51 0.4\n"
-                "btc لانگ اهرم 10 98000 91000"
-            )
-            force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp فروش اهرم 7 2.51 0.4"}
-            send_message(chat_id, msg, force_reply_markup)
-            
-        elif text in ["لیست هشدارهای قیمتی 📝", "لیست هشدارها 📝", "لیست"]:
-            my_alerts = [a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)]
-            if not my_alerts:
-                send_message(chat_id, "شما هیچ هشدار فعالی ندارید.", keyboard)
-            else:
-                # مرتب‌سازی بر اساس زمان ثبت (جدیدترین در ابتدا)
-                my_alerts = my_alerts[::-1]
-                msg = f"تعداد هشدارهای فعال: {len(my_alerts)}\n\n"
-                for i, a in enumerate(my_alerts, 1):
-                    sym = a['symbol'].lower()
-                    tag = a.get('tag', '')
-                    tag_display = str(tag).strip() if tag and not str(tag).replace('.', '').isdigit() else "ندارد"
+                if (up_count + down_count) == 0:
+                    send_message(chat_id, "دریافت قیمت‌ها انجام نشد. لطفاً چند لحظه بعد دوباره بزنید.", keyboard)
+                    continue
+
+                total = up_count + down_count
+                if total > 0:
+                    trend = build_market_status_line(up_count, down_count)
+                    if trend:
+                        msg = (f"روند بازار {trend}
+"
+                               f"تعداد ارزهای مثبت {up_count}
+"
+                               f"تعداد ارزهای منفی {down_count}")
+                        send_message(chat_id, msg, keyboard)
                     
-                    close_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
-                    
-                    # Resolve entry price - اول از فیلد entry هشدار بخون
-                    entry = 0.0
-                    try:
-                        entry = float(a.get("entry", 0) or 0)
-                    except:
-                        pass
-                    # اگه entry هنوز صفره از tag امتحان کن
-                    if entry == 0 and tag and str(tag).replace('.', '').isdigit():
+            elif text in ["بیشترین رشد و افت 📈📉", "بیشترین رشد و افت", "بیشترین رشد", "بیشترین افت"]:
+                if not stats_data:
+                    send_message(chat_id, "متاسفانه دریافت اطلاعات بازار با مشکل مواجه شد.", keyboard)
+                    continue
+                
+                sorted_by_growth = sorted(stats_data.items(), key=lambda x: x[1].get("growth", 0), reverse=True)
+                top_20 = sorted_by_growth[:20]
+                
+                top_lines = []
+                for sym, item in top_20:
+                    g = int(round(item.get("growth", 0)))
+                    c = int(round(item.get("dayChange", 0)))
+                    c_sign = "+" if c > 0 else ""
+                    top_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
+                top_msg = "
+".join(top_lines)
+                
+                sorted_by_drop = sorted(stats_data.items(), key=lambda x: x[1].get("dayChange", 0))
+                bottom_10 = sorted_by_drop[:10]
+                
+                bottom_lines = []
+                for sym, item in bottom_10:
+                    g = int(round(item.get("growth", 0)))
+                    c = int(round(item.get("dayChange", 0)))
+                    c_sign = "+" if c > 0 else ""
+                    bottom_lines.append(f"{sym} +{g} % درصد تابلو {c_sign}{c} %")
+                bottom_msg = "
+".join(bottom_lines)
+
+                msg = f"بیشترین رشد:
+{top_msg}
+
+بیشترین افت:
+{bottom_msg}"
+                send_message(chat_id, msg, keyboard)
+                
+            elif text in ["هشدار قیمتی 🔔", "هشدار قیمتی", "هشدار قیمت 🔔"]:
+                msg = (
+                    "لطفا نام ارز، نشانه متنی، قیمت tp و قیمت stop را وارد نمایید.
+"
+                    "(قیمت ورود به صورت خودکار برابر با قیمت لحظه‌ای بازار ثبت می‌شود)
+
+"
+                    "مثال‌ها:
+"
+                    "xrp 2.51 0.4
+"
+                    "xrp فروش اهرم 7 2.51 0.4
+"
+                    "btc لانگ اهرم 10 98000 91000"
+                )
+                force_reply_markup = {"force_reply": True, "input_field_placeholder": "xrp فروش اهرم 7 2.51 0.4"}
+                send_message(chat_id, msg, force_reply_markup)
+                
+            elif text in ["لیست هشدارهای قیمتی 📝", "لیست هشدارها 📝", "لیست"]:
+                my_alerts = [a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)]
+                if not my_alerts:
+                    send_message(chat_id, "شما هیچ هشدار فعالی ندارید.", keyboard)
+                else:
+                    my_alerts = my_alerts[::-1]
+                    msg = f"تعداد هشدارهای فعال: {len(my_alerts)}
+
+"
+                    for i, a in enumerate(my_alerts, 1):
+                        sym = a['symbol'].lower()
+                        tag = a.get('tag', '')
+                        tag_display = str(tag).strip() if tag and not str(tag).replace('.', '').isdigit() else "ندارد"
+                        
+                        close_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
+                        
+                        entry = 0.0
                         try:
-                            entry = float(tag)
+                            entry = float(a.get("entry", 0) or 0)
                         except:
                             pass
-                        
-                    if close_price == 0:
-                        close_price = entry if entry > 0 else 0
+                        if entry == 0 and tag and str(tag).replace('.', '').isdigit():
+                            try:
+                                entry = float(tag)
+                            except:
+                                pass
+                            
+                        if close_price == 0:
+                            close_price = entry if entry > 0 else 0
 
-                    # تشخیص نوع معامله (شورت یا لانگ):
-                    trade_type = a.get('trade_type', '')
-                    is_short = (trade_type == 'short')
-                    tp_val = float(a.get('tp', 0) or 0)
-                    stop_val = float(a.get('stop', 0) or 0)
-                    if not trade_type:
-                        if entry > 0:
-                            if tp_val > 0 and tp_val < entry:
+                        trade_type = a.get('trade_type', '')
+                        is_short = (trade_type == 'short')
+                        tp_val = float(a.get('tp', 0) or 0)
+                        stop_val = float(a.get('stop', 0) or 0)
+                        if not trade_type:
+                            if entry > 0:
+                                if tp_val > 0 and tp_val < entry:
+                                    is_short = True
+                                elif stop_val > 0 and stop_val > entry:
+                                    is_short = True
+                                elif tp_val > 0 and tp_val > entry:
+                                    is_short = False
+                                elif stop_val > 0 and stop_val < entry:
+                                    is_short = False
+                            if not is_short and any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell', 'مثبت']):
                                 is_short = True
-                            elif stop_val > 0 and stop_val > entry:
-                                is_short = True
-                            elif tp_val > 0 and tp_val > entry:
-                                is_short = False
-                            elif stop_val > 0 and stop_val < entry:
-                                is_short = False
-                        if not is_short and any(k in str(tag).lower() for k in ['شورت', 'فروش', 'short', 'sell', 'مثبت']):
-                            is_short = True
+                            
+                        leverage = int(a.get("leverage") or 7)
+                        if leverage == 1:
+                            leverage = 7
+                        diff_pct = 0.0
+                        if entry > 0 and close_price > 0:
+                            if is_short:
+                                diff_pct = round(((entry - close_price) / entry) * 100 * leverage, 2)
+                            else:
+                                diff_pct = round(((close_price - entry) / entry) * 100 * leverage, 2)
                         
-                    leverage = int(a.get("leverage") or 7)
-                    if leverage == 1:
-                        leverage = 7
-                    diff_pct = 0.0
-                    if entry > 0 and close_price > 0:
-                        if is_short:
-                            # در معامله شورت: در نزول قیمت سود، در صعود قیمت ضرر
-                            diff_pct = round(((entry - close_price) / entry) * 100 * leverage, 2)
+                        abs_diff = abs(diff_pct)
+                        if abs_diff == int(abs_diff):
+                            diff_val_str = str(int(abs_diff))
                         else:
-                            # در معامله لانگ: در صعود قیمت سود، در نزول قیمت ضرر
-                            diff_pct = round(((close_price - entry) / entry) * 100 * leverage, 2)
+                            diff_val_str = f"{abs_diff:.2f}".rstrip('0').rstrip('.')
+
+                        if diff_pct > 0:
+                            pnl_str = f"سود + {diff_val_str}٪"
+                        elif diff_pct < 0:
+                            pnl_str = f"ضرر - {diff_val_str}٪"
+                        else:
+                            pnl_str = "سود + 0٪"
+                        
+                        msg += (
+                            f"{i}- نام: {sym}  نشانه: {tag_display}
+"
+                            f"قیمت: {fmt_price(close_price)}  entri: {fmt_price(entry)}
+"
+                            f"تیپی: {fmt_price(a['tp'])}  استاپ: {fmt_price(a['stop'])}
+"
+                            f"{pnl_str}
+
+"
+                        )
                     
-                    abs_diff = abs(diff_pct)
-                    if abs_diff == int(abs_diff):
-                        diff_val_str = str(int(abs_diff))
-                    else:
-                        diff_val_str = f"{abs_diff:.2f}".rstrip('0').rstrip('.')
+                    msg += "راهنمای حذف:
+"
+                    msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.
+"
+                    msg += "مثال:
+"
+                    msg += "11 (حذف کل لیست)
+"
+                    msg += "1 btc (حذف فقط ارز btc)"
+                    send_message(chat_id, msg, keyboard)
 
-                    if diff_pct > 0:
-                        pnl_str = f"سود + {diff_val_str}٪"
-                    elif diff_pct < 0:
-                        pnl_str = f"ضرر - {diff_val_str}٪"
-                    else:
-                        pnl_str = "سود + 0٪"
-                    
-                    msg += (
-                        f"{i}- نام: {sym}  نشانه: {tag_display}\n"
-                        f"قیمت: {fmt_price(close_price)}  entri: {fmt_price(entry)}\n"
-                        f"تیپی: {fmt_price(a['tp'])}  استاپ: {fmt_price(a['stop'])}\n"
-                        f"{pnl_str}\n\n"
-                    )
-                
-                msg += "راهنمای حذف:\n"
-                msg += "برای حذف کامل عدد 11 و برای حذف یک ارز عدد 1 به همراه نام ارز را وارد نمایید.\n"
-                msg += "مثال:\n"
-                msg += "11 (حذف کل لیست)\n"
-                msg += "1 btc (حذف فقط ارز btc)"
-                send_message(chat_id, msg, keyboard)
-
-        elif text == "11" or (text.startswith("حذف") and "11" in text):
-            count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)])
-            if count_deleted > 0:
-                data["alerts"] = [a for a in data.get("alerts", []) if str(a.get("chat_id")) != str(chat_id)]
-                send_message(chat_id, "کل لیست هشدارهای شما با موفقیت حذف شد.", keyboard)
-            else:
-                send_message(chat_id, "شما هیچ هشدار فعالی در لیست ندارید.", keyboard)
-
-        elif (text.startswith("1 ") or text.startswith("1-") or (len(text.split()) == 2 and text.split()[0] == "1") or (text.startswith("1") and len(text) > 2 and text[1:].isalpha())):
-            parts = text.replace("-", " ").strip().split()
-            if len(parts) >= 2 and parts[0] == "1":
-                target_sym = parts[1].lower().replace("_usdt", "").replace("usdt", "")
-            elif text.startswith("1") and len(text) > 1:
-                target_sym = text[1:].strip().lower().replace("_usdt", "").replace("usdt", "")
-            else:
-                target_sym = ""
-                
-            if target_sym:
-                count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym])
+            elif text == "11" or (text.startswith("حذف") and "11" in text):
+                count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id)])
                 if count_deleted > 0:
-                    data["alerts"] = [a for a in data.get("alerts", []) if not (str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym)]
-                    send_message(chat_id, f"هشدار ارز {target_sym.upper()} با موفقیت حذف شد.", keyboard)
+                    data["alerts"] = [a for a in data.get("alerts", []) if str(a.get("chat_id")) != str(chat_id)]
+                    send_message(chat_id, "کل لیست هشدارهای شما با موفقیت حذف شد.", keyboard)
                 else:
-                    send_message(chat_id, f"هشداری برای ارز {target_sym.upper()} در لیست شما پیدا نشد.", keyboard)
+                    send_message(chat_id, "شما هیچ هشدار فعالی در لیست ندارید.", keyboard)
 
-        elif text in ["چارت 📊", "چارت", "chart"]:
-            guide_msg = (
-                "برای دریافت چارت، 4 بخش زیر را با فاصله وارد نمایید:\n\n"
-                "1 نام ارز\n"
-                "2 تایم فریم (15 ، 30 ، 1 ، 2 ، 4)\n"
-                "3 قیمت مد نظر (مبدأ)\n"
-                "4 کد 0 برای کمترین قیمت یا 9 برای بیشترین قیمت\n\n"
-                "سیستم به طور خودکار از قیمت مبدأ تا زمان فعلی کندل‌ها را خروجی می‌دهد.\n\n"
-                "مثال:\n"
-                "btc 1 65000 0\n"
-                "eth 4 2500 9"
-            )
-            force_reply_markup = {"force_reply": True, "input_field_placeholder": "btc 1 65000 0"}
-            send_message(chat_id, guide_msg, force_reply_markup)
+            elif (text.startswith("1 ") or text.startswith("1-") or (len(text.split()) == 2 and text.split()[0] == "1") or (text.startswith("1") and len(text) > 2 and text[1:].isalpha())):
+                parts = text.replace("-", " ").strip().split()
+                if len(parts) >= 2 and parts[0] == "1":
+                    target_sym = parts[1].lower().replace("_usdt", "").replace("usdt", "")
+                elif text.startswith("1") and len(text) > 1:
+                    target_sym = text[1:].strip().lower().replace("_usdt", "").replace("usdt", "")
+                else:
+                    target_sym = ""
+                    
+                if target_sym:
+                    count_deleted = len([a for a in data.get("alerts", []) if str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym])
+                    if count_deleted > 0:
+                        data["alerts"] = [a for a in data.get("alerts", []) if not (str(a.get("chat_id")) == str(chat_id) and a.get("symbol", "").lower() == target_sym)]
+                        send_message(chat_id, f"هشدار ارز {target_sym.upper()} با موفقیت حذف شد.", keyboard)
+                    else:
+                        send_message(chat_id, f"هشداری برای ارز {target_sym.upper()} در لیست شما پیدا نشد.", keyboard)
 
-        elif check_is_chart(text, message):
-            parts = text.replace("چارت", "").replace(",", " ").strip().split()
-            if len(parts) == 4:
-                chart_res = process_chart_request(parts[0], parts[1], parts[2], parts[3])
-                send_message(chat_id, chart_res, keyboard)
-            else:
-                send_message(chat_id, "فرمت دستور چارت اشتباه است! لطفاً به این شکل بفرستید:\nbtc 1 65000 0", keyboard)
+            elif text in ["چارت 📊", "چارت", "chart"]:
+                guide_msg = (
+                    "برای دریافت چارت، 4 بخش زیر را با فاصله وارد نمایید:
 
-        elif text.startswith("هشدار") or (
-            ("قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", ""))
-            and not check_is_chart(text, message)
-        ) or (
-            len(text.replace("هشدار", "").replace(",", " ").strip().split()) >= 3
-            and any(char.isdigit() for char in text)
-            and not check_is_chart(text, message)
-        ):
+"
+                    "1 نام ارز
+"
+                    "2 تایم فریم (15 ، 30 ، 1 ، 2 ، 4)
+"
+                    "3 قیمت مد نظر (مبدأ)
+"
+                    "4 کد 0 برای کمترین قیمت یا 9 برای بیشترین قیمت
 
-            raw = text.replace("هشدار", "").replace(",", " ").strip()
-            # تبدیل اعداد فارسی به انگلیسی
-            persian_digits = '۰۱۲۳۴۵۶۷۸۹'
-            for idx_p, d in enumerate(persian_digits):
-                raw = raw.replace(d, str(idx_p))
+"
+                    "سیستم به طور خودکار از قیمت مبدأ تا زمان فعلی کندل‌ها را خروجی می‌دهد.
 
-            parts = raw.split()
-            sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
-            tag = ""
-            entry = 0.0
-            tp = 0.0
-            stop = 0.0
-            leverage = 7
-            valid = False
+"
+                    "مثال:
+"
+                    "btc 1 65000 0
+"
+                    "eth 4 2500 9"
+                )
+                force_reply_markup = {"force_reply": True, "input_field_placeholder": "btc 1 65000 0"}
+                send_message(chat_id, guide_msg, force_reply_markup)
 
-            # پارس اهرم در صورت وجود (پیش‌فرض ۷)
-            lev_match = re.search(r'اهرم\s*(\d+)', raw)
-            if lev_match:
+            elif check_is_chart(text, message):
+                parts = text.replace("چارت", "").replace(",", " ").strip().split()
+                if len(parts) == 4:
+                    chart_res = process_chart_request(parts[0], parts[1], parts[2], parts[3])
+                    send_message(chat_id, chart_res, keyboard)
+                else:
+                    send_message(chat_id, "فرمت دستور چارت اشتباه است! لطفاً به این شکل بفرستید:
+btc 1 65000 0", keyboard)
+
+            elif text.startswith("هشدار") or (
+                ("قیمت tp" in message.get("reply_to_message", {}).get("text", "") or "قیمت ورود" in message.get("reply_to_message", {}).get("text", ""))
+                and not check_is_chart(text, message)
+            ) or (
+                len(text.replace("هشدار", "").replace(",", " ").strip().split()) >= 3
+                and any(char.isdigit() for char in text)
+                and not check_is_chart(text, message)
+            ):
+
+                raw = text.replace("هشدار", "").replace(",", " ").strip()
+                persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+                for idx_p, d in enumerate(persian_digits):
+                    raw = raw.replace(d, str(idx_p))
+
+                parts = raw.split()
+                sym = parts[0].lower().replace("_usdt", "").replace("usdt", "")
+                tag = ""
+                entry = 0.0
+                tp = 0.0
+                stop = 0.0
+                leverage = 7
+                valid = False
+
+                lev_match = re.search(r'اهرم\s*(\d+)', raw)
+                if lev_match:
+                    try:
+                        leverage = int(lev_match.group(1))
+                    except Exception:
+                        leverage = 7
+
                 try:
-                    leverage = int(lev_match.group(1))
-                except Exception:
-                    leverage = 7
-
-            # طبق دستور دقیق کاربر:
-            # دو کادر/عدد آخر در نظر گرفته می‌شوند:
-            # آخرین عدد (چهارمی) = استاپ (stop)
-            # یکی مانده به آخر (سومی) = تی‌پی (tp)
-            # تمام بخش‌های بین نام ارز و تی‌پی = نشانه (tag)
-            try:
-                stop = float(parts[-1])
-                tp = float(parts[-2])
-                tag_parts = parts[1:-2]
-                tag = " ".join(tag_parts).strip()
-                valid = True
-            except (ValueError, IndexError):
-                # اگر فقط یک عدد در انتها وارد شده بود (فقط تی‌پی)
-                try:
-                    tp = float(parts[-1])
-                    stop = 0.0
-                    tag_parts = parts[1:-1]
+                    stop = float(parts[-1])
+                    tp = float(parts[-2])
+                    tag_parts = parts[1:-2]
                     tag = " ".join(tag_parts).strip()
                     valid = True
                 except (ValueError, IndexError):
-                    valid = False
+                    try:
+                        tp = float(parts[-1])
+                        stop = 0.0
+                        tag_parts = parts[1:-1]
+                        tag = " ".join(tag_parts).strip()
+                        valid = True
+                    except (ValueError, IndexError):
+                        valid = False
 
-            if valid:
-                if sym in prices:
-                    if "alerts" not in data:
-                        data["alerts"] = []
+                if valid:
+                    if sym in prices:
+                        if "alerts" not in data:
+                            data["alerts"] = []
 
-                    # قیمت کلوز اینتری = قیمت زنده بازار در لحظه ثبت معامله
-                    entry = float(prices.get(sym, 0))
+                        entry = float(prices.get(sym, 0))
 
-                    # قانون مستقیم کاربر:
-                    # اگر سومی که تیپی هست زیر قیمت کلوز اینتری باشه معامله شورت
-                    # و اگر تیپی بالای قیمت کلوز اینتری باشه معامله لانگ
-                    if tp < entry:
-                        trade_type = "short"
+                        if tp < entry:
+                            trade_type = "short"
+                        else:
+                            trade_type = "long"
+
+                        data["alert_counter"] = data.get("alert_counter", 0) + 1
+                        alert_num = data["alert_counter"]
+
+                        data["alerts"].append({
+                            "symbol": sym,
+                            "tag": tag,
+                            "entry": entry,
+                            "tp": tp,
+                            "stop": stop,
+                            "trade_type": trade_type,
+                            "leverage": leverage,
+                            "alert_num": alert_num,
+                            "chat_id": chat_id,
+                            "created_at": int(datetime.utcnow().timestamp())
+                        })
+                        tag_display = tag if tag else "بدون نشانه"
+                        type_display = "شورت (فروش)" if trade_type == "short" else "لانگ (خرید)"
+                        confirm_msg = (
+                            f"✅ هشدار با موفقیت ثبت شد!
+
+"
+                            f"نام: {sym.upper()}  نوع: {type_display}
+"
+                            f"نشانه: {tag_display}
+"
+                            f"entri: {fmt_price(entry)}
+"
+                            f"تیپی: {fmt_price(tp)}  استاپ: {fmt_price(stop)}"
+                        )
+                        send_message(chat_id, confirm_msg, keyboard)
                     else:
-                        trade_type = "long"
-
-                    # شماره ترتیبی هشدار
-                    data["alert_counter"] = data.get("alert_counter", 0) + 1
-                    alert_num = data["alert_counter"]
-
-                    data["alerts"].append({
-                        "symbol": sym,
-                        "tag": tag,
-                        "entry": entry,
-                        "tp": tp,
-                        "stop": stop,
-                        "trade_type": trade_type,
-                        "leverage": leverage,
-                        "alert_num": alert_num,
-                        "chat_id": chat_id,
-                        "created_at": int(datetime.utcnow().timestamp())
-                    })
-                    tag_display = tag if tag else "بدون نشانه"
-                    type_display = "شورت (فروش)" if trade_type == "short" else "لانگ (خرید)"
-                    confirm_msg = (
-                        f"✅ هشدار با موفقیت ثبت شد!\n\n"
-                        f"نام: {sym.upper()}  نوع: {type_display}\n"
-                        f"نشانه: {tag_display}\n"
-                        f"entri: {fmt_price(entry)}\n"
-                        f"تیپی: {fmt_price(tp)}  استاپ: {fmt_price(stop)}"
+                        send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
+                else:
+                    send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.
+مثال:
+xrp 2.51 0.4", keyboard)
+                    
+            else:
+                sym = text.replace('usdt', '').strip()
+                if sym in stats_data:
+                    info = stats_data[sym]
+                    day_change = round(info["dayChange"], 2)
+                    growth = round(info.get("growth", 0), 2)
+                    day_low = info["dayLow"]
+                    day_high = info["dayHigh"]
+                    price_now = info["lastPrice"]
+                    vol_str = format_volume(info.get("amount24", 0))
+                    
+                    sign = "+" if day_change > 0 else ""
+                    msg = (
+                        f"نام {sym}
+"
+                        f"قیمت {fmt_price(price_now)}
+"
+                        f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %
+"
+                        f"کمترین قیمت {fmt_price(day_low)}
+"
+                        f"بیشترین قیمت {fmt_price(day_high)}
+"
+                        f"حجم {vol_str}"
                     )
-                    send_message(chat_id, confirm_msg, keyboard)
+                    send_message(chat_id, msg, keyboard)
                 else:
-                    send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
-            else:
-                send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.\nمثال:\nxrp 2.51 0.4\nxrp 1.58 2.51 0.4\nxrp فروش منفی 7 درصد اهرم 7 1.58 2.51 0.4", keyboard)
-                
-        else:
-            sym = text.replace('usdt', '').strip()
-            if sym in stats_data:
-                info = stats_data[sym]
-                day_change = round(info["dayChange"], 2)
-                growth = round(info.get("growth", 0), 2)
-                day_low = info["dayLow"]
-                day_high = info["dayHigh"]
-                price_now = info["lastPrice"]
-                vol_str = format_volume(info.get("amount24", 0))
-                
-                sign = "+" if day_change > 0 else ""
-                msg = (
-                    f"نام {sym}\n"
-                    f"قیمت {fmt_price(price_now)}\n"
-                    f"میزان رشد +{growth} % درصد تابلو {sign}{day_change} %\n"
-                    f"کمترین قیمت {fmt_price(day_low)}\n"
-                    f"بیشترین قیمت {fmt_price(day_high)}\n"
-                    f"حجم {vol_str}"
-                )
-                send_message(chat_id, msg, keyboard)
-            else:
-                send_message(chat_id, "دستور یا نام ارز پیدا نشد.\nبرای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
+                    send_message(chat_id, "دستور یا نام ارز پیدا نشد.
+برای دیدن لیست دکمه‌ها /start را بفرستید.", keyboard)
 
-    # Acknowledge to Telegram that messages were processed
-    if max_id > last_id:
-        data["last_update_id"] = max_id
+        if max_id > last_id:
+            data["last_update_id"] = max_id
+            try:
+                requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates", params={"offset": max_id + 1, "limit": 1}, timeout=10)
+            except Exception:
+                pass
+
+        current_stage = "بخش بررسی و پایش هشدارهای فعال (Check Active Alerts)"
+        remaining_alerts = []
+        for alert in data.get("alerts", []):
+            sym = alert.get("symbol", "")
+            current_price = prices.get(sym)
+            
+            if not current_price:
+                remaining_alerts.append(alert)
+                continue
+                
+            entry_price = float(alert.get("entry", 0) or 0)
+            tp_price = float(alert.get("tp", 0) or 0)
+            stop_price = float(alert.get("stop", 0) or 0)
+            trade_type = alert.get("trade_type", "")
+            
+            is_short = (trade_type == "short")
+            if not trade_type:
+                if tp_price > 0 and entry_price > 0:
+                    is_short = (tp_price < entry_price)
+                elif stop_price > 0 and entry_price > 0:
+                    is_short = (stop_price > entry_price)
+                elif any(k in str(alert.get("tag", "")).lower() for k in ["شورت", "فروش", "short", "sell", "مثبت"]):
+                    is_short = True
+                else:
+                    is_short = False
+
+            triggered = False
+            triggered_type = ""
+            trigger_price = 0
+            
+            if is_short:
+                if tp_price > 0 and current_price <= tp_price:
+                    triggered = True
+                    triggered_type = "tp"
+                    trigger_price = tp_price
+                elif stop_price > 0 and current_price >= stop_price:
+                    triggered = True
+                    triggered_type = "stop"
+                    trigger_price = stop_price
+            else:
+                if tp_price > 0 and current_price >= tp_price:
+                    triggered = True
+                    triggered_type = "tp"
+                    trigger_price = tp_price
+                elif stop_price > 0 and current_price <= stop_price:
+                    triggered = True
+                    triggered_type = "stop"
+                    trigger_price = stop_price
+                
+            if triggered:
+                leverage = int(alert.get("leverage") or 7)
+                if leverage == 1:
+                    leverage = 7
+                
+                if entry_price > 0:
+                    if is_short:
+                        pnl_pct = ((entry_price - trigger_price) / entry_price) * leverage * 100
+                    else:
+                        pnl_pct = ((trigger_price - entry_price) / entry_price) * leverage * 100
+                    pnl_pct_rounded = round(abs(pnl_pct))
+                    if pnl_pct >= 0:
+                        pnl_label = f"سود + {pnl_pct_rounded}٪"
+                    else:
+                        pnl_label = f"ضرر - {pnl_pct_rounded}٪"
+                else:
+                    pnl_label = ""
+
+                pnl_text = f" : {pnl_label}" if pnl_label else ""
+                tag_part = f" {alert.get('tag')}" if alert.get("tag") else ""
+                msg_alert = (
+                    f"نام {sym.lower()}{tag_part}"
+                    f" entri {fmt_price(entry_price)}"
+                    f" {triggered_type} {fmt_price(trigger_price)}"
+                    f"{pnl_text}"
+                )
+                send_message(ALERT_CHANNEL, msg_alert)
+                send_message(alert["chat_id"], f"هشدار فعال شد:
+{msg_alert}")
+            else:
+                remaining_alerts.append(alert)
+                
+        data["alerts"] = remaining_alerts
+
+        # --- بخش گزارش ساعتی / روزانه حال بازار و کانال اوربیت (ادغام‌شده از ourbit.py و haal_bazaar.py) ---
+        current_stage = "بخش ارسال گزارش‌های دوره‌ای و ساعتی بازار (Market Status Report & Ourbit Hourly Bot)"
+        iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
+        shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
+        today_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y/%m/%d')
+        time_str = iran_time.strftime('%H : %M')
+        current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
+
+        minute_of_day = iran_time.hour * 60 + iran_time.minute
+        snap_minute = 19 * 60 + 20   # 19:20
+        send_minute = 19 * 60 + 25   # 19:25
+
+        # گزارش روزانه ساعت ۱۹:۲۵ به CHANNEL_REPORT_MAIN
+        if data.get("last_daily_report_date") != today_str:
+            if minute_of_day >= snap_minute and data.get("pending_report_date") != today_str:
+                if stats_data:
+                    snap_up = 0
+                    snap_down = 0
+                    for item in stats_data.values():
+                        chg = item.get("dayChange", 0)
+                        if chg > 0:
+                            snap_up += 1
+                        elif chg < 0:
+                            snap_down += 1
+
+                    if (snap_up + snap_down) > 0:
+                        data["pending_report"] = {
+                            "date": today_str,
+                            "up": snap_up,
+                            "down": snap_down,
+                            "time_str": current_date_str,
+                        }
+                        data["pending_report_date"] = today_str
+
+            pending = data.get("pending_report") or {}
+            if minute_of_day >= send_minute and pending.get("date") == today_str:
+                up_count = int(pending.get("up", 0))
+                down_count = int(pending.get("down", 0))
+
+                trend = build_market_status_line(up_count, down_count)
+                if trend:
+                    daily_report_msg = (
+                        f"حال بازار {trend}
+"
+                        f"تعداد ارزهای مثبت {up_count}
+"
+                        f"تعداد ارزهای منفی {down_count}
+
+"
+                        f"تاریخ {pending.get('time_str', current_date_str)}"
+                    )
+                    send_message(CHANNEL_REPORT_MAIN, daily_report_msg)
+                    data["last_daily_report_date"] = today_str
+                    data.pop("pending_report", None)
+                    data.pop("pending_report_date", None)
+
+        # گزارش ساعتی حال بازار به CHANNEL_REPORT_MAIN
+        current_hour_key = f"{today_str}_{iran_time.hour}"
+        if data.get("last_hourly_report_key") != current_hour_key:
+            up_hourly, down_hourly, _ = get_true_24h_counts(stats_data, data)
+            if (up_hourly + down_hourly) > 0:
+                hourly_trend = build_market_status_line(up_hourly, down_hourly)
+                if hourly_trend:
+                    hourly_msg = (
+                        f"گزارش ساعتی حال بازار
+"
+                        f"روند بازار {hourly_trend}
+"
+                        f"تعداد ارزهای مثبت {up_hourly}
+"
+                        f"تعداد ارزهای منفی {down_hourly}
+
+"
+                        f"تاریخ {current_date_str}"
+                    )
+                    send_message(CHANNEL_REPORT_MAIN, hourly_msg)
+                    data["last_hourly_report_key"] = current_hour_key
+
+        # گزارش ساعتی دوم (ourbit.py) به ROSHD_CHANNEL_ID (-1003961062602) با ROSHD_BOT_TOKEN
+        current_hour = iran_time.hour
+        current_minute = iran_time.minute
+        if current_hour in REPORT_HOURS and current_minute < REPORT_WINDOW_MINUTES:
+            last_roshd_hour = data.get("last_roshd_report_hour", -1)
+            last_roshd_date = data.get("last_roshd_report_date", "")
+            if not (last_roshd_date == today_str and last_roshd_hour == current_hour):
+                up_roshd, down_roshd, _ = get_true_24h_counts(stats_data, data)
+                if (up_roshd + down_roshd) > 0:
+                    roshd_trend = build_market_status_line(up_roshd, down_roshd)
+                    if roshd_trend:
+                        roshd_msg = (
+                            f"حال بازار {roshd_trend}
+"
+                            f"تعداد ارزهای مثبت {up_roshd}
+"
+                            f"تعداد ارزهای منفی {down_roshd}
+
+"
+                            f"تاریخ {shamsi_date} ساعت {time_str}"
+                        )
+                        send_roshd_message(roshd_msg)
+                        data["last_roshd_report_hour"] = current_hour
+                        data["last_roshd_report_date"] = today_str
+
+        current_stage = "بخش ذخیره نهایی اطلاعات در فایل (save data)"
         try:
-            requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates", params={"offset": max_id + 1, "limit": 1}, timeout=10)
-        except Exception:
-            pass
+            with open(DATA_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Error saving data: {e}")
 
-    # Check Active Alerts
-    remaining_alerts = []
-    for alert in data.get("alerts", []):
-        sym = alert.get("symbol", "")
-        current_price = prices.get(sym)
-        
-        if not current_price:
-            remaining_alerts.append(alert)
-            continue
-            
-        entry_price = float(alert.get("entry", 0) or 0)
-        tp_price = float(alert.get("tp", 0) or 0)
-        stop_price = float(alert.get("stop", 0) or 0)
-        trade_type = alert.get("trade_type", "")
-        
-        # تشخیص دقیق شورت یا لانگ
-        is_short = (trade_type == "short")
-        if not trade_type:
-            if tp_price > 0 and entry_price > 0:
-                is_short = (tp_price < entry_price)
-            elif stop_price > 0 and entry_price > 0:
-                is_short = (stop_price > entry_price)
-            elif any(k in str(alert.get("tag", "")).lower() for k in ["شورت", "فروش", "short", "sell", "مثبت"]):
-                is_short = True
-            else:
-                is_short = False
-
-        triggered = False
-        triggered_type = ""
-        trigger_price = 0
-        
-        if is_short:
-            # در معامله شورت:
-            # تی‌پی پایین‌تر از نقطه ورود است (نزول قیمت = سود)
-            if tp_price > 0 and current_price <= tp_price:
-                triggered = True
-                triggered_type = "tp"
-                trigger_price = tp_price
-            # استاپ بالاتر از نقطه ورود است (صعود قیمت = ضرر)
-            elif stop_price > 0 and current_price >= stop_price:
-                triggered = True
-                triggered_type = "stop"
-                trigger_price = stop_price
-        else:
-            # در معامله لانگ:
-            # تی‌پی بالاتر از نقطه ورود است (صعود قیمت = سود)
-            if tp_price > 0 and current_price >= tp_price:
-                triggered = True
-                triggered_type = "tp"
-                trigger_price = tp_price
-            # استاپ پایین‌تر از نقطه ورود است (نزول قیمت = ضرر)
-            elif stop_price > 0 and current_price <= stop_price:
-                triggered = True
-                triggered_type = "stop"
-                trigger_price = stop_price
-            
-        if triggered:
-            leverage = int(alert.get("leverage") or 7)
-            if leverage == 1:
-                leverage = 7
-            alert_num = alert.get("alert_num", "")
-
-            # محاسبه دقیق سود یا ضرر با اهرم
-            # در شورت: نزول = سود، صعود = ضرر
-            # در لانگ: صعود = سود، نزول = ضرر
-            if entry_price > 0:
-                if is_short:
-                    pnl_pct = ((entry_price - trigger_price) / entry_price) * leverage * 100
-                else:
-                    pnl_pct = ((trigger_price - entry_price) / entry_price) * leverage * 100
-                pnl_pct_rounded = round(abs(pnl_pct))
-                if pnl_pct >= 0:
-                    pnl_label = f"سود + {pnl_pct_rounded}٪"
-                else:
-                    pnl_label = f"ضرر - {pnl_pct_rounded}٪"
-            else:
-                pnl_label = ""
-
-            pnl_text = f" : {pnl_label}" if pnl_label else ""
-            tag_part = f" {alert.get('tag')}" if alert.get("tag") else ""
-            msg_alert = (
-                f"نام {sym.lower()}{tag_part}"
-                f" entri {fmt_price(entry_price)}"
-                f" {triggered_type} {fmt_price(trigger_price)}"
-                f"{pnl_text}"
-            )
-            send_message(ALERT_CHANNEL, msg_alert)
-            send_message(alert["chat_id"], f"هشدار فعال شد:\n{msg_alert}")
-        else:
-            remaining_alerts.append(alert)
-            
-    data["alerts"] = remaining_alerts
-
-    # Daily Market Status Report to CHANNEL_REPORT_MAIN
-    # مرحله ۱: ساعت ۱۹:۲۰ عکس می‌گیرد (از عدد خود صرافی)
-    # مرحله ۲: ساعت ۱۹:۲۵ همان عکس را ارسال می‌کند
-    iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
-    shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
-    today_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y/%m/%d')
-    time_str = iran_time.strftime('%H : %M')
-    current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
-
-    minute_of_day = iran_time.hour * 60 + iran_time.minute
-    snap_minute = 19 * 60 + 20   # 19:20
-    send_minute = 19 * 60 + 25   # 19:25
-
-    if data.get("last_daily_report_date") != today_str:
-
-        # --- مرحله ۱: عکس‌گرفتن ساعت ۱۹:۲۰ ---
-        if minute_of_day >= snap_minute and data.get("pending_report_date") != today_str:
-            if stats_data:
-                snap_up = 0
-                snap_down = 0
-                for item in stats_data.values():
-                    chg = item.get("dayChange", 0)
-                    if chg > 0:
-                        snap_up += 1
-                    elif chg < 0:
-                        snap_down += 1
-
-                if (snap_up + snap_down) > 0:
-                    data["pending_report"] = {
-                        "date": today_str,
-                        "up": snap_up,
-                        "down": snap_down,
-                        "time_str": current_date_str,
-                    }
-                    data["pending_report_date"] = today_str
-
-        # --- مرحله ۲: ارسال ساعت ۱۹:۲۵ ---
-        pending = data.get("pending_report") or {}
-        if minute_of_day >= send_minute and pending.get("date") == today_str:
-            up_count = int(pending.get("up", 0))
-            down_count = int(pending.get("down", 0))
-
-            trend = build_market_status_line(up_count, down_count)
-            if trend:
-                daily_report_msg = (
-                    f"حال بازار {trend}\n"
-                    f"تعداد ارزهای مثبت {up_count}\n"
-                    f"تعداد ارزهای منفی {down_count}\n\n"
-                    f"تاریخ {pending.get('time_str', current_date_str)}"
-                )
-                send_message(CHANNEL_REPORT_MAIN, daily_report_msg)
-                data["last_daily_report_date"] = today_str
-                data.pop("pending_report", None)
-                data.pop("pending_report_date", None)
-    
-    # Save data locally
-    try:
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
     except Exception as e:
-        print(f"Error saving data: {e}")
+        tb_str = traceback.format_exc()
+        print(f"Error occurred:
+{tb_str}")
+        send_error_to_channels(str(e), tb_str, stage_hint=current_stage)
+        raise
 
 if __name__ == "__main__":
     main()
