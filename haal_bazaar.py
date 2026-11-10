@@ -913,67 +913,6 @@ def main():
         time_str = iran_time.strftime('%H : %M')
         current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
 
-        minute_of_day = iran_time.hour * 60 + iran_time.minute
-        snap_minute = 19 * 60 + 20   # 19:20
-        send_minute = 19 * 60 + 25   # 19:25
-
-        # گزارش روزانه ساعت ۱۹:۲۵ به CHANNEL_REPORT_MAIN
-        if data.get("last_daily_report_date") != today_str:
-            if minute_of_day >= snap_minute and data.get("pending_report_date") != today_str:
-                if stats_data:
-                    snap_up = 0
-                    snap_down = 0
-                    for item in stats_data.values():
-                        chg = item.get("dayChange", 0)
-                        if chg > 0:
-                            snap_up += 1
-                        elif chg < 0:
-                            snap_down += 1
-
-                    if (snap_up + snap_down) > 0:
-                        data["pending_report"] = {
-                            "date": today_str,
-                            "up": snap_up,
-                            "down": snap_down,
-                            "time_str": current_date_str,
-                        }
-                        data["pending_report_date"] = today_str
-
-            pending = data.get("pending_report") or {}
-            if minute_of_day >= send_minute and pending.get("date") == today_str:
-                up_count = int(pending.get("up", 0))
-                down_count = int(pending.get("down", 0))
-
-                trend = build_market_status_line(up_count, down_count)
-                if trend:
-                    daily_report_msg = (
-                        f"حال بازار {trend}\n"
-                        f"تعداد ارزهای مثبت {up_count}\n"
-                        f"تعداد ارزهای منفی {down_count}\n\n"
-                        f"تاریخ {pending.get('time_str', current_date_str)}"
-                    )
-                    send_message(CHANNEL_REPORT_MAIN, daily_report_msg)
-                    data["last_daily_report_date"] = today_str
-                    data.pop("pending_report", None)
-                    data.pop("pending_report_date", None)
-
-        # گزارش ساعتی حال بازار به CHANNEL_REPORT_MAIN
-        current_hour_key = f"{today_str}_{iran_time.hour}"
-        if data.get("last_hourly_report_key") != current_hour_key:
-            up_hourly, down_hourly, _ = get_true_24h_counts(stats_data, data)
-            if (up_hourly + down_hourly) > 0:
-                hourly_trend = build_market_status_line(up_hourly, down_hourly)
-                if hourly_trend:
-                    hourly_msg = (
-                        f"گزارش ساعتی حال بازار\n"
-                        f"روند بازار {hourly_trend}\n"
-                        f"تعداد ارزهای مثبت {up_hourly}\n"
-                        f"تعداد ارزهای منفی {down_hourly}\n\n"
-                        f"تاریخ {current_date_str}"
-                    )
-                    send_message(CHANNEL_REPORT_MAIN, hourly_msg)
-                    data["last_hourly_report_key"] = current_hour_key
-
         # گزارش ساعتی دوم (ourbit.py) به ROSHD_CHANNEL_ID (-1003961062602) با ROSHD_BOT_TOKEN
         current_hour = iran_time.hour
         current_minute = iran_time.minute
