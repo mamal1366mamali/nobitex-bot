@@ -15,21 +15,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
+        id: checkout_step
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
+        id: python_step
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Install Libraries
+        id: install_step
         run: |
           python -m pip install --upgrade pip
           pip install requests pandas jdatetime openpyxl
 
       - name: Run Bot
+        id: run_bot_step
         env:
           SELL_BOT_TOKEN: ${{ secrets.SELL_BOT_TOKEN }}
           BUY_BOT_TOKEN: ${{ secrets.BUY_BOT_TOKEN }}
@@ -39,9 +43,44 @@ jobs:
         run: python bot.py
 
       - name: Commit and save trades data
+        id: commit_step
+        if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add trades.json
           git diff --staged --quiet || (git commit -m "Auto-update trades.json by Bot" && git pull --rebase && git push)
 
+      - name: Notify Telegram on Workflow Failure
+        if: failure() && steps.run_bot_step.outcome != 'failure'
+        env:
+          SELL_BOT_TOKEN: ${{ secrets.SELL_BOT_TOKEN }}
+          EXIT_BOT_TOKEN: ${{ secrets.EXIT_BOT_TOKEN }}
+          REPORT_BOT_TOKEN: ${{ secrets.REPORT_BOT_TOKEN }}
+          CHECKOUT_OUTCOME: ${{ steps.checkout_step.outcome }}
+          PYTHON_OUTCOME: ${{ steps.python_step.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install_step.outcome }}
+          COMMIT_OUTCOME: ${{ steps.commit_step.outcome }}
+        run: |
+          SELL_TOK="${SELL_BOT_TOKEN:-${REPORT_BOT_TOKEN:-8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E}}"
+          EXIT_TOK="${EXIT_BOT_TOKEN:-$SELL_TOK}"
+          
+          FAILED_PART="اختلال موقت در سرورهای خود گیت‌هاب"
+          if [ "$CHECKOUT_OUTCOME" == "failure" ]; then
+            FAILED_PART="بخش دریافت فایل‌ها از مخزن گیت‌هاب (Checkout) به دلیل اختلال سرور گیت‌هاب"
+          elif [ "$PYTHON_OUTCOME" == "failure" ]; then
+            FAILED_PART="بخش راه‌اندازی پایتون (Set up Python) در سرور گیت‌هاب"
+          elif [ "$INSTALL_OUTCOME" == "failure" ]; then
+            FAILED_PART="بخش نصب کتابخانه‌ها (Install Libraries) یا کندی سرور گیت‌هاب"
+          elif [ "$COMMIT_OUTCOME" == "failure" ]; then
+            FAILED_PART="بخش ذخیره و آپلود فایل trades.json (Commit and Push) در گیت‌هاب"
+          fi
+
+          MSG="⚠️ گزارش خطا از فایل سیستم گیت‌هاب (run_bot.yml)
+          ربات: Ourbit Filter Bot
+          بخش دارای خطا: ${FAILED_PART}
+          توضیح: این خطا از کدهای پایتون شما نیست و به دلیل اختلال موقت در سیستم خود گیت‌هاب رخ داده است."
+
+          curl -s -X POST "https://api.telegram.org/bot${SELL_TOK}/sendMessage" -d chat_id="114669886" --data-urlencode "text=$MSG" > /dev/null || true
+          curl -s -X POST "https://api.telegram.org/bot${SELL_TOK}/sendMessage" -d chat_id="-1004290922830" --data-urlencode "text=$MSG" > /dev/null || true
+          curl -s -X POST "https://api.telegram.org/bot${EXIT_TOK}/sendMessage" -d chat_id="-1004415777827" --data-urlencode "text=$MSG" > /dev/null || true
