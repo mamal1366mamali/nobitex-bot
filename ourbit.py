@@ -1,3 +1,7 @@
+import sys
+# غیرفعال کردن کامل ربات بدون حذف کدهای اصلی
+sys.exit(0)
+
 import json
 import os
 import math
@@ -230,6 +234,8 @@ def should_send_report(data, iran_time):
 
 
 def main():
+    return  # این ربات غیرفعال شده است و کدهای آن دست‌نخورده باقی مانده‌اند
+    
     data = load_data()
 
     iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
