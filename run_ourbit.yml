@@ -1,16 +1,18 @@
-name: Run Ourbit Bot
+name: Run Ourbit Bot - Haal Bazaar Reporter
+
 on:
   repository_dispatch:
     types: [run-ourbit-roshd]
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
+  # schedule:
+  #   - cron: '*/5 * * * *'
 
 permissions:
   contents: write
 
 jobs:
   run-bot:
+    if: false  # غیرفعال کردن کامل اجرای ربات در گیت‌هاب اکشنز بدون حذف کدها
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,7 +27,7 @@ jobs:
         run: |
           pip install requests jdatetime pandas
 
-      - name: Run Ourbit bot
+      - name: Run Ourbit bot (Haal Bazaar Reporter)
         env:
           ROSHD_BOT_TOKEN: ${{ secrets.ROSHD_BOT_TOKEN }}
         run: python ourbit.py
