@@ -780,5 +780,7 @@
             "lt": 44.408
         }
     },
-    "last_hourly_report_key": "1405/08/19_22"
+    "last_hourly_report_key": "1405/08/19_23",
+    "last_roshd_report_hour": 23,
+    "last_roshd_report_date": "1405/08/19"
 }
