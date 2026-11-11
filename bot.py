@@ -444,8 +444,8 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         f"تاریخ: {date_str}\n"
         f"{market_state_block()}"
         f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)} stop: {fmt_price(stop)}\n"
-        f"حجم: {vol}\n"
-        f"low: {fmt_price(low)} hi: {fmt_price(high)}"
+        f"low: {fmt_price(low)} hi: {fmt_price(high)}\n"
+        f"حجم: {vol}"
     )
 
 def calculate_duration_str(start_ts, end_ts):
@@ -498,31 +498,30 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
             parts.append(tag)
         elif tag == 'true':
             parts.append("z")
+    status_line = ""
     if daily_tp_count is not None and daily_stop_count is not None:
         tp_c = int(daily_tp_count)
         st_c = int(daily_stop_count)
         diff = tp_c - st_c
         if diff > 0:
-            eq_str = f"{diff} tp"
+            eq_str = f"{diff}  tp"
         elif diff < 0:
-            eq_str = f"{abs(diff)} stop"
+            eq_str = f"{abs(diff)}  stop"
         else:
             eq_str = "0"
-        parts.append(f"وضعیت {tp_c} tp {st_c} stop مساوی {eq_str}")
+        status_line = f"وضعیت {tp_c}  tp  {st_c} stop  خروجی {eq_str}\n"
     msg = f"{' '.join(parts)}\n"
     msg += f"نام: {name}\n"
     msg += f"دسته بندی رشد: {cat_name} میزان رشد: +{growth:.2f} %\n"
-    if exit_type == "tp":
-        entry_line = f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)}\n"
-    else:
-        entry_line = f"Entri: {fmt_price(entry)} stop: {fmt_price(stop)}\n"
+    entry_line = f"Entri: {fmt_price(entry)} tp: {fmt_price(tp)} stop  {fmt_price(stop)}\n"
     msg += f"شروع: {start_date_str}\n"
     msg += f"پایان: {end_date_str}\n"
     msg += f"مدت {duration_str}\n"
     msg += market_state_block()
+    msg += status_line
     msg += entry_line
-    msg += f"حجم: {vol}\n"
-    msg += f"low: {fmt_price(low)} hi: {fmt_price(high)}"
+    msg += f"low: {fmt_price(low)} hi: {fmt_price(high)}\n"
+    msg += f"حجم: {vol}"
     return msg
 
 def get_valid_categories(growth):
@@ -2711,7 +2710,7 @@ def detect_failed_part(err_title, err_details, stage_hint=""):
     return failed_part, explanation
 
 def send_error_to_channels(err_title, err_details, stage_hint=""):
-    """ارسال متن کامل خطا و بخش دارای خطا به هر دو کانال فروش و خروج و پی‌وی ادمین"""
+    """ارسال متن کامل خطا و بخش دارای خطا به کانال فروش و پی‌وی ادمین"""
     failed_part, explanation = detect_failed_part(err_title, err_details, stage_hint)
     msg = (
         f"⚠️ گزارش خطا در اجرای ربات (bot.py)\n"
@@ -2725,17 +2724,11 @@ def send_error_to_channels(err_title, err_details, stage_hint=""):
     if len(msg) > 4000:
         msg = msg[:4000] + "\n...(ادامه خطا کوتاه شد)"
     
-    # استخراج کانال فروش اصلی از دسته‌بندی‌ها (-1004290922830) و کانال خروج (-1004415777827)
+    # ارسال فقط به کانال فروش اصلی (-1004290922830) و پی‌وی ادمین (حذف ارسال به کانال خروج)
     sell_channel = "-1004290922830"
-    exit_channel = CHANNEL_EXIT_MAIN
-    
     sell_tok = SELL_BOT_TOKEN or REPORT_BOT_TOKEN
-    exit_tok = get_exit_token() or sell_tok
     
-    # ارسال به کانال فروش و پی‌وی
     send_telegram_message(sell_tok, [PERSONAL_ID, sell_channel], msg)
-    # ارسال به کانال خروج
-    send_telegram_message(exit_tok, [exit_channel], msg)
 
 if __name__ == '__main__':
     import traceback
