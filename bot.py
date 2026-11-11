@@ -403,16 +403,16 @@ def is_release_entry(trades, symbol, current_ts, lock_hours=24, window_hours=48)
     return lock_hours * 3600 <= age <= window_hours * 3600
 
 def coin_is_z(trades, symbol, current_ts, today_str):
-    """برچسب آزادسازی این ارز برای امروز ('y' یا 'z' یا '')"""
+    """برچسب آزادسازی این ارز برای امروز ('x' یا 'y' یا 'z' یا '')"""
     sym = symbol.upper()
     t_day = str(today_str).replace(' ', '/')
-    for t in trades:
+    for t in reversed(trades):
         if t.get('symbol', '').upper() != sym:
             continue
         o_time = str(t.get('open_time') or '').replace(' ', '/')
         if o_time == t_day:
             tag = t.get('release_entry')
-            if tag in ('y', 'z'):
+            if tag in ('x', 'y', 'z'):
                 return tag
             if tag is True:
                 return 'z'
@@ -432,7 +432,7 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         parts.append(str(int(coin_num)))
     if release_flag:
         tag = str(release_flag).strip().lower()
-        if tag in ('y', 'z'):
+        if tag in ('x', 'y', 'z'):
             parts.append(tag)
         elif tag == 'true':
             parts.append("z")
@@ -494,7 +494,7 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
         parts.append(str(int(coin_num)))
     if release_flag:
         tag = str(release_flag).strip().lower()
-        if tag in ('y', 'z'):
+        if tag in ('x', 'y', 'z'):
             parts.append(tag)
         elif tag == 'true':
             parts.append("z")
@@ -671,10 +671,12 @@ def cascade_bump(start_cat, step):
 
 def chain_cap_reached(trades, symbol, trade):
     """آیا زنجیرهٔ این ارز به سقف tp خود رسیده است؟"""
-    # معاملات با برچسب y در هر دسته‌بندی فقط و فقط ۱ تی‌پی دارند و وارد پشتبند آبشاری نمی‌شوند
-    if trade.get('release_entry') == 'y':
+    # معاملات دسته x بعد از تی‌پی یا استاپ تا روز بعد (۲۴ ساعت) معامله نمی‌شوند (بدون پشتبند)
+    if trade.get('release_entry') == 'x':
         return True
     n, start_cat = get_chain_info(trades, symbol, trade)
+    if trade.get('release_entry') == 'y':
+        return n >= 2
     cap = CATEGORY_TP_CAP.get(start_cat)
     if cap is None:
         return False
@@ -706,33 +708,28 @@ def post_lock_new_peak(df, stop_ts_iran, last_high, min_rise=0.30):
         return False
 
 def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None, df=None):
-    """وضعیت قفلِ بعد از استاپ برای این ارز.
+    """وضعیت قفل و دسته‌بندی‌های بعد از استاپ (y / z / x):
     خروجی: (locked, only_100plus, equality_required, release_tag, base_floor)
-    - locked           : معامله مجاز نیست
-    - only_100plus     : فقط دستهٔ ۱۰۰+ مجاز است
-    - equality_required: تطابق قیمت ورود با بازار
-    - release_tag      : نشانگر 'y' (قله جدید زیر ۱۰۰٪) یا 'z' (بالای ۱۰۰٪) یا '' (عادی)
-    - base_floor       : بیشترین قیمت روز قبل (قله قدیم) که کف جدید این ارز می‌شود
 
-    قوانین:
-    ۱) تا ۴۸ ساعت بعد از استاپ: محاسبات مخصوصِ استاپ فعال است.
-       - بعد از ۴۸ ساعت (۲ روز کاری): کلیه محدودیت‌های استاپ منقضی می‌شوند و کف و سقف و رشد به حالت کاملاً عادی برمی‌گردند.
-    ۲) روز اول (۰ تا ۲۴ ساعت بعد از استاپ):
-       - قفل کامل است، مگر اینکه رشد بالای ۱۰۰٪ باشد و وارد دسته +۱۰۰٪ شود (نشان 'z').
-    ۳) روز دوم (۲۴ تا ۴۸ ساعت بعد از استاپ):
-       - وارد هیچ دسته‌ای نمی‌شود، مگر اینکه قله جدیدی بزند که حداقل ۳۰ درصد بیشتر از قله قبلی باشد.
-       - اگر قله جدید (+۳۰٪) زده شد:
-           * بیشترین قیمت آن روز (قله قدیم) می‌شود کف جدید (base_floor).
-           * رشد موج جدید نسبت به این کف محاسبه می‌شود: ((new_high - base_floor) / base_floor) * 100.
-           * اگر رشد موج جدید زیر ۱۰۰٪ باشد: با نشان 'y'، ورود منفی ۱۵٪ از قله، و سقف تی‌پی فقط ۱ بار.
-           * اگر رشد موج جدید بالای ۱۰۰٪ باشد: با نشان 'z'.
-       - اگر بعد از خروج (تی‌پی) در همین بازه، دوباره بخواهد وارد شود، باید مجدداً قله جدید (+۳۰٪) نسبت به قله معامله قبلی بزند.
-       - اگر قله جدید (+۳۰٪) زده نشد: قفل می‌ماند (مگر رشد بالای ۱۰۰٪ در دسته ۱۰۰+ با نشان 'z').
+    قوانین جدید:
+    ۱) دسته y: ارزهایی که در روز استاپ می‌خورند (استاپ اول)، تا روز بعد (۲۴ ساعت) فیلتر می‌شوند؛
+       در این مدت فقط اگر بالای ۱۰۰ درصد رشد کنند وارد چرخه معامله می‌شوند:
+       - با برچسب 'y'
+       - اهرم ۴، ورود منفی ۲۵٪، تی‌پی ۲۵٪، استاپ ۲۵٪ بالای نقطه ورود و محدودیت حداکثر ۲ تی‌پی
+       - شرط برابری قیمت ورود با قیمت بازار (equality_required = True)
+    ۲) دسته z: ارزهایی که استاپ اول را خورده‌اند و رشد کمتر از ۱۰۰ درصد دارند (پس از پایان فیلتر ۲۴ ساعته تا ۴۸ ساعت):
+       - با برچسب 'z'
+       - نقطه ورود منفی ۲۰ درصد (entry_drop = 0.20)
+       - استاپ ۱۴ درصد و تی‌پی ۱۵ درصد و تی‌پی‌های دسته‌بندی‌شده عادی
+       - شرط برابری قیمت ورود با قیمت بازار (equality_required = True)
+    ۳) دسته x: ارزهایی که بعد از خوردن استاپ اول، وارد دسته y (بالای ۱۰۰٪) یا دسته z (زیر ۱۰۰٪) شده‌اند و دوباره استاپ خورده‌اند (یا در خود چرخه x بوده‌اند):
+       - تا ۱ روز (۲۴ ساعت) کاملاً قفل می‌شوند و حق هیچ معامله‌ای ندارند (حتی بالای ۱۰۰٪).
+       - بعد از ۱ روز (ساعت ۲۴ تا ۴۸) با برچسب 'x' و محاسبات معمولی کمترین و بیشترین قیمت ۲۴ ساعته وارد چرخه می‌شوند.
+       - شرط ورود در حالت x: زدن قله جدید بالاتر از قله معامله قبلی + برابری قیمت ورود با قیمت بازار.
+       - اگر در حالت x معامله‌ای باز شد و تی‌پی یا استاپ خورد، تا فردای آن روز (۲۴ ساعت بعد) دیگر معامله نمی‌شود و برای ورود مجدد دوباره باید قله جدید بزند.
     """
     sym = symbol.upper()
-    last_ts = 0.0
-    last_cat = ''
-    last_high = 0.0
+    stop_trades = []
     for t in trades:
         if t.get('symbol', '').upper() != sym:
             continue
@@ -742,23 +739,42 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
             ts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
         except Exception:
             ts = 0.0
-        if ts > last_ts:
-            last_ts = ts
-            last_cat = str(t.get('category_id') or '')
-            try:
-                last_high = float(t.get('high') or t.get('stop') or t.get('entry') or 0)
-            except Exception:
-                last_high = 0.0
+        if ts > 0:
+            stop_trades.append((ts, t))
 
-    if last_ts <= 0:
+    if not stop_trades:
         return False, False, False, '', 0.0
+
+    stop_trades.sort(key=lambda x: x[0])
+    last_ts, last_stop_trade = stop_trades[-1]
 
     age = current_ts - last_ts
     if age < 0:
         return False, False, False, '', 0.0
 
-    # قانون ۴۸ ساعت (۲ روز کاری): پایان کامل محدودیت‌های استاپ و بازگشت به حالت عادی
-    if age > 48 * 3600:
+    # بعد از ۴۸ ساعت از آخرین استاپ (و در صورتی که معامله x در ۲۴ ساعت اخیر بسته نشده باشد) به حالت عادی برمی‌گردد
+    last_x_close_ts = 0.0
+    last_x_high = 0.0
+    for t in trades:
+        if t.get('symbol', '').upper() != sym:
+            continue
+        if t.get('release_entry') == 'x' and str(t.get('status', '')).lower() in ('tp', 'stop'):
+            try:
+                cts = float(t.get('close_timestamp') or t.get('open_timestamp') or 0)
+            except Exception:
+                cts = 0.0
+            if cts > last_x_close_ts:
+                last_x_close_ts = cts
+                try:
+                    last_x_high = float(t.get('high') or t.get('stop') or t.get('entry') or 0)
+                except Exception:
+                    last_x_high = 0.0
+
+    # اگر معامله دسته x تی‌پی یا استاپ خورده باشد، تا ۲۴ ساعت بعد از بسته شدنش کاملاً قفل است
+    if last_x_close_ts > 0 and (current_ts - last_x_close_ts) < 24 * 3600:
+        return True, False, True, 'x', 0.0
+
+    if age > 48 * 3600 and (last_x_close_ts <= 0 or (current_ts - last_x_close_ts) > 48 * 3600):
         return False, False, False, '', 0.0
 
     cur_growth = 0.0
@@ -780,48 +796,48 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
         except Exception:
             pass
 
-    equality_required = True
+    try:
+        last_high = float(last_stop_trade.get('high') or last_stop_trade.get('stop') or last_stop_trade.get('entry') or 0)
+    except Exception:
+        last_high = 0.0
 
-    # ---------- روز اول: تا ۲۴ ساعت بعد از استاپ ----------
+    # تشخیص اینکه آیا این ارز مشمول دسته x است؟
+    # (یعنی آخرین استاپ روی معامله‌ای بوده که خودش برچسب y یا z یا x داشته، یا دو استاپ در فاصله کمتر از ۴۸ ساعت خورده است)
+    prev_stop_within_48h = (len(stop_trades) >= 2 and (last_ts - stop_trades[-2][0]) <= 48 * 3600)
+    is_x_mode = (last_stop_trade.get('release_entry') in ('y', 'z', 'x')) or prev_stop_within_48h or (last_x_close_ts > 0 and (current_ts - last_x_close_ts) <= 48 * 3600)
+
+    # ---------- حالت ۳: دسته x (استاپ مجدد پس از y یا z) ----------
+    if is_x_mode:
+        # تا ۱ روز (۲۴ ساعت) بعد از استاپ کاملاً قفل است و هیچ حق معامله‌ای ندارد
+        if age < 24 * 3600:
+            return True, False, True, 'x', 0.0
+
+        # اگر در ۲۴ ساعت اخیر معامله x باز و بسته شده باشد (با tp یا stop)، تا فردای آن روز معامله نمی‌شود
+        if last_x_close_ts > 0 and (current_ts - last_x_close_ts) < 24 * 3600:
+            return True, False, True, 'x', 0.0
+
+        # بعد از گذشت ۲۴ ساعت، شرط ورود مجدد: زدن قله جدید بالاتر از قله معامله قبلی + برابری قیمت ورود با قیمت بازار
+        ref_high = max(last_high, last_x_high)
+        has_new_peak = (ref_high <= 0) or (cur_high > ref_high) or post_lock_new_peak(df, max(last_ts, last_x_close_ts), ref_high, min_rise=0.001)
+        if not has_new_peak:
+            return True, False, True, 'x', 0.0
+
+        return False, False, True, 'x', 0.0
+
+    # ---------- حالت ۱ و ۲: بعد از استاپ اول (دسته y برای بالای ۱۰۰٪ و دسته z برای زیر ۱۰۰٪) ----------
+    # در ۲۴ ساعت اول بعد از استاپ: فیلتر می‌شود تا روز بعد، مگر اینکه بالای ۱۰۰٪ رشد کند (دسته y)
     if age < 24 * 3600:
-        # قفل کامل، مگر اینکه رشد بالای ۱۰۰٪ باشد و وارد دسته ۱۰۰+ شود (با نشان 'z')
         if cur_growth >= 100:
-            return False, True, True, 'z', 0.0
+            return False, True, True, 'y', 0.0
         return True, False, True, '', 0.0
 
-    # ---------- روز دوم: بین ۲۴ تا ۴۸ ساعت بعد از استاپ ----------
-    # پیدا کردن آخرین قله مرجع: اگر بعد از استاپ معامله‌ای انجام و بسته شده باشد، سقف آن معامله ملاک است
-    ref_high = last_high
-    after_stop_trades = [
-        t for t in trades
-        if t.get('symbol', '').upper() == sym
-        and float(t.get('open_timestamp') or 0) > last_ts
-    ]
-    if after_stop_trades:
-        latest_trade = max(after_stop_trades, key=lambda t: float(t.get('open_timestamp') or 0))
-        try:
-            t_high = float(latest_trade.get('high') or 0)
-            if t_high > 0:
-                ref_high = t_high
-        except Exception:
-            pass
+    # در روز دوم (۲۴ تا ۴۸ ساعت بعد از استاپ اول):
+    # اگر رشد بالای ۱۰۰٪ باشد: دسته y (اهرم ۴، تی‌پی ۲۵٪، استاپ ۲۵٪، سقف ۲ تی‌پی)
+    if cur_growth >= 100:
+        return False, True, True, 'y', 0.0
 
-    # شرط قله جدید: حداقل ۳۰ درصد بیشتر از قله روز قبل / قله قبلی
-    has_new_peak_30 = (ref_high > 0 and cur_high >= (ref_high * 1.30)) or post_lock_new_peak(df, last_ts, ref_high, min_rise=0.30)
-
-    if has_new_peak_30 and ref_high > 0:
-        # قله قدیم می‌شود کف جدید (base_floor)
-        base_floor = ref_high
-        wave_growth = ((cur_high - base_floor) / base_floor) * 100 if base_floor > 0 else cur_growth
-        if wave_growth >= 100 or cur_growth >= 100:
-            return False, False, True, 'z', base_floor
-        else:
-            return False, False, True, 'y', base_floor
-    else:
-        # قله جدید زده نشده؛ وارد هیچ دسته‌ای نمی‌شود مگر اینکه رشد بالای ۱۰۰٪ در دسته ۱۰۰+ باشد
-        if cur_growth >= 100:
-            return False, True, True, 'z', 0.0
-        return True, False, True, '', 0.0
+    # اگر رشد کمتر از ۱۰۰٪ باشد: دسته z (ورود منفی ۲۰٪، تی‌پی ۱۵٪، استاپ ۱۴٪، تی‌پی‌های دسته‌بندی‌شده)
+    return False, False, True, 'z', 0.0
 
 def price_returned_to_level(df, since_ts_utc, level):
     """آیا قیمت بعد از زمان داده‌شده (ثانیه UTC) دوباره به این سطح رسیده است؟"""
@@ -1873,18 +1889,10 @@ def process_markets(app_data):
         if locked:
             continue
 
-        # اگر معامله با برچسب y باشد، قله قدیم (base_floor) کف جدید می‌شود و رشد بر مبنای آن محاسبه می‌شود
-        if release_tag == 'y' and base_floor and base_floor > 0:
-            eff_low = float(base_floor)
-            eff_high = float(high_24h)
-            eff_growth = ((eff_high - eff_low) / eff_low) * 100 if eff_low > 0 else growth
-            valid_cats = get_valid_categories(eff_growth)
-        else:
-            eff_low = float(low_24h)
-            eff_high = float(high_24h)
-            eff_growth = float(growth)
-
-        active_growth = eff_growth if (release_tag == 'y') else growth
+        eff_low = float(low_24h)
+        eff_high = float(high_24h)
+        eff_growth = float(growth)
+        active_growth = growth
 
         # ارزی که اعلان حذف دارد، معاملهٔ جدید روی آن باز نمی‌شود
         if symbol.upper() in delist_symbols:
@@ -1950,7 +1958,8 @@ def process_markets(app_data):
                 stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
                 should_enter = (current_close >= entry_price)
             else:
-                entry_drop = cat_info['entry_drop']
+                # در دسته z (زیر ۱۰۰٪ بعد از استاپ)، نقطه ورود منفی ۲۰ درصد است و تی‌پی ۱۵٪ و استاپ ۱۴٪
+                entry_drop = 0.20 if (release_tag == 'z' and cat_id != '100_plus') else cat_info['entry_drop']
                 if trade_type == 'short':
                     cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40"]
 
@@ -2107,7 +2116,7 @@ def process_markets(app_data):
 
                             tp_price = round_price(entry_price * (1 - cat_info['tp_drop']))
                             stop_price = round_price(entry_price * (1 + cat_info['stop_rise']))
-                            neg_pct = round(cat_info['entry_drop'] * 100, 1) if (cat_info['entry_drop'] * 100) % 1 != 0 else int(cat_info['entry_drop'] * 100)
+                            neg_pct = drop_to_percent(entry_drop)
                             should_enter = (current_close <= entry_price and current_close > tp_price)
                         else:
                             last_sub = prev_sub_trades[-1]
@@ -2184,7 +2193,7 @@ def process_markets(app_data):
                     'close_time': '',
                     'close_price': 0.0,
                     'pnl': 0.0,
-                    'leverage': (4 if (equality_required and active_growth >= 100) else cat_info.get('leverage', 7))
+                    'leverage': (4 if (release_tag == 'y' or cat_id == '100_plus') else cat_info.get('leverage', 7))
                 }
                 trades.append(new_trade)
 
