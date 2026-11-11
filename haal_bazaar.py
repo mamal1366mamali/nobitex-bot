@@ -98,15 +98,21 @@ def send_message(chat_id, text, reply_markup=None):
         pass
 
 def send_roshd_message(text):
-    token = ROSHD_BOT_TOKEN if ROSHD_BOT_TOKEN else BOT_TOKEN
-    if not token:
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": ROSHD_CHANNEL_ID, "text": text}
-    try:
-        requests.post(url, json=payload, timeout=10)
-    except Exception:
-        pass
+    tokens = []
+    if ROSHD_BOT_TOKEN:
+        tokens.append(ROSHD_BOT_TOKEN)
+    if BOT_TOKEN and BOT_TOKEN not in tokens:
+        tokens.append(BOT_TOKEN)
+    for token in tokens:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {"chat_id": ROSHD_CHANNEL_ID, "text": text}
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            if r.status_code == 200 and r.json().get("ok"):
+                return True
+        except Exception:
+            pass
+    return False
 
 def get_updates(offset=None):
     if not BOT_TOKEN:
@@ -915,12 +921,13 @@ def main():
 
         # گزارش ساعتی دوم (ourbit.py) به ROSHD_CHANNEL_ID (-1003961062602) با ROSHD_BOT_TOKEN
         current_hour = iran_time.hour
-        current_minute = iran_time.minute
-        if current_hour in REPORT_HOURS and current_minute < REPORT_WINDOW_MINUTES:
+        if current_hour in REPORT_HOURS:
             last_roshd_hour = data.get("last_roshd_report_hour", -1)
             last_roshd_date = data.get("last_roshd_report_date", "")
             if not (last_roshd_date == today_str and last_roshd_hour == current_hour):
                 up_roshd, down_roshd, _ = get_true_24h_counts(stats_data, data)
+                if (up_roshd + down_roshd) == 0:
+                    up_roshd, down_roshd, _ = get_true_24h_counts(stats_data, data, force=True)
                 if (up_roshd + down_roshd) > 0:
                     roshd_trend = build_market_status_line(up_roshd, down_roshd)
                     if roshd_trend:
@@ -930,9 +937,9 @@ def main():
                             f"تعداد ارزهای منفی {down_roshd}\n\n"
                             f"تاریخ {shamsi_date} ساعت {time_str}"
                         )
-                        send_roshd_message(roshd_msg)
-                        data["last_roshd_report_hour"] = current_hour
-                        data["last_roshd_report_date"] = today_str
+                        if send_roshd_message(roshd_msg):
+                            data["last_roshd_report_hour"] = current_hour
+                            data["last_roshd_report_date"] = today_str
 
         current_stage = "بخش ذخیره نهایی اطلاعات در فایل (save data)"
         try:
