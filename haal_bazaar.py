@@ -13,13 +13,13 @@ import traceback
 
 warnings.filterwarnings('ignore')
 
-# Config for Haal Bazaar Bot
-BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN", "")
+# Config for Haal Bazaar Bot (with fallback token from run_haal.yml)
+BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
 ALERT_CHANNEL = "-1004462898426"
 CHANNEL_REPORT_MAIN = "-1004304608564"
 
 # Config for Roshd / Ourbit Hourly Channel Bot
-ROSHD_BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN", "")
+ROSHD_BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN") or BOT_TOKEN
 ROSHD_CHANNEL_ID = "-1003961062602"
 
 PERSONAL_ID = "114669886"
@@ -35,7 +35,7 @@ REPORT_HOURS = set(range(24))
 REPORT_WINDOW_MINUTES = 5
 
 iran_time_global = datetime.utcnow() + timedelta(hours=3, minutes=30)
-current_date_str_global = f"{jdatetime.datetime.fromgregorian(datetime=iran_time_global).strftime('%Y %m %d')} ساعت {iran_time_global.strftime('%H : %M')} دقیقه"
+current_date_str_global = f"{jdatetime.datetime.fromgregorian(datetime=iran_time_global).strftime('%Y/%m/%d')} ساعت {iran_time_global.strftime('%H : %M')} دقیقه"
 
 def detect_failed_part(err_title, err_details, stage_hint=""):
     tb = (err_details or "").lower()
@@ -86,16 +86,23 @@ def send_error_to_channels(err_title, err_details, stage_hint=""):
     send_message(CHANNEL_EXIT_MAIN, msg)
 
 def send_message(chat_id, text, reply_markup=None):
-    if not BOT_TOKEN:
-        return
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text}
-    if reply_markup:
-        payload["reply_markup"] = reply_markup
-    try:
-        requests.post(url, json=payload, timeout=10)
-    except Exception:
-        pass
+    tokens = []
+    if BOT_TOKEN:
+        tokens.append(BOT_TOKEN)
+    if ROSHD_BOT_TOKEN and ROSHD_BOT_TOKEN not in tokens:
+        tokens.append(ROSHD_BOT_TOKEN)
+    for token in tokens:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {"chat_id": chat_id, "text": text}
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            if r.status_code == 200 and r.json().get("ok"):
+                return True
+        except Exception:
+            pass
+    return False
 
 def send_roshd_message(text):
     tokens = []
@@ -113,6 +120,12 @@ def send_roshd_message(text):
         except Exception:
             pass
     return False
+
+def send_hourly_report_to_all(text):
+    """ارسال گزارش ساعتی حال بازار به هر دو کانال مربوطه"""
+    sent_main = send_message(CHANNEL_REPORT_MAIN, text)
+    sent_roshd = send_roshd_message(text)
+    return sent_main or sent_roshd
 
 def get_updates(offset=None):
     if not BOT_TOKEN:
@@ -262,7 +275,6 @@ def get_true_24h_counts(stats_data, data, force=False):
             elif last < ref:
                 down += 1
         else:
-            # پشتیبان در صورت عدم دریافت کندل ۵ دقیقه‌ای برای یک ارز
             chg = item.get("dayChange", 0) or 0
             if chg > 0:
                 up += 1
@@ -531,10 +543,14 @@ def main():
                 if total > 0:
                     trend = build_market_status_line(up_count, down_count)
                     if trend:
+                        now_iran = datetime.utcnow() + timedelta(hours=3, minutes=30)
+                        shamsi_now = jdatetime.datetime.fromgregorian(datetime=now_iran).strftime('%Y/%m/%d')
+                        hour_now = f"{now_iran.hour:02d} : 00"
                         msg = (
-                            f"روند بازار {trend}\n"
+                            f"حال بازار {trend}\n"
                             f"تعداد ارزهای مثبت {up_count}\n"
-                            f"تعداد ارزهای منفی {down_count}"
+                            f"تعداد ارزهای منفی {down_count}\n\n"
+                            f"تاریخ {shamsi_now} ساعت {hour_now}"
                         )
                         send_message(chat_id, msg, keyboard)
                     
@@ -911,35 +927,36 @@ def main():
                 
         data["alerts"] = remaining_alerts
 
-        # --- بخش گزارش ساعتی / روزانه حال بازار و کانال اوربیت (ادغام‌شده از ourbit.py و haal_bazaar.py) ---
-        current_stage = "بخش ارسال گزارش‌های دوره‌ای و ساعتی بازار (Market Status Report & Ourbit Hourly Bot)"
+        # --- بخش گزارش ساعتی راس هر ساعت حال بازار به کانال‌های مربوطه ---
+        current_stage = "بخش ارسال گزارش ساعتی حال بازار (Hourly Market Status Report)"
         iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
-        shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
         today_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y/%m/%d')
-        time_str = iran_time.strftime('%H : %M')
-        current_date_str = f"{shamsi_date} ساعت {time_str} دقیقه"
-
-        # گزارش ساعتی دوم (ourbit.py) به ROSHD_CHANNEL_ID (-1003961062602) با ROSHD_BOT_TOKEN
         current_hour = iran_time.hour
-        if current_hour in REPORT_HOURS:
-            last_roshd_hour = data.get("last_roshd_report_hour", -1)
-            last_roshd_date = data.get("last_roshd_report_date", "")
-            if not (last_roshd_date == today_str and last_roshd_hour == current_hour):
-                up_roshd, down_roshd, _ = get_true_24h_counts(stats_data, data)
-                if (up_roshd + down_roshd) == 0:
-                    up_roshd, down_roshd, _ = get_true_24h_counts(stats_data, data, force=True)
-                if (up_roshd + down_roshd) > 0:
-                    roshd_trend = build_market_status_line(up_roshd, down_roshd)
-                    if roshd_trend:
-                        roshd_msg = (
-                            f"حال بازار {roshd_trend}\n"
-                            f"تعداد ارزهای مثبت {up_roshd}\n"
-                            f"تعداد ارزهای منفی {down_roshd}\n\n"
-                            f"تاریخ {shamsi_date} ساعت {time_str}"
+        exact_hour_str = f"{current_hour:02d} : 00"
+
+        if current_hour in REPORT_HOURS and stats_data:
+            last_report_hour = data.get("last_roshd_report_hour", -1)
+            last_report_date = data.get("last_roshd_report_date", "")
+
+            if not (last_report_date == today_str and last_report_hour == current_hour):
+                up_count, down_count, _ = get_true_24h_counts(stats_data, data)
+                if (up_count + down_count) == 0:
+                    up_count, down_count, _ = get_true_24h_counts(stats_data, data, force=True)
+
+                if (up_count + down_count) > 0:
+                    market_trend = build_market_status_line(up_count, down_count)
+                    if market_trend:
+                        hourly_msg = (
+                            f"حال بازار {market_trend}\n"
+                            f"تعداد ارزهای مثبت {up_count}\n"
+                            f"تعداد ارزهای منفی {down_count}\n\n"
+                            f"تاریخ {today_str} ساعت {exact_hour_str}"
                         )
-                        if send_roshd_message(roshd_msg):
+                        if send_hourly_report_to_all(hourly_msg):
                             data["last_roshd_report_hour"] = current_hour
                             data["last_roshd_report_date"] = today_str
+                            data["last_main_report_hour"] = current_hour
+                            data["last_main_report_date"] = today_str
 
         current_stage = "بخش ذخیره نهایی اطلاعات در فایل (save data)"
         try:
