@@ -16,7 +16,7 @@ warnings.filterwarnings('ignore')
 # Config for Haal Bazaar Bot (with fallback token from run_haal.yml)
 BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
 ALERT_CHANNEL = "-1004462898426"
-CHANNEL_REPORT_MAIN = "-1004304608564"
+CHANNEL_REPORT_MAIN = "-1003961062602"
 
 # Config for Roshd / Ourbit Hourly Channel Bot
 ROSHD_BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN") or BOT_TOKEN
@@ -122,10 +122,8 @@ def send_roshd_message(text):
     return False
 
 def send_hourly_report_to_all(text):
-    """ارسال گزارش ساعتی حال بازار به هر دو کانال مربوطه"""
-    sent_main = send_message(CHANNEL_REPORT_MAIN, text)
-    sent_roshd = send_roshd_message(text)
-    return sent_main or sent_roshd
+    """ارسال گزارش ساعتی حال بازار فقط به کانال حال بازار (-1003961062602)"""
+    return send_message(CHANNEL_REPORT_MAIN, text)
 
 def get_updates(offset=None):
     if not BOT_TOKEN:
@@ -927,7 +925,7 @@ def main():
                 
         data["alerts"] = remaining_alerts
 
-        # --- بخش گزارش ساعتی راس هر ساعت حال بازار به کانال‌های مربوطه ---
+        # --- بخش گزارش ساعتی راس هر ساعت حال بازار به کانال مربوطه ---
         current_stage = "بخش ارسال گزارش ساعتی حال بازار (Hourly Market Status Report)"
         iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
         today_str = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y/%m/%d')
