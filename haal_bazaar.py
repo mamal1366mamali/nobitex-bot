@@ -935,8 +935,15 @@ def main():
         if current_hour in REPORT_HOURS and stats_data:
             last_report_hour = data.get("last_roshd_report_hour", -1)
             last_report_date = data.get("last_roshd_report_date", "")
+            last_main_hour = data.get("last_main_report_hour", -1)
+            last_main_date = data.get("last_main_report_date", "")
 
-            if not (last_report_date == today_str and last_report_hour == current_hour):
+            already_sent = (
+                (last_report_date == today_str and last_report_hour == current_hour)
+                or (last_main_date == today_str and last_main_hour == current_hour)
+            )
+
+            if not already_sent:
                 up_count, down_count, _ = get_true_24h_counts(stats_data, data)
                 if (up_count + down_count) == 0:
                     up_count, down_count, _ = get_true_24h_counts(stats_data, data, force=True)
@@ -955,6 +962,12 @@ def main():
                             data["last_roshd_report_date"] = today_str
                             data["last_main_report_hour"] = current_hour
                             data["last_main_report_date"] = today_str
+                        else:
+                            send_error_to_channels(
+                                "Telegram Send Failed (Hourly Haal Bazaar)",
+                                f"ارسال گزارش ساعتی حال بازار به کانال {CHANNEL_REPORT_MAIN} ناموفق بود. بررسی کنید ربات در کانال ادمین باشد و توکن معتبر باشد.",
+                                stage_hint=current_stage
+                            )
 
         current_stage = "بخش ذخیره نهایی اطلاعات در فایل (save data)"
         try:
