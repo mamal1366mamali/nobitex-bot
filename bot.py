@@ -2279,13 +2279,15 @@ def cat_display_name(cat_id):
     return c_name
 
 
-def build_counts_totals(cat_stats, week=False):
+def build_counts_totals(cat_stats, week=False, month=False):
     """بخش جمع کل: تعداد تمامی معاملات + tp + stop + open + بازهای روزهای گذشته"""
+    is_period = week or month
+
     def open_count(st):
-        return st['opening'] if week else st.get('opening_today', st['opening'])
+        return st['opening'] if is_period else st.get('opening_today', st['opening'])
 
     def open_pnl_of(st):
-        return st['open_pnl'] if week else st.get('open_pnl_today', st['open_pnl'])
+        return st['open_pnl'] if is_period else st.get('open_pnl_today', st['open_pnl'])
 
     total_all = sum(s['tp'] + s['stop'] + open_count(s) for s in cat_stats.values())
     if total_all <= 0:
@@ -2296,9 +2298,11 @@ def build_counts_totals(cat_stats, week=False):
     sum_open = sum(open_count(s) for s in cat_stats.values())
     sum_open_pnl = sum(open_pnl_of(s) for s in cat_stats.values())
 
-    label = ' هفته' if week else ''
+    label = ' ماه' if month else (' هفته' if week else '')
     out = ''
-    if week:
+    if month:
+        out += f"محاسبات معاملات این ماه {pnl_word((sum_tp - sum_stop) * 100)}\n"
+    elif week:
         out += f"محاسبات معاملات این هفته {pnl_word((sum_tp - sum_stop) * 100)}\n"
     out += f"تعداد تمامی معاملات{label} {total_all}\n"
     out += f"tp {sum_tp}\n"
@@ -2306,7 +2310,7 @@ def build_counts_totals(cat_stats, week=False):
     out += f"open {sum_open} {pnl_word(sum_open_pnl)}\n"
 
     # معاملات باز مانده از روزهای گذشته (جمع تمام دسته‌بندی‌ها)
-    if not week:
+    if not is_period:
         past_count = sum(s.get('opening_past', 0) for s in cat_stats.values())
         if past_count > 0:
             past_pnl = sum(s.get('open_pnl_past', 0.0) for s in cat_stats.values())
@@ -2329,10 +2333,12 @@ def build_counts_totals(cat_stats, week=False):
     return out
 
 
-def build_counts_categories(cat_stats, week=False):
+def build_counts_categories(cat_stats, week=False, month=False):
     """بخش دسته‌بندی‌ها: tp / stop / open هر دسته از بیشترین به کمترین"""
+    is_period = week or month
+
     def open_count(st):
-        return st['opening'] if week else st.get('opening_today', st['opening'])
+        return st['opening'] if is_period else st.get('opening_today', st['opening'])
 
     ranked = [(cid, st) for cid, st in cat_stats.items()
               if (st['tp'] + st['stop'] + open_count(st)) > 0]
@@ -2341,16 +2347,16 @@ def build_counts_categories(cat_stats, week=False):
     out = ''
     for cat_id, st in ranked:
         line = f"دسته بندی {cat_display_name(cat_id)} tp {st['tp']} stop {st['stop']} open {open_count(st)}"
-        if week:
+        if is_period:
             line += f" {pnl_word((st['tp'] - st['stop']) * 100)}"
         out += line + "\n"
 
     return out
 
 
-def build_counts_block(cat_stats, week=False):
-    """بخش تعداد معاملات (جمع کل + دسته‌بندی‌ها) — برای گزارش هفتگی"""
-    return build_counts_totals(cat_stats, week) + build_counts_categories(cat_stats, week)
+def build_counts_block(cat_stats, week=False, month=False):
+    """بخش تعداد معاملات (جمع کل + دسته‌بندی‌ها) — برای گزارش هفتگی و ماهانه"""
+    return build_counts_totals(cat_stats, week=week, month=month) + build_counts_categories(cat_stats, week=week, month=month)
 
 
 def generate_and_send_daily_report(app_data, target_date=None):
@@ -2680,6 +2686,67 @@ def generate_and_send_weekly_report(app_data):
         chats = list(set(chats))
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
 
+def generate_and_send_monthly_report(app_data):
+    """محاسبات ماهانه (۴ هفته = ۲۸ روز) و ارسال فقط به کانال گزارش هفتگی"""
+    trades = app_data.get('trades', [])
+    current_ts = iran_time.timestamp()
+    period_start_ts = float(app_data.get('monthly_period_start_ts') or (current_ts - (28 * 86400)))
+    # گزارش از لحظهٔ شروع تازه (اگر ثبت شده باشد)
+    report_start_ts = int(app_data.get('report_start_ts') or 0)
+
+    cat_stats = {cat: {'tp': 0, 'stop': 0, 'opening': 0, 'closed_pnl': 0.0, 'open_pnl': 0.0} for cat in CATEGORIES.keys()}
+
+    for t in trades:
+        cat_id = t.get('category_id') or '30_40'
+        if cat_id not in cat_stats:
+            cat_id = '30_40'
+
+        stats = cat_stats[cat_id]
+
+        if t['status'] == 'OPEN':
+            # ارزی که قیمت ندارد (حذف یا متوقف شده) از گزارش حذف می‌شود
+            try:
+                df = get_candles(t['symbol'], resolution=60, num_candles=1)
+                current_close = float(df['close'].iloc[-1]) if (df is not None and len(df) > 0) else None
+            except Exception:
+                current_close = None
+            if not current_close or current_close <= 0:
+                continue
+
+            stats['opening'] += 1
+
+            cat_info = CATEGORIES.get(cat_id, CATEGORIES['30_40'])
+            trade_type = cat_info.get('trade_type', 'short')
+
+            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
+            if trade_type == 'short':
+                live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
+            else:
+                live_pnl = calculate_long_pnl(t['entry'], current_close, leverage=t_lev)
+
+            stats['open_pnl'] += live_pnl
+
+        elif t['status'] in ['tp', 'stop']:
+            close_ts = float(t.get('close_timestamp') or 0)
+            if close_ts >= period_start_ts and close_ts >= report_start_ts:
+                # مثل گزارش هفتگی: هر tp = +۱۰۰٪ و هر stop = -۱۰۰٪
+                trade_pnl = 100.0 if t['status'] == 'tp' else -100.0
+                stats['closed_pnl'] += trade_pnl
+
+                if t['status'] == 'tp':
+                    stats['tp'] += 1
+                else:
+                    stats['stop'] += 1
+
+    # جمع‌بندی ماهانه (۴ هفته): محاسبات کل، تعدادها و دسته‌بندی‌ها
+    monthly_counts = build_counts_block(cat_stats, month=True)
+    if monthly_counts:
+        monthly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], monthly_counts)
+    else:
+        msg = f"محاسبات معاملات این ماه 0 %\nتعداد تمامی معاملات ماه 0\n\nتاریخ {today_str.replace('/', ' ')}"
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], msg)
+
 def detect_failed_part(err_title, err_details, stage_hint=""):
     """تشخیص دقیق بخش دارای خطا و توضیح فارسی مشابه ساختار فایل run_bot.yml"""
     tb = (err_details or "").lower()
@@ -2701,6 +2768,8 @@ def detect_failed_part(err_title, err_details, stage_hint=""):
         failed_part = "بخش محاسبه و ارسال گزارش روزانه (Daily Report)"
     elif "generate_and_send_weekly_report" in tb:
         failed_part = "بخش محاسبه و ارسال گزارش هفتگی (Weekly Report)"
+    elif "generate_and_send_monthly_report" in tb:
+        failed_part = "بخش محاسبه و ارسال گزارش ماهانه (Monthly Report)"
     elif "process_markets" in tb:
         failed_part = "بخش بررسی بازار، فیلتر ارزها و مدیریت معاملات (process_markets)"
     elif "send_telegram" in tb:
@@ -2777,6 +2846,20 @@ if __name__ == '__main__':
                     current_stage = "بخش محاسبه و ارسال گزارش هفتگی (generate_and_send_weekly_report)"
                     generate_and_send_weekly_report(app_data)
                     app_data['last_weekly_report_date'] = target_date
+
+                    # شمارش هفته‌ها برای گزارش ماهانه (۴ هفته از همین هفته)
+                    if not app_data.get('monthly_period_start_ts'):
+                        week1_start = iran_time.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=7)
+                        app_data['monthly_period_start_ts'] = int(week1_start.timestamp())
+                    app_data['monthly_week_counter'] = int(app_data.get('monthly_week_counter') or 0) + 1
+
+                # گزارش ماهانه بعد از هر ۴ هفته (بامداد شنبه پایان هفته چهارم)
+                if int(app_data.get('monthly_week_counter') or 0) >= 4 and app_data.get('last_monthly_report_date') != target_date:
+                    current_stage = "بخش محاسبه و ارسال گزارش ماهانه (generate_and_send_monthly_report)"
+                    generate_and_send_monthly_report(app_data)
+                    app_data['last_monthly_report_date'] = target_date
+                    app_data['monthly_week_counter'] = 0
+                    app_data['monthly_period_start_ts'] = int(iran_time.timestamp())
     except Exception as e:
         tb_str = traceback.format_exc()
         print(f"Error occurred:\n{tb_str}")
