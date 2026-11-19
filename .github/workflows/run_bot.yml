@@ -83,4 +83,3 @@ jobs:
 
           curl -s -X POST "https://api.telegram.org/bot${SELL_TOK}/sendMessage" -d chat_id="114669886" --data-urlencode "text=$MSG" > /dev/null || true
           curl -s -X POST "https://api.telegram.org/bot${SELL_TOK}/sendMessage" -d chat_id="-1004290922830" --data-urlencode "text=$MSG" > /dev/null || true
-          curl -s -X POST "https://api.telegram.org/bot${EXIT_TOK}/sendMessage" -d chat_id="-1004415777827" --data-urlencode "text=$MSG" > /dev/null || true
