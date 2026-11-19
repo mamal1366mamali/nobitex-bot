@@ -28,6 +28,7 @@ CHANNEL_EXIT_MAIN = "-1004415777827"
 CHANNEL_REPORT_MAIN = "-1004304608564"
 CHANNEL_REPORT_CATEGORIES = "-1004370780343"
 CHANNEL_WEEKLY_REPORT = "-1004462143665"
+CHANNEL_WEEKLY_REPORT_CATEGORIES = "-1004431916276"
 
 CATEGORIES = {
     "20_30": {
@@ -2668,12 +2669,12 @@ def generate_and_send_weekly_report(app_data):
             
         msg += f"\n6 تاریخ\n{current_date_str}"
 
-        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, cat_info['report_channel']]
+        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT_CATEGORIES, cat_info['report_channel']]
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
 
     if total_all_transactions == 0:
         msg = f"گزارش هفتگی\nتعداد معاملات هفته 0\nتاریخ {current_date_str}"
-        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT]
+        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, CHANNEL_WEEKLY_REPORT_CATEGORIES]
         for c in CATEGORIES.values():
             chats.append(c['report_channel'])
         chats = list(set(chats))
@@ -2733,11 +2734,11 @@ def send_error_to_channels(err_title, err_details, stage_hint=""):
     if len(msg) > 4000:
         msg = msg[:4000] + "\n...(ادامه خطا کوتاه شد)"
     
-    # ارسال فقط به کانال فروش اصلی (-1004290922830) و پی‌وی ادمین (حذف ارسال به کانال خروج)
+    # ارسال فقط به کانال فروش اصلی (-1004290922830) و عدم ارسال به هیچ کانال دیگر
     sell_channel = "-1004290922830"
     sell_tok = SELL_BOT_TOKEN or REPORT_BOT_TOKEN
     
-    send_telegram_message(sell_tok, [PERSONAL_ID, sell_channel], msg)
+    send_telegram_message(sell_tok, [sell_channel], msg)
 
 if __name__ == '__main__':
     import traceback
