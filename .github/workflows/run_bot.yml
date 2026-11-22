@@ -62,7 +62,7 @@ jobs:
           INSTALL_OUTCOME: ${{ steps.install_step.outcome }}
           COMMIT_OUTCOME: ${{ steps.commit_step.outcome }}
         run: |
-          SELL_TOK="${SELL_BOT_TOKEN:-${REPORT_BOT_TOKEN:-8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E}}"
+          SELL_TOK="${SELL_BOT_TOKEN:-$REPORT_BOT_TOKEN}"
           EXIT_TOK="${EXIT_BOT_TOKEN:-$SELL_TOK}"
           
           FAILED_PART="اختلال موقت در سرورهای خود گیت‌هاب"
