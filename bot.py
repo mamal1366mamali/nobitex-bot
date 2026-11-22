@@ -15,8 +15,8 @@ warnings.filterwarnings('ignore')
 SELL_BOT_TOKEN = os.environ.get("SELL_BOT_TOKEN") or ""
 BUY_BOT_TOKEN = os.environ.get("BUY_BOT_TOKEN") or ""
 EXIT_BOT_TOKEN = os.environ.get("EXIT_BOT_TOKEN") or ""
-REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
-WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN") or "8820733728:AAEM4e3UlWM7YekuFcFwsPXBd-GWsgievHE"
+REPORT_BOT_TOKEN = os.environ.get("REPORT_BOT_TOKEN") or ""
+WEEKLY_REPORT_BOT_TOKEN = os.environ.get("WEEKLY_REPORT_BOT_TOKEN") or ""
 
 def get_exit_token():
     """توکن خروج: اگر EXIT_BOT_TOKEN تنظیم شده باشد از آن استفاده می‌کند،
@@ -29,6 +29,7 @@ CHANNEL_REPORT_MAIN = "-1004304608564"
 CHANNEL_REPORT_CATEGORIES = "-1004370780343"
 CHANNEL_WEEKLY_REPORT = "-1004462143665"
 CHANNEL_WEEKLY_REPORT_CATEGORIES = "-1004431916276"
+GROUP_PAYANNAMEH = "-5009781660"
 
 CATEGORIES = {
     "20_30": {
@@ -2579,7 +2580,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
         report_date_str = f"{target_date.replace('/', ' ')} ساعت {time_str} دقیقه"
         msg_rank += f"\nتاریخ {report_date_str}"
 
-        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN], msg_rank)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], msg_rank)
         send_telegram_message(get_exit_token() or REPORT_BOT_TOKEN, [CHANNEL_EXIT_MAIN], msg_rank)
 
     # ارسال فایل اکسل طبق درخواست غیرفعال شد
@@ -2648,6 +2649,7 @@ def generate_and_send_weekly_report(app_data):
     if weekly_counts:
         weekly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], weekly_counts)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], weekly_counts)
 
     total_all_transactions = 0
     for cat_id, stats in cat_stats.items():
@@ -2685,6 +2687,7 @@ def generate_and_send_weekly_report(app_data):
             chats.append(c['report_channel'])
         chats = list(set(chats))
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], msg)
 
 def generate_and_send_monthly_report(app_data):
     """محاسبات ماهانه (۴ هفته = ۲۸ روز) و ارسال فقط به کانال گزارش هفتگی"""
@@ -2743,9 +2746,11 @@ def generate_and_send_monthly_report(app_data):
     if monthly_counts:
         monthly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], monthly_counts)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], monthly_counts)
     else:
         msg = f"محاسبات معاملات این ماه 0 %\nتعداد تمامی معاملات ماه 0\n\nتاریخ {today_str.replace('/', ' ')}"
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], msg)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], msg)
 
 def detect_failed_part(err_title, err_details, stage_hint=""):
     """تشخیص دقیق بخش دارای خطا و توضیح فارسی مشابه ساختار فایل run_bot.yml"""
