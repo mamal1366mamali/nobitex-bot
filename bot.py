@@ -2648,8 +2648,8 @@ def generate_and_send_weekly_report(app_data):
     weekly_counts = build_counts_block(cat_stats, week=True)
     if weekly_counts:
         weekly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
-        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], weekly_counts)
-        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], weekly_counts)
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, GROUP_PAYANNAMEH], weekly_counts)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN], weekly_counts)
 
     total_all_transactions = 0
     for cat_id, stats in cat_stats.items():
@@ -2682,12 +2682,12 @@ def generate_and_send_weekly_report(app_data):
 
     if total_all_transactions == 0:
         msg = f"گزارش هفتگی\nتعداد معاملات هفته 0\nتاریخ {current_date_str}"
-        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, CHANNEL_WEEKLY_REPORT_CATEGORIES]
+        chats = [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, CHANNEL_WEEKLY_REPORT_CATEGORIES, GROUP_PAYANNAMEH]
         for c in CATEGORIES.values():
             chats.append(c['report_channel'])
         chats = list(set(chats))
         send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, chats, msg)
-        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], msg)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN], msg)
 
 def generate_and_send_monthly_report(app_data):
     """محاسبات ماهانه (۴ هفته = ۲۸ روز) و ارسال فقط به کانال گزارش هفتگی"""
@@ -2745,12 +2745,12 @@ def generate_and_send_monthly_report(app_data):
     monthly_counts = build_counts_block(cat_stats, month=True)
     if monthly_counts:
         monthly_counts += f"\nتاریخ {today_str.replace('/', ' ')}"
-        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], monthly_counts)
-        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], monthly_counts)
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, GROUP_PAYANNAMEH], monthly_counts)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN], monthly_counts)
     else:
         msg = f"محاسبات معاملات این ماه 0 %\nتعداد تمامی معاملات ماه 0\n\nتاریخ {today_str.replace('/', ' ')}"
-        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT], msg)
-        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN, GROUP_PAYANNAMEH], msg)
+        send_telegram_message(WEEKLY_REPORT_BOT_TOKEN, [PERSONAL_ID, CHANNEL_WEEKLY_REPORT, GROUP_PAYANNAMEH], msg)
+        send_telegram_message(REPORT_BOT_TOKEN, [CHANNEL_REPORT_MAIN], msg)
 
 def detect_failed_part(err_title, err_details, stage_hint=""):
     """تشخیص دقیق بخش دارای خطا و توضیح فارسی مشابه ساختار فایل run_bot.yml"""
