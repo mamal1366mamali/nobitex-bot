@@ -57,7 +57,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "DOS_USDT",
@@ -81,7 +81,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 3,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "SOXS_USDT",
@@ -105,7 +105,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "LISTA_USDT",
@@ -129,7 +129,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "ELSA_USDT",
@@ -153,7 +153,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "AT_USDT",
@@ -177,7 +177,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "GUA_USDT",
@@ -201,7 +201,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "MANTRA_USDT",
@@ -251,7 +251,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 10,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
         },
         {
             "symbol": "MMT_USDT",
@@ -275,14 +275,37 @@
             "cat_entry_num": 1,
             "global_entry_num": 11,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795694744
+            "last_seen_ts": 1795695045
+        },
+        {
+            "symbol": "BIGTIME_USDT",
+            "category_id": "30_40",
+            "growth": 31.20632585509378,
+            "low": 0.005438,
+            "high": 0.007135,
+            "leg": null,
+            "entry": 0.006065,
+            "tp": 0.005155,
+            "stop": 0.006914,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/09/05",
+            "open_timestamp": 1795695045,
+            "open_date_str": "1405 09 05 ساعت 12 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "cat_entry_num": 7,
+            "global_entry_num": 12,
+            "coin_trade_num": 1
         }
     ],
     "market_state": {
-        "up": 651,
-        "down": 132,
-        "ts": 1795675544.0347703,
+        "up": 649,
+        "down": 135,
+        "ts": 1795682458.5859568,
         "total": 787,
-        "counted": 783
+        "counted": 784
     }
 }
