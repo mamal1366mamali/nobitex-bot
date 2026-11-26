@@ -58,7 +58,7 @@ jobs:
           INSTALL_OUTCOME: ${{ steps.install_step.outcome }}
           COMMIT_OUTCOME: ${{ steps.commit_step.outcome }}
         run: |
-          TOK="${HAAL_BOT_TOKEN:-8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E}"
+          TOK="${HAAL_BOT_TOKEN}"
           
           FAILED_PART="اختلال موقت در سرورهای خود گیت‌هاب"
           if [ "$CHECKOUT_OUTCOME" == "failure" ]; then
