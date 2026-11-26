@@ -18,7 +18,7 @@ BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_F
 ALERT_CHANNEL = "-1004462898426"
 CHANNEL_REPORT_MAIN = "-1003961062602"
 
-# Config for Roshd / Ourbit Hourly Channel Bot
+# Config for Roshd / Toobit Hourly Channel Bot
 ROSHD_BOT_TOKEN = os.environ.get("ROSHD_BOT_TOKEN") or BOT_TOKEN
 ROSHD_CHANNEL_ID = "-1003961062602"
 
@@ -27,9 +27,66 @@ CHANNEL_EXIT_MAIN = "-1004415777827"
 CHANNEL_SELL_MAIN = "-1004290922830"
 DATA_FILE = "haal_data.json"
 
-# Ourbit API (Futures)
-OURBIT_TICKER_URL = "https://futures.ourbit.com/api/v1/contract/ticker"
-OURBIT_KLINE_URL = "https://futures.ourbit.com/api/v1/contract/kline"
+# Toobit API (Futures USDT-M only)
+TOOBIT_EXCHANGE_INFO_URL = "https://api.toobit.com/api/v1/exchangeInfo"
+TOOBIT_TICKER_URL = "https://api.toobit.com/quote/v1/contract/ticker/24hr"
+TOOBIT_KLINE_URL = "https://api.toobit.com/quote/v1/contract/klines"
+
+_TOOBIT_SYMBOL_MAP = {}
+_TOOBIT_CONTRACTS_CACHE = {}
+
+def from_toobit_symbol(raw_sym):
+    """تبدیل نماد فیوچرز توبیت (BTC-SWAP-USDT) به نام پایه (btc) و حذف کامل اسپات."""
+    s = str(raw_sym or "").strip().upper()
+    if s.endswith("-SWAP-USDT"):
+        return s[:-10].lower()
+    return ""
+
+def to_toobit_symbol(sym):
+    """تبدیل نام پایه (btc) به نماد قرارداد فیوچرز توبیت (BTC-SWAP-USDT)."""
+    s = str(sym or "").strip().lower()
+    if s in _TOOBIT_SYMBOL_MAP:
+        return _TOOBIT_SYMBOL_MAP[s]
+    s_upper = s.upper()
+    if s_upper.endswith("-SWAP-USDT"):
+        return s_upper
+    s_clean = s_upper.replace("_USDT", "").replace("USDT", "")
+    return f"{s_clean}-SWAP-USDT" if s_clean else ""
+
+def get_toobit_contracts():
+    """لیست قراردادهای فعال فیوچرز USDT-M توبیت (فقط contracts و بدون بازار اسپات)."""
+    global _TOOBIT_CONTRACTS_CACHE
+    if _TOOBIT_CONTRACTS_CACHE:
+        return _TOOBIT_CONTRACTS_CACHE
+    try:
+        r = requests.get(TOOBIT_EXCHANGE_INFO_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+        if r.status_code == 200:
+            contracts = (r.json() or {}).get("contracts") or []
+            cache = {}
+            for c in contracts:
+                if not isinstance(c, dict):
+                    continue
+                raw_sym = str(c.get("symbol") or "").strip().upper()
+                status = str(c.get("status") or "").strip().upper()
+                quote_asset = str(c.get("quoteAsset") or "").strip().upper()
+                sym = from_toobit_symbol(raw_sym)
+                if not sym:
+                    continue
+                if quote_asset and quote_asset != "USDT":
+                    continue
+                if status and status != "TRADING":
+                    continue
+                try:
+                    c_size = float(c.get("contractMultiplier") or c.get("contractSize") or 1.0)
+                except Exception:
+                    c_size = 1.0
+                _TOOBIT_SYMBOL_MAP[sym] = raw_sym
+                cache[sym] = {"exchangeSymbol": raw_sym, "contractSize": c_size}
+            if cache:
+                _TOOBIT_CONTRACTS_CACHE = cache
+    except Exception:
+        pass
+    return _TOOBIT_CONTRACTS_CACHE
 
 REPORT_HOURS = set(range(24))
 REPORT_WINDOW_MINUTES = 5
@@ -44,7 +101,7 @@ def detect_failed_part(err_title, err_details, stage_hint=""):
     if stage_hint:
         failed_part = stage_hint
     elif "get_market_data" in tb:
-        failed_part = "بخش دریافت اطلاعات بازار از صرافی اوربیت (get_market_data)"
+        failed_part = "بخش دریافت اطلاعات بازار از صرافی توبیت (get_market_data)"
     elif "get_true_24h_counts" in tb or "_kline_ref_24h" in tb:
         failed_part = "بخش محاسبه مقادیر ۲۴ ساعته و روند بازار (get_true_24h_counts)"
     elif "process_chart_request" in tb:
@@ -54,7 +111,7 @@ def detect_failed_part(err_title, err_details, stage_hint=""):
     elif "get_updates" in tb:
         failed_part = "بخش دریافت پیام‌ها از تلگرام (get_updates)"
     else:
-        failed_part = "بخش اجرای اصلی ربات حال بازار و اوربیت (Main Execution)"
+        failed_part = "بخش اجرای اصلی ربات حال بازار و توبیت (Main Execution)"
 
     if "timeout" in err or "connection" in err or "requests" in tb or "read timed out" in err or "max retries" in err:
         explanation = "این خطا به دلیل کندی اینترنت سرور یا عدم پاسخگویی موقت سرور صرافی/تلگرام رخ داده است."
@@ -71,7 +128,7 @@ def send_error_to_channels(err_title, err_details, stage_hint=""):
     failed_part, explanation = detect_failed_part(err_title, err_details, stage_hint)
     msg = (
         f"⚠️ گزارش خطا در اجرای ربات (haal_bazaar.py)\n"
-        f"ربات: Haal Bazaar & Ourbit Hourly Bot\n"
+        f"ربات: Haal Bazaar & Toobit Hourly Bot\n"
         f"زمان: {current_date_str_global}\n"
         f"بخش دارای خطا: {failed_part}\n"
         f"توضیح: {explanation}\n"
@@ -145,37 +202,55 @@ def get_market_data():
     stats_data = {}
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(OURBIT_TICKER_URL, headers=headers, timeout=15)
+        contracts_cache = get_toobit_contracts()
+        r = requests.get(TOOBIT_TICKER_URL, headers=headers, timeout=20)
         if r.status_code == 200:
             res_json = r.json()
-            tickers = res_json.get("data", []) if isinstance(res_json, dict) else res_json
+            tickers = res_json if isinstance(res_json, list) else (res_json.get("data", []) if isinstance(res_json, dict) else [])
             if isinstance(tickers, list):
                 for item in tickers:
-                    symbol_raw = item.get("symbol", "")
-                    symbol = symbol_raw.upper()
-                    if not symbol.endswith("_USDT") and not symbol.endswith("USDT"):
+                    if not isinstance(item, dict):
                         continue
+                    symbol_raw = str(item.get("s") or item.get("symbol") or "").strip().upper()
                     if symbol_raw.startswith("~~"):
                         continue
-                    sym = symbol.replace("_USDT", "").replace("USDT", "").lower()
+                    sym = from_toobit_symbol(symbol_raw)
+                    if not sym:
+                        continue
+                    if contracts_cache and sym not in contracts_cache:
+                        continue
                     if re.match(r'^\d+(yes|no)$', sym):
                         continue
-                    
+
                     try:
-                        last_price = float(item.get("lastPrice", 0))
-                        day_change = float(item.get("riseFallRate", 0)) * 100
-                        high_price = float(item.get("high24Price", 0))
-                        low_price = float(item.get("lower24Price", 0))
-                        amount_24 = float(item.get("amount24", 0) or 0)
-                        if amount_24 == 0 and "volume24" in item:
-                            vol24 = float(item.get("volume24", 0) or 0)
+                        last_price = float(item.get("c") or item.get("lastPrice") or 0)
+                        if last_price <= 0:
+                            continue
+                        high_price = float(item.get("h") or item.get("high24Price") or 0)
+                        low_price = float(item.get("l") or item.get("lower24Price") or 0)
+                        open_price = float(item.get("o") or 0)
+
+                        pcp_raw = item.get("pcp")
+                        if pcp_raw is not None and str(pcp_raw) != "":
+                            rise_fall_rate = float(pcp_raw)
+                        elif open_price > 0:
+                            rise_fall_rate = (last_price - open_price) / open_price
+                        else:
+                            rise_fall_rate = 0.0
+                        day_change = rise_fall_rate * 100
+
+                        amount_24 = float(item.get("qv") or item.get("amount24") or 0)
+                        if amount_24 == 0:
+                            vol24 = float(item.get("v") or item.get("volume24") or 0)
                             if vol24 > 0 and last_price > 0:
-                                amount_24 = vol24 * last_price
-                        
+                                c_size = float((contracts_cache.get(sym) or {}).get("contractSize") or 1.0)
+                                amount_24 = vol24 * c_size * last_price
+
                         growth = 0
                         if low_price > 0:
                             growth = ((high_price - low_price) / low_price) * 100
-                        
+
+                        _TOOBIT_SYMBOL_MAP[sym] = symbol_raw
                         prices[sym] = last_price
                         stats_data[sym] = {
                             "dayChange": day_change,
@@ -188,37 +263,45 @@ def get_market_data():
                     except Exception:
                         pass
     except Exception as e:
-        print(f"Error fetching market data from Ourbit Futures: {e}")
+        print(f"Error fetching market data from Toobit Futures: {e}")
     return prices, stats_data
 
 def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
+    if not pair or not str(pair).endswith("-SWAP-USDT"):
+        return None
     target = time.time() - 24 * 3600
     for i in range(tries):
         try:
             r = requests.get(
-                f"{OURBIT_KLINE_URL}/{pair}?interval=Min5&limit=300",
+                f"{TOOBIT_KLINE_URL}?symbol={pair}&interval=5m&limit=300",
                 headers={"User-Agent": "Mozilla/5.0"},
                 timeout=20
             )
             res = r.json()
-            d = res.get("data") or {}
-            times = d.get("time") if isinstance(d, dict) else None
-            closes = d.get("close") if isinstance(d, dict) else None
-            if times and closes:
+            raw_candles = res if isinstance(res, list) else (res.get("data", []) if isinstance(res, dict) else [])
+            if isinstance(raw_candles, list) and raw_candles:
                 best = None
-                for ts, c in zip(times, closes):
+                first = None
+                for k in raw_candles:
+                    if not isinstance(k, list) or len(k) < 5:
+                        continue
                     try:
-                        t = float(ts)
+                        t = float(k[0])
+                        cv = float(k[4])
                     except Exception:
                         continue
                     if t > 1e11:
                         t /= 1000.0
+                    if first is None and cv > 0:
+                        first = cv
                     if t <= target:
-                        best = float(c)
+                        best = cv
                     else:
                         break
                 if best and best > 0:
                     return best
+                if first and first > 0:
+                    return first
         except Exception:
             pass
         if i < tries - 1:
@@ -228,7 +311,7 @@ def _kline_ref_24h(pair, tries=2, sleep_base=0.3):
 def _fetch_refs(syms, workers, tries, sleep_base):
     if not syms:
         return {}
-    pairs = [f"{s.upper()}_USDT" for s in syms]
+    pairs = [to_toobit_symbol(s) for s in syms]
     out = {}
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
@@ -324,19 +407,19 @@ def fmt_price(val):
         return str(val)
 
 def process_chart_request(symbol, timeframe, target_price_str, code_str):
-    sym = symbol.lower().replace("_usdt", "").replace("usdt", "").strip()
+    sym = symbol.lower().replace("-swap-usdt", "").replace("_usdt", "").replace("usdt", "").strip()
     
     tf_map = {
-        '15': ('Min15', '15 دقیقه', 1),
-        '15m': ('Min15', '15 دقیقه', 1),
-        '30': ('Min30', '30 دقیقه', 1),
-        '30m': ('Min30', '30 دقیقه', 1),
-        '1': ('Min60', '1 ساعته', 1),
-        '1h': ('Min60', '1 ساعته', 1),
-        '2': ('Min60', '2 ساعته', 2),
-        '2h': ('Min60', '2 ساعته', 2),
-        '4': ('Hour4', '4 ساعته', 1),
-        '4h': ('Hour4', '4 ساعته', 1),
+        '15': ('15m', '15 دقیقه', 1),
+        '15m': ('15m', '15 دقیقه', 1),
+        '30': ('30m', '30 دقیقه', 1),
+        '30m': ('30m', '30 دقیقه', 1),
+        '1': ('1h', '1 ساعته', 1),
+        '1h': ('1h', '1 ساعته', 1),
+        '2': ('2h', '2 ساعته', 1),
+        '2h': ('2h', '2 ساعته', 1),
+        '4': ('4h', '4 ساعته', 1),
+        '4h': ('4h', '4 ساعته', 1),
     }
     
     tf_clean = str(timeframe).lower().strip()
@@ -348,32 +431,39 @@ def process_chart_request(symbol, timeframe, target_price_str, code_str):
     code_clean = str(code_str).strip()
     is_min = (code_clean == '0')
     
-    pair = f"{sym.upper()}_USDT"
-    url = f"{OURBIT_KLINE_URL}/{pair}?interval={api_interval}"
+    pair = to_toobit_symbol(sym)
+    url = f"{TOOBIT_KLINE_URL}?symbol={pair}&interval={api_interval}&limit=500"
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
-        r = requests.get(url, headers=headers, timeout=12)
+        r = requests.get(url, headers=headers, timeout=15)
         res = r.json()
     except Exception:
         return "خطا در اتصال به سرور"
         
-    if not res.get("success") or not res.get("data"):
+    raw_candles = res if isinstance(res, list) else (res.get("data", []) if isinstance(res, dict) else [])
+    if not isinstance(raw_candles, list) or len(raw_candles) == 0:
         return f"ارز {sym} یافت نشد"
         
-    raw_data = res["data"]
+    rows = []
+    for k in raw_candles:
+        if not isinstance(k, list) or len(k) < 5:
+            continue
+        try:
+            rows.append({
+                'time': int(float(k[0])),
+                'open': float(k[1]),
+                'high': float(k[2]),
+                'low': float(k[3]),
+                'close': float(k[4]),
+            })
+        except Exception:
+            continue
+    if not rows:
+        return f"داده‌ای برای {sym} یافت نشد"
     try:
-        df = pd.DataFrame(raw_data)
-        if len(df) == 0:
-            return f"داده‌ای برای {sym} یافت نشد"
+        df = pd.DataFrame(rows).sort_values('time').tail(500).reset_index(drop=True)
     except Exception:
         return "خطا در پردازش داده‌ها"
-        
-    df = df.tail(500).reset_index(drop=True)
-    df['open'] = df['open'].astype(float)
-    df['high'] = df['high'].astype(float)
-    df['low'] = df['low'].astype(float)
-    df['close'] = df['close'].astype(float)
-    df['time'] = df['time'].astype(int)
     
     if mult == 2:
         agg_rows = []
@@ -808,7 +898,7 @@ def main():
                         )
                         send_message(chat_id, confirm_msg, keyboard)
                     else:
-                        send_message(chat_id, f"ارز {sym.upper()} در بازار تتری اوربیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
+                        send_message(chat_id, f"ارز {sym.upper()} در بازار فیوچرز تتری توبیت پیدا نشد! لطفا نام ارز را صحیح بنویسید.", keyboard)
                 else:
                     send_message(chat_id, "فرمت اشتباه است! حداقل باید نام ارز و دو قیمت (tp و stop) وارد شود.\nمثال:\nxrp 2.51 0.4", keyboard)
                     
