@@ -14,7 +14,7 @@ import traceback
 warnings.filterwarnings('ignore')
 
 # Config for Haal Bazaar Bot (with fallback token from run_haal.yml)
-BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN") or "8865582989:AAHRhGoMjnVUsBpCNj_FlZAm-Hmk7p_SR0E"
+BOT_TOKEN = os.environ.get("HAAL_BOT_TOKEN") or ""
 ALERT_CHANNEL = "-1004462898426"
 CHANNEL_REPORT_MAIN = "-1003961062602"
 
