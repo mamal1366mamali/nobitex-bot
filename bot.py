@@ -1677,6 +1677,7 @@ def capital_summary(trades, settings=None):
 
 def process_markets(app_data):
     trades = app_data.get('trades', [])
+    is_paused = bool(app_data.get('bot_paused', False))
     market_overview = get_market_overview()
     _MARKET_CTX['app_data'] = app_data
     _MARKET_CTX['overview'] = market_overview
@@ -1934,7 +1935,7 @@ def process_markets(app_data):
                 send_telegram_message(get_exit_token(), [cat_info['report_channel']], msg_cat)
 
                 # اگر خروج با TP بود و معامله short بود: سریعاً همان لحظه (پشتبندش) معامله دسته بعدی باز شود
-                if exit_type == 'tp' and trade_type == 'short':
+                if exit_type == 'tp' and trade_type == 'short' and not is_paused:
                     cat_order = ["100_plus", "90_100", "80_90", "70_80", "60_70", "50_60", "40_50", "30_40"]
                     if cat_id in cat_order:
                         # ارز +۱۰۰٪: اگر رشد هنوز بالای ۱۰۰ باشد → پشتبند در خود دسته ۱۰۰+
@@ -2042,6 +2043,9 @@ def process_markets(app_data):
             # آخرین زمانی که این معاملهٔ باز چک شد (برای تشخیص ترتیب tp/stop بعد از خوابِ ربات)
             if trade.get('status') == 'OPEN':
                 trade['last_seen_ts'] = int(current_ts)
+
+        if is_paused:
+            continue
 
         # قانون قفل بعد از استاپ:
         # - تا ۱ روز (۲۴ ساعت): قفل کامل، مگر اینکه رشد بالای ۱۰۰٪ باشد و وارد دسته +۱۰۰٪ شود (نشان z)
