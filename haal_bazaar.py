@@ -557,6 +557,134 @@ def check_is_chart(raw_text, msg_obj):
             return True
     return False
 
+
+TRADES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trades.json")
+
+def load_trades_data():
+    if os.path.exists(TRADES_FILE) and os.path.getsize(TRADES_FILE) > 0:
+        try:
+            with open(TRADES_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"last_report_date": "", "trades": [], "bot_paused": False}
+
+def save_trades_data(t_data):
+    with open(TRADES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(t_data, f, ensure_ascii=False, indent=4)
+
+def _pnl_text(val):
+    iv = int(round(val))
+    if iv > 0:
+        return f"سود {iv} ٪"
+    if iv < 0:
+        return f"ضرر {abs(iv)} ٪"
+    return "0 ٪"
+
+def get_trades_status_message(prices, stats_data):
+    t_data = load_trades_data()
+    trades = t_data.get("trades", [])
+    report_start_ts = int(t_data.get("report_start_ts") or 0)
+    now_iran = datetime.utcnow() + timedelta(hours=3, minutes=30)
+    today_str = jdatetime.datetime.fromgregorian(datetime=now_iran).strftime('%Y/%m/%d')
+
+    tp_today = 0
+    stop_today = 0
+    open_today = 0
+    open_today_pnl = 0.0
+
+    open_past = 0
+    open_past_pnl = 0.0
+    oldest_ts = None
+    oldest_date = ""
+
+    for t in trades:
+        status = str(t.get("status") or "")
+        if status in ("tp", "stop"):
+            c_ts = float(t.get("close_timestamp") or 0)
+            if str(t.get("close_time") or "").replace(" ", "/") == today_str and c_ts >= report_start_ts:
+                if status == "tp":
+                    tp_today += 1
+                else:
+                    stop_today += 1
+        elif status == "OPEN":
+            sym = str(t.get("symbol") or "").lower().replace("_usdt", "").replace("usdt", "")
+            cur_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0)
+            entry = float(t.get("entry") or 0)
+            lev = float(t.get("leverage") or 7)
+            live_pnl = 0.0
+            if entry > 0 and cur_price > 0:
+                live_pnl = ((entry - cur_price) / entry) * 100 * lev
+
+            if str(t.get("open_time") or "").replace(" ", "/") == today_str:
+                open_today += 1
+                open_today_pnl += live_pnl
+            else:
+                open_past += 1
+                open_past_pnl += live_pnl
+                o_ts = float(t.get("open_timestamp") or 0)
+                o_date = str(t.get("open_time") or "").replace("/", " ")
+                if o_ts > 0 and (oldest_ts is None or o_ts < oldest_ts):
+                    oldest_ts = o_ts
+                    oldest_date = o_date
+
+    total_today = tp_today + stop_today + open_today
+    diff = tp_today - stop_today
+    if diff > 0:
+        diff_str = f"tp {diff}"
+    elif diff < 0:
+        diff_str = f"stop {abs(diff)}"
+    else:
+        diff_str = "0"
+
+    bot_state = "متوقف" if t_data.get("bot_paused") else "فعال"
+    msg = (
+        f"وضعیت ربات: {bot_state}\n"
+        f"تعداد معاملات امروز تا این لحظه {total_today}\n"
+        f"tp {tp_today} stop {stop_today} خروجی {diff_str}\n"
+        f"open {open_today} {_pnl_text(open_today_pnl)}\n"
+    )
+
+    if open_past > 0:
+        elapsed_str = ""
+        if oldest_ts:
+            diff_sec = max(0, int(now_iran.timestamp() - oldest_ts))
+            days = diff_sec // 86400
+            hours = (diff_sec % 86400) // 3600
+            elapsed_str = f" {days} روز و {hours} ساعت"
+        msg += f"تعداد معاملات باز روزهای گذشته {open_past} {_pnl_text(open_past_pnl)} قدیمی ترین {oldest_date}{elapsed_str}"
+    else:
+        msg += "تعداد معاملات باز روزهای گذشته 0"
+
+    return msg
+
+def close_all_open_trades(prices, stats_data):
+    t_data = load_trades_data()
+    trades = t_data.get("trades", [])
+    now_iran = datetime.utcnow() + timedelta(hours=3, minutes=30)
+    today_str = jdatetime.datetime.fromgregorian(datetime=now_iran).strftime('%Y/%m/%d')
+    now_ts = int(now_iran.timestamp())
+
+    closed_count = 0
+    for t in trades:
+        if t.get("status") == "OPEN":
+            sym = str(t.get("symbol") or "").lower().replace("_usdt", "").replace("usdt", "")
+            cur_price = prices.get(sym) or stats_data.get(sym, {}).get("lastPrice", 0) or float(t.get("entry") or 0)
+            entry = float(t.get("entry") or 0)
+            lev = float(t.get("leverage") or 7)
+            pnl = round(((entry - cur_price) / entry) * 100 * lev, 2) if entry > 0 else 0.0
+
+            t["status"] = "closed"
+            t["close_reason"] = "manual_close_all"
+            t["close_time"] = today_str
+            t["close_timestamp"] = now_ts
+            t["close_price"] = cur_price
+            t["pnl"] = pnl
+            closed_count += 1
+
+    save_trades_data(t_data)
+    return closed_count
+
 def main():
     current_stage = "بخش بارگذاری اولیه اطلاعات (load data)"
     try:
@@ -590,17 +718,66 @@ def main():
             if not text or not chat_id:
                 continue
 
-            keyboard = {
-                "keyboard": [
-                    [{"text": "قیمت لحظه ای 💰"}],
-                    [{"text": "حال بازار 📊"}],
-                    [{"text": "بیشترین رشد و افت 📈📉"}],
-                    [{"text": "هشدار قیمتی 🔔"}],
-                    [{"text": "لیست هشدارهای قیمتی 📝"}],
-                    [{"text": "چارت 📊"}]
-                ],
-                "resize_keyboard": True
-            }
+            is_admin = (str(chat_id) == str(PERSONAL_ID))
+            kb_rows = [
+                [{"text": "قیمت لحظه ای 💰"}],
+                [{"text": "حال بازار 📊"}],
+                [{"text": "بیشترین رشد و افت 📈📉"}],
+                [{"text": "هشدار قیمتی 🔔"}],
+                [{"text": "لیست هشدارهای قیمتی 📝"}],
+                [{"text": "چارت 📊"}]
+            ]
+            if is_admin:
+                kb_rows.extend([
+                    [{"text": "وضعیت معاملات"}],
+                    [{"text": "توقف ربات"}],
+                    [{"text": "شروع مجدد"}],
+                    [{"text": "بستن تمام معاملات"}]
+                ])
+            keyboard = {"keyboard": kb_rows, "resize_keyboard": True}
+
+            if is_admin and text in ["وضعیت معاملات", "توقف ربات", "شروع مجدد", "بستن تمام معاملات", "تایید توقف ربات", "تایید شروع مجدد", "تایید بستن تمام معاملات", "انصراف"]:
+                if text == "وضعیت معاملات":
+                    send_message(chat_id, get_trades_status_message(prices, stats_data), keyboard)
+                    continue
+
+                elif text == "توقف ربات":
+                    confirm_kb = {"keyboard": [[{"text": "تایید توقف ربات"}], [{"text": "انصراف"}]], "resize_keyboard": True}
+                    send_message(chat_id, "آیا از توقف ربات مطمئن هستید؟ هیچ معامله جدیدی باز نمی‌شود و فقط معاملات باز مدیریت می‌شوند.", confirm_kb)
+                    continue
+
+                elif text == "تایید توقف ربات":
+                    t_data = load_trades_data()
+                    t_data["bot_paused"] = True
+                    save_trades_data(t_data)
+                    send_message(chat_id, "ربات متوقف شد. معاملات باز تا رسیدن به تی‌پی یا استاپ مدیریت می‌شوند.", keyboard)
+                    continue
+
+                elif text == "شروع مجدد":
+                    confirm_kb = {"keyboard": [[{"text": "تایید شروع مجدد"}], [{"text": "انصراف"}]], "resize_keyboard": True}
+                    send_message(chat_id, "آیا از شروع مجدد ربات مطمئن هستید؟", confirm_kb)
+                    continue
+
+                elif text == "تایید شروع مجدد":
+                    t_data = load_trades_data()
+                    t_data["bot_paused"] = False
+                    save_trades_data(t_data)
+                    send_message(chat_id, "ربات فعال شد و چرخه معاملات به حالت عادی برگشت.", keyboard)
+                    continue
+
+                elif text == "بستن تمام معاملات":
+                    confirm_kb = {"keyboard": [[{"text": "تایید بستن تمام معاملات"}], [{"text": "انصراف"}]], "resize_keyboard": True}
+                    send_message(chat_id, "آیا از بستن تمام معاملات باز امروز و روزهای گذشته مطمئن هستید؟", confirm_kb)
+                    continue
+
+                elif text == "تایید بستن تمام معاملات":
+                    closed_n = close_all_open_trades(prices, stats_data)
+                    send_message(chat_id, f"تمام معاملات باز بسته شد. تعداد: {closed_n}", keyboard)
+                    continue
+
+                elif text == "انصراف":
+                    send_message(chat_id, "عملیات لغو شد.", keyboard)
+                    continue
 
             if text == "/start":
                 msg = (
