@@ -19,18 +19,21 @@
             "tp": 0.2367,
             "stop": 0.3175,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/09/05",
             "open_timestamp": 1795684539,
             "open_date_str": "1405 09 05 ساعت 09 : 15 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/09/05",
+            "close_price": 0.2367,
+            "pnl": 105.06,
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795687843,
+            "close_timestamp": 1795688140,
+            "close_date_str": "1405 09 05 ساعت 10 : 15 دقیقه",
+            "duration_str": "1 ساعت"
         },
         {
             "symbol": "AVAAI_USDT",
@@ -54,7 +57,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "DOS_USDT",
@@ -78,7 +81,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 3,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "SOXS_USDT",
@@ -102,7 +105,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "LISTA_USDT",
@@ -126,7 +129,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 5,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "ELSA_USDT",
@@ -150,7 +153,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "AT_USDT",
@@ -174,7 +177,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "GUA_USDT",
@@ -198,7 +201,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
         },
         {
             "symbol": "MANTRA_USDT",
@@ -248,14 +251,37 @@
             "cat_entry_num": 1,
             "global_entry_num": 10,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795687843
+            "last_seen_ts": 1795688140
+        },
+        {
+            "symbol": "MMT_USDT",
+            "category_id": "40_50",
+            "growth": 52.23048327137546,
+            "low": 0.2152,
+            "high": 0.3276,
+            "entry": 0.2485,
+            "tp": 0.2112,
+            "stop": 0.2833,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/09/05",
+            "open_timestamp": 1795688140,
+            "open_date_str": "1405 09 05 ساعت 10 : 15 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 7,
+            "leg": "tp",
+            "cat_entry_num": 1,
+            "global_entry_num": 11,
+            "coin_trade_num": 2
         }
     ],
     "market_state": {
-        "up": 668,
-        "down": 118,
-        "ts": 1795672864.8964653,
+        "up": 651,
+        "down": 132,
+        "ts": 1795675544.0347703,
         "total": 787,
-        "counted": 786
+        "counted": 783
     }
 }
