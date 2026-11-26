@@ -127,8 +127,29 @@ CATEGORIES = {
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 TRADES_FILE = os.path.join(SCRIPT_DIR, "trades.json")
-BASE_URL = 'https://futures.ourbit.com/api/v1/contract/kline'
-ORDERBOOK_URL = 'https://futures.ourbit.com/api/v1/contract/ticker'
+BASE_URL = 'https://api.toobit.com/quote/v1/contract/klines'
+ORDERBOOK_URL = 'https://api.toobit.com/quote/v1/contract/ticker/24hr'
+
+_TOOBIT_SYMBOL_MAP = {}
+
+def from_toobit_symbol(raw_sym):
+    """تبدیل نماد فیوچرز توبیت (BTC-SWAP-USDT) به فرمت داخلی ربات (BTC_USDT).
+    نمادهای غیر فیوچرز (اسپات) را رد می‌کند."""
+    s = str(raw_sym or '').strip().upper()
+    if s.endswith('-SWAP-USDT'):
+        return s[:-10] + '_USDT'
+    return ''
+
+def to_toobit_symbol(symbol):
+    """تبدیل نماد داخلی ربات (BTC_USDT) به نماد قرارداد فیوچرز توبیت (BTC-SWAP-USDT)"""
+    s = str(symbol or '').strip().upper()
+    if s in _TOOBIT_SYMBOL_MAP:
+        return _TOOBIT_SYMBOL_MAP[s]
+    if s.endswith('-SWAP-USDT'):
+        return s
+    if s.endswith('_USDT'):
+        return s[:-5] + '-SWAP-USDT'
+    return ''
 
 iran_time = datetime.utcnow() + timedelta(hours=3, minutes=30)
 shamsi_date = jdatetime.datetime.fromgregorian(datetime=iran_time).strftime('%Y %m %d')
@@ -159,11 +180,7 @@ def load_data():
     return {"last_report_date": "", "trades": []}
 
 # معاملات بازی که باید یک‌بار حذف شوند: (نماد، تاریخ ورود، قیمت ورود)
-BAD_OPEN_TRADES = [
-    ("IRYS_USDT", "1405/08/05", 0.02916),
-    ("BEAT_USDT", "1405/08/07", 0.0979),
-    ("ON_USDT", "1405/08/08", 0.2156),
-]
+BAD_OPEN_TRADES = []
 
 # شروع تازه (درخواست کاربر): حذف معاملات باز + صفر شدن گزارش روز و هفته از این لحظه
 FRESH_START_ID = "fresh_start_1405_08_12"
@@ -270,64 +287,145 @@ def fmt_price(val):
         return str(val)
 
 def get_market_overview():
+    """دریافت تیکر ۲۴ ساعته فقط از بازار فیوچرز (قراردادهای USDT-M) صرافی توبیت؛ بازار اسپات کاملاً حذف است."""
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
+        contracts_cache = get_contract_details()
         response = requests.get(ORDERBOOK_URL, headers=headers, timeout=20)
         data = response.json()
         valid_map = {}
-        items = data.get('data', [])
+        items = data if isinstance(data, list) else (data.get('data', []) if isinstance(data, dict) else [])
         if isinstance(items, list):
             for ticker in items:
-                sym = ticker.get('symbol', '')
-                if sym.endswith('_USDT'):
-                    valid_map[sym] = ticker
+                if not isinstance(ticker, dict):
+                    continue
+                raw_sym = str(ticker.get('s') or ticker.get('symbol') or '').strip().upper()
+                # فقط قراردادهای فیوچرز USDT-M توبیت (-SWAP-USDT) و حذف کامل بازار اسپات
+                sym = from_toobit_symbol(raw_sym)
+                if not sym:
+                    continue
+                if contracts_cache and sym not in contracts_cache:
+                    continue
+                try:
+                    last_p = float(ticker.get('c') or ticker.get('lastPrice') or 0)
+                    high_p = float(ticker.get('h') or ticker.get('high24Price') or 0)
+                    low_p = float(ticker.get('l') or ticker.get('lower24Price') or 0)
+                    open_p = float(ticker.get('o') or 0)
+                except Exception:
+                    continue
+                if last_p <= 0:
+                    continue
+                pcp_raw = ticker.get('pcp')
+                try:
+                    if pcp_raw is not None and str(pcp_raw) != '':
+                        rise_fall_rate = float(pcp_raw)
+                    elif open_p > 0:
+                        rise_fall_rate = (last_p - open_p) / open_p
+                    else:
+                        rise_fall_rate = 0.0
+                except Exception:
+                    rise_fall_rate = 0.0
+                _TOOBIT_SYMBOL_MAP[sym] = raw_sym
+                valid_map[sym] = {
+                    'symbol': sym,
+                    'exchangeSymbol': raw_sym,
+                    'lastPrice': last_p,
+                    'high24Price': high_p,
+                    'lower24Price': low_p,
+                    'openPrice': open_p,
+                    'riseFallRate': rise_fall_rate,
+                    'volume24': float(ticker.get('v') or 0),
+                    'amount24': float(ticker.get('qv') or 0),
+                }
         return valid_map
     except Exception:
         pass
     return {}
 
 def get_candles(symbol, resolution=60, num_candles=24):
-    url = f"{BASE_URL}/{symbol}?interval=Min60"
+    """دریافت کندل‌های فیوچرز صرافی توبیت برای نماد قرارداد (-SWAP-USDT)"""
+    toobit_sym = to_toobit_symbol(symbol)
+    if not toobit_sym or not toobit_sym.endswith('-SWAP-USDT'):
+        return None
+    interval_map = {
+        1: '1m', 3: '3m', 5: '5m', 15: '15m', 30: '30m',
+        60: '1h', 120: '2h', 240: '4h', 360: '6h', 720: '12h', 1440: '1d'
+    }
+    interval = interval_map.get(resolution, '1h')
+    limit = min(max(int(num_candles), 2), 1000)
+    url = f"{BASE_URL}?symbol={toobit_sym}&interval={interval}&limit={limit}"
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers, timeout=15)
         res = response.json()
-        if res.get('success') and 'data' in res:
-            data = res['data']
-            df = pd.DataFrame(data)
-            if len(df) > 0:
-                df = df.tail(num_candles).reset_index(drop=True)
-                df['open'] = df['open'].astype(float)
-                df['high'] = df['high'].astype(float)
-                df['low'] = df['low'].astype(float)
-                df['close'] = df['close'].astype(float)
-                df['volume'] = df['amount'].astype(float)
+        raw_candles = res if isinstance(res, list) else (res.get('data', []) if isinstance(res, dict) else [])
+        if isinstance(raw_candles, list) and len(raw_candles) > 0:
+            c_info = _contract_details_cache.get(symbol) or {}
+            try:
+                c_size = float(c_info.get('contractSize') or 1.0)
+            except Exception:
+                c_size = 1.0
+            rows = []
+            for k in raw_candles:
+                if not isinstance(k, list) or len(k) < 6:
+                    continue
+                try:
+                    t_val = float(k[0])
+                    if t_val > 1e11:
+                        t_val /= 1000.0
+                    o_val = float(k[1])
+                    h_val = float(k[2])
+                    l_val = float(k[3])
+                    c_val = float(k[4])
+                    base_vol = float(k[5])
+                    if len(k) > 7 and k[7] not in (None, ''):
+                        qv_val = float(k[7])
+                        v_val = qv_val if (qv_val > 0 or base_vol <= 0) else (base_vol * c_size * c_val)
+                    else:
+                        v_val = base_vol * c_size * c_val
+                    rows.append({
+                        'time': t_val,
+                        'open': o_val,
+                        'high': h_val,
+                        'low': l_val,
+                        'close': c_val,
+                        'volume': v_val,
+                    })
+                except Exception:
+                    continue
+            if rows:
+                df = pd.DataFrame(rows).sort_values('time').tail(num_candles).reset_index(drop=True)
                 return df
     except Exception:
         pass
     return None
 
 def first_touch_after(symbol, tp_price, stop_price, start_utc_ts, trade_type='short'):
-    """ترتیب واقعی برخورد قیمت با tp و stop با کندل‌های ۱ دقیقه‌ای.
+    """ترتیب واقعی برخورد قیمت با tp و stop با کندل‌های ۱ دقیقه‌ای فیوچرز توبیت.
     خروجی: 'tp' یا 'stop' یا None (اگر هیچ‌کدام نخورده باشد)"""
     try:
-        url = f"{BASE_URL}/{symbol}?interval=Min1&limit=1440"
+        toobit_sym = to_toobit_symbol(symbol)
+        if not toobit_sym or not toobit_sym.endswith('-SWAP-USDT'):
+            return None
+        url = f"{BASE_URL}?symbol={toobit_sym}&interval=1m&limit=1000"
+        if start_utc_ts and 0 < start_utc_ts <= time.time():
+            start_ms = max(0, int((start_utc_ts - 60) * 1000))
+            url += f"&startTime={start_ms}"
         res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15).json()
-        data = res.get('data') or {}
-        times = data.get('time') or []
-        highs = data.get('high') or []
-        lows = data.get('low') or []
+        raw_candles = res if isinstance(res, list) else (res.get('data', []) if isinstance(res, dict) else [])
         tp_ts = None
         st_ts = None
-        for i in range(min(len(times), len(highs), len(lows))):
+        for k in raw_candles:
+            if not isinstance(k, list) or len(k) < 5:
+                continue
             try:
-                ts = float(times[i])
+                ts = float(k[0])
                 if ts > 1e11:
                     ts /= 1000.0
                 if ts < start_utc_ts:
                     continue
-                hi = float(highs[i])
-                lo = float(lows[i])
+                hi = float(k[2])
+                lo = float(k[3])
             except Exception:
                 continue
             if trade_type == 'short':
@@ -977,23 +1075,27 @@ _MARKET_STATE = {'up': 0, 'down': 0, 'ts': 0.0}
 _MARKET_CTX = {'app_data': None, 'overview': None}
 
 def _ref_24h_pair(pair, tries=2, sleep_base=0.3):
-    """کلوز ۲۴ ساعت قبل از کندل ۵ دقیقه‌ای"""
+    """کلوز ۲۴ ساعت قبل از کندل ۵ دقیقه‌ای فیوچرز توبیت"""
+    toobit_sym = to_toobit_symbol(pair)
+    if not toobit_sym or not toobit_sym.endswith('-SWAP-USDT'):
+        return None
     target = time.time() - 24 * 3600
     for i in range(tries):
         try:
             r = requests.get(
-                f"{BASE_URL}/{pair}?interval=Min5&limit=300",
+                f"{BASE_URL}?symbol={toobit_sym}&interval=5m&limit=300",
                 headers={"User-Agent": "Mozilla/5.0"}, timeout=20
             )
-            d = (r.json().get("data") or {})
-            times = d.get("time") or []
-            closes = d.get("close") or []
+            res = r.json()
+            raw_candles = res if isinstance(res, list) else (res.get("data", []) if isinstance(res, dict) else [])
             best = None
             first = None
-            for ts, c in zip(times, closes):
+            for k in raw_candles:
+                if not isinstance(k, list) or len(k) < 5:
+                    continue
                 try:
-                    t = float(ts)
-                    cv = float(c)
+                    t = float(k[0])
+                    cv = float(k[4])
                 except Exception:
                     continue
                 if t > 1e11:
@@ -1177,8 +1279,8 @@ def market_state_block():
     return f"روند بازار {trend} تعداد ارزهای مثبت {up} تعداد ارزهای منفی {down}\n"
 
 # ---------- پایش اعلانات «حذف ارز» در صرافی ----------
-DELIST_SECTION_URL = "https://www.ourbit.com/support/categories/360000254192"
-DELIST_ARTICLE_URL = "https://www.ourbit.com/support/articles/{id}"
+DELIST_SECTION_URL = "https://support.toobit.com/api/v2/help_center/en-us/articles/search.json?query=delist&per_page=20"
+DELIST_ARTICLE_URL = "https://support.toobit.com/api/v2/help_center/en-us/articles/{id}.json"
 DELIST_CHECK_INTERVAL = 6 * 3600     # هر ۶ ساعت یک‌بار اعلانات چک می‌شود
 DELIST_CLOSE_BEFORE = 3 * 3600       # سه ساعت مانده به زمان حذف، معامله بسته می‌شود
 DELIST_MAX_PER_RUN = 8
@@ -1204,30 +1306,21 @@ def ts_to_iran_str(ts):
         return "-"
 
 
-def _next_data_json(html):
-    m = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html, re.S)
-    if not m:
-        return None
-    try:
-        return json.loads(m.group(1))
-    except Exception:
-        return None
-
-
 def fetch_delist_announcements():
-    """لیست اعلان‌های بخش «حذف ارز» صرافی: [(id, title)]"""
+    """لیست اعلان‌های بخش «حذف ارز فیوچرز» صرافی توبیت: [(id, title)]"""
     try:
         r = requests.get(DELIST_SECTION_URL, headers={'User-Agent': 'Mozilla/5.0'}, timeout=25)
-        j = _next_data_json(r.text)
-        if not j:
+        if r.status_code != 200:
             return []
-        groups = (((j.get('props') or {}).get('pageProps') or {}).get('_articleLists')) or []
+        j = r.json() or {}
+        results = j.get('results') or j.get('articles') or []
         items = []
-        for g in groups:
-            for a in (g.get('articles') or []):
-                title = a.get('title') or ''
-                if a.get('id') and re.search(r'delist', title, re.I):
-                    items.append((str(a['id']), title))
+        for a in results:
+            title = a.get('title') or ''
+            # فقط اعلانات حذف قراردادهای فیوچرز (اعلانات اسپات نادیده گرفته می‌شوند)
+            if (a.get('id') and re.search(r'delist', title, re.I)
+                    and re.search(r'(future|perpetual|contract|swap)', title, re.I)):
+                items.append((str(a['id']), title))
         return items
     except Exception:
         return []
@@ -1236,35 +1329,43 @@ def fetch_delist_announcements():
 def parse_delist_deadline_utc(text):
     """زمان حذف از متن اعلان (UTC) → epoch واقعی"""
     m = re.search(r'(\d{1,2}):(\d{2})\s*,?\s*([A-Za-z]+)\s+(\d{1,2})\s*,?\s*(\d{4})\s*\(UTC\)', text)
-    if not m:
-        return None
-    try:
-        month = _MONTHS_EN.get(m.group(3).lower())
-        if not month:
-            return None
-        dt = datetime(int(m.group(5)), month, int(m.group(4)),
-                      int(m.group(1)), int(m.group(2)), tzinfo=timezone.utc)
-        return dt.timestamp()
-    except Exception:
-        return None
+    if m:
+        try:
+            month = _MONTHS_EN.get(m.group(3).lower())
+            if month:
+                dt = datetime(int(m.group(5)), month, int(m.group(4)),
+                              int(m.group(1)), int(m.group(2)), tzinfo=timezone.utc)
+                return dt.timestamp()
+        except Exception:
+            pass
+    m2 = re.search(r'(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*\(?UTC\)?', text, re.I)
+    if m2:
+        try:
+            dt = datetime(int(m2.group(1)), int(m2.group(2)), int(m2.group(3)),
+                          int(m2.group(4)), int(m2.group(5)), tzinfo=timezone.utc)
+            return dt.timestamp()
+        except Exception:
+            pass
+    return None
 
 
 def fetch_delist_symbols(article_id):
-    """نمادهای اعلان حذف + زمان حذف (None یعنی خطا)"""
+    """نمادهای اعلان حذف فیوچرز توبیت + زمان حذف (None یعنی خطا)"""
     try:
         r = requests.get(DELIST_ARTICLE_URL.format(id=article_id),
                          headers={'User-Agent': 'Mozilla/5.0'}, timeout=25)
-        j = _next_data_json(r.text)
-        if not j:
+        if r.status_code != 200:
             return None
-        fd = ((j.get('props') or {}).get('pageProps') or {}).get('fallbackData') or {}
-        body = (fd.get('data') or {}).get('body') or ''
+        j = r.json() or {}
+        body = ((j.get('article') or {}).get('body')) or ''
         if not body:
             return None
         text = re.sub(r'<[^>]+>', ' ', body)
         for a, b in (('&nbsp;', ' '), ('&#39;', "'"), ('&amp;', '&'), ('&quot;', '"')):
             text = text.replace(a, b)
-        symbols = set(re.findall(r'\b([A-Z0-9]{2,15})USDT\b', text.upper()))
+        upper_text = text.upper()
+        symbols = set(re.findall(r'\b([A-Z0-9]{2,15})-SWAP-USDT\b', upper_text))
+        symbols.update(re.findall(r'\b([A-Z0-9]{2,15})USDT\b', upper_text))
         return symbols, parse_delist_deadline_utc(text)
     except Exception:
         return None
@@ -1325,7 +1426,7 @@ def check_delist_announcements(app_data, trades, current_ts):
 # برای فعال‌سازی فقط CAPITAL_MANAGEMENT_ENABLED را True کن.
 CAPITAL_MANAGEMENT_ENABLED = False
 
-CONTRACT_DETAIL_URL = "https://futures.ourbit.com/api/v1/contract/detail"
+CONTRACT_DETAIL_URL = "https://api.toobit.com/api/v1/exchangeInfo"
 
 CAPITAL_SETTINGS = {
     'total_capital': 4.78,       # موجودی فعلی (دلار)
@@ -1357,17 +1458,48 @@ _contract_details_cache = {}
 
 
 def get_contract_details():
-    """جزئیات قراردادها (contractSize و minVol) — یک‌بار خوانده و کش می‌شود"""
+    """جزئیات قراردادهای فیوچرز USDT-M توبیت (فقط contracts و بدون بازار اسپات) — یک‌بار خوانده و کش می‌شود"""
     global _contract_details_cache
     if _contract_details_cache:
         return _contract_details_cache
     try:
-        r = requests.get(CONTRACT_DETAIL_URL, timeout=20)
-        data = (r.json() or {}).get('data') or []
+        r = requests.get(CONTRACT_DETAIL_URL, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+        data = (r.json() or {}).get('contracts') or []
         cache = {}
         for c in data:
-            if c.get('symbol'):
-                cache[c['symbol']] = c
+            if not isinstance(c, dict):
+                continue
+            raw_sym = str(c.get('symbol') or '').strip().upper()
+            status = str(c.get('status') or '').strip().upper()
+            quote_asset = str(c.get('quoteAsset') or '').strip().upper()
+            # فقط قراردادهای فعال فیوچرز USDT-M (-SWAP-USDT) و حذف کامل اسپات
+            sym = from_toobit_symbol(raw_sym)
+            if not sym:
+                continue
+            if quote_asset and quote_asset != 'USDT':
+                continue
+            if status and status != 'TRADING':
+                continue
+            min_vol = 1.0
+            for flt in (c.get('filters') or []):
+                if isinstance(flt, dict) and flt.get('filterType') == 'LOT_SIZE':
+                    try:
+                        min_vol = float(flt.get('minQty') or 1.0)
+                    except Exception:
+                        min_vol = 1.0
+                    break
+            try:
+                contract_size = float(c.get('contractMultiplier') or c.get('contractSize') or 1.0)
+            except Exception:
+                contract_size = 1.0
+            _TOOBIT_SYMBOL_MAP[sym] = raw_sym
+            cache[sym] = {
+                'symbol': sym,
+                'exchangeSymbol': raw_sym,
+                'contractSize': contract_size,
+                'minVol': min_vol,
+                'status': status or 'TRADING',
+            }
         if cache:
             _contract_details_cache = cache
     except Exception:
@@ -2792,7 +2924,7 @@ def detect_failed_part(err_title, err_details, stage_hint=""):
     elif "ensure_market_state" in tb or "_haal_refs" in tb or "_fetch_refs" in tb:
         failed_part = "بخش محاسبه روند و حال بازار (Market State / Haal Data)"
     elif "get_market_overview" in tb or "get_candles" in tb or "first_touch_after" in tb:
-        failed_part = "بخش دریافت قیمت‌ها و کندل‌ها از سرور صرافی اوربیت (Ourbit API)"
+        failed_part = "بخش دریافت قیمت‌ها و کندل‌ها از سرور صرافی توبیت (Toobit Futures API)"
     elif "generate_and_send_daily_report" in tb:
         failed_part = "بخش محاسبه و ارسال گزارش روزانه (Daily Report)"
     elif "generate_and_send_weekly_report" in tb:
@@ -2822,7 +2954,7 @@ def send_error_to_channels(err_title, err_details, stage_hint=""):
     failed_part, explanation = detect_failed_part(err_title, err_details, stage_hint)
     msg = (
         f"⚠️ گزارش خطا در اجرای ربات (bot.py)\n"
-        f"ربات: Ourbit Filter Bot\n"
+        f"ربات: Toobit Futures Filter Bot\n"
         f"زمان: {current_date_str}\n"
         f"بخش دارای خطا: {failed_part}\n"
         f"توضیح: {explanation}\n"
