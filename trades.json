@@ -57,7 +57,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "DOS_USDT",
@@ -108,7 +108,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "LISTA_USDT",
@@ -159,7 +159,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "AT_USDT",
@@ -183,7 +183,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "GUA_USDT",
@@ -207,7 +207,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "MANTRA_USDT",
@@ -311,7 +311,7 @@
             "cat_entry_num": 7,
             "global_entry_num": 12,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "MANTRA_USDT",
@@ -335,7 +335,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 13,
             "coin_trade_num": 3,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
         },
         {
             "symbol": "EVAA_USDT",
@@ -467,14 +467,38 @@
             "cat_entry_num": 2,
             "global_entry_num": 18,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795756850
+            "last_seen_ts": 1795757137
+        },
+        {
+            "symbol": "BULLA_USDT",
+            "category_id": "100_plus",
+            "growth": 112.52877342979286,
+            "low": 0.03041,
+            "high": 0.06463,
+            "leg": null,
+            "entry": 0.04847,
+            "tp": 0.03635,
+            "stop": 0.06059,
+            "neg_pct": 25,
+            "status": "OPEN",
+            "open_time": "1405/09/06",
+            "open_timestamp": 1795757137,
+            "open_date_str": "1405 09 06 ساعت 05 : 25 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 4,
+            "release_entry": "y",
+            "cat_entry_num": 1,
+            "global_entry_num": 1,
+            "coin_trade_num": 2
         }
     ],
     "market_state": {
-        "up": 575,
-        "down": 208,
-        "ts": 1795727744.414897,
+        "up": 445,
+        "down": 336,
+        "ts": 1795744541.1945982,
         "total": 787,
-        "counted": 783
+        "counted": 781
     }
 }
