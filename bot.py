@@ -512,7 +512,7 @@ def coin_is_z(trades, symbol, current_ts, today_str):
         o_time = str(t.get('open_time') or '').replace(' ', '/')
         if o_time == t_day:
             tag = t.get('release_entry')
-            if tag in ('x', 'y', 'z'):
+            if tag in ('x', 'y', 'z', 'w'):
                 return tag
             if tag is True:
                 return 'z'
@@ -532,7 +532,7 @@ def generate_entry_message(trade_type, symbol, cat_name, growth, neg_percent, lo
         parts.append(str(int(coin_num)))
     if release_flag:
         tag = str(release_flag).strip().lower()
-        if tag in ('x', 'y', 'z'):
+        if tag in ('x', 'y', 'z', 'w'):
             parts.append(tag)
         elif tag == 'true':
             parts.append("z")
@@ -594,7 +594,7 @@ def generate_exit_message(exit_type, symbol, cat_name, growth, neg_percent, low,
         parts.append(str(int(coin_num)))
     if release_flag:
         tag = str(release_flag).strip().lower()
-        if tag in ('x', 'y', 'z'):
+        if tag in ('x', 'y', 'z', 'w'):
             parts.append(tag)
         elif tag == 'true':
             parts.append("z")
@@ -851,7 +851,7 @@ def post_lock_new_peak(df, stop_ts_iran, last_high, min_rise=0.30):
     except Exception:
         return False
 
-def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None, df=None):
+def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None, df=None, is_w_dump=False):
     """وضعیت قفل و دسته‌بندی‌های بعد از استاپ (y / z / x):
     خروجی: (locked, only_100plus, equality_required, release_tag, base_floor)
 
@@ -959,7 +959,15 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
     # آخرین استاپ روی معامله‌ای با برچسب y یا z یا x بوده باشد،
     # یا دو استاپ در فاصله کمتر از ۲۴ ساعت خورده باشد
     prev_stop_within_24h = (len(stop_trades) >= 2 and (last_ts - stop_trades[-2][0]) <= 24 * 3600)
-    is_x_mode = (last_stop_trade.get('release_entry') in ('y', 'z', 'x')) or prev_stop_within_24h
+    was_100plus_stop = (
+        last_stop_trade.get('category_id') == '100_plus'
+        or float(last_stop_trade.get('growth') or 0) >= 100
+    )
+    is_x_mode = (
+        last_stop_trade.get('release_entry') in ('y', 'z', 'x')
+        or prev_stop_within_24h
+        or was_100plus_stop
+    )
 
     # ---------- حالت ۳: دسته x (استاپ مجدد پس از y یا z یا x) ----------
     if is_x_mode:
@@ -983,8 +991,8 @@ def get_symbol_stop_state(trades, symbol, current_ts, high_24h=None, growth=None
     if age >= 24 * 3600:
         return False, False, False, '', 0.0
 
-    # اگر در همان ۲۴ ساعت بالای ۱۰۰٪ رشد کند: دسته y (فقط 100_plus، اهرم ۴، تی‌پی ۲۵٪، استاپ ۲۵٪، سقف ۲ تی‌پی)
-    if cur_growth >= 100:
+    # اگر در همان ۲۴ ساعت بالای ۱۰۰٪ رشد کند (و ناشی از ریزش و کف جدید نباشد): دسته y (فقط 100_plus، اهرم ۴، تی‌پی ۲۵٪، استاپ ۲۵٪، سقف ۲ تی‌پی)
+    if cur_growth >= 100 and not is_w_dump:
         return False, True, True, 'y', 0.0
 
     # اگر زیر ۱۰۰٪ باشد: قفل می‌ماند مگر اینکه در همان روز قله جدیدی بالاتر از قله قبلی بزند → دسته z
@@ -1966,6 +1974,15 @@ def process_markets(app_data):
         if low_24h > 0:
             growth = ((high_24h - low_24h) / low_24h) * 100
 
+        # تشخیص دسته w: ارزهایی که کف جدید می‌زنند (بعد از سقف) و قیمت کلوز از بیشترین قیمت ۱۰۰٪ کمتر شده است
+        low_after_high = False
+        try:
+            low_after_high = int(df['low'].idxmin()) > int(df['high'].idxmax())
+        except Exception:
+            low_after_high = False
+        close_drop_from_high_pct = ((high_24h - current_close) / current_close) * 100 if current_close > 0 else 0.0
+        is_w_dump = (growth >= 100) and low_after_high and (close_drop_from_high_pct >= 100)
+
         valid_cats = get_valid_categories(growth)
         open_trades_for_symbol = [t for t in trades if t['symbol'] == symbol and t['status'] == 'OPEN']
         
@@ -2189,9 +2206,13 @@ def process_markets(app_data):
                             # درصدهای tp و stop همان درصدهای خود دسته هستند (۱۵٪ / ۱۴٪)
                             # اگر ارز بعد از استاپ بالای ۱۰۰٪ است → همهٔ دسته‌ها با شرایط ۱۰۰+ (۲۵٪/۲۵٪/اهرم ۴)
                             _c_locked, _c_only, _c_eq, _c_blow, *_ = get_symbol_stop_state(
-                                trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df)
-                            c_plus100 = bool((_c_eq and growth >= 100) or next_cat_id == '100_plus')
-                            if c_plus100:
+                                trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df, is_w_dump=is_w_dump)
+                            is_w_trade = (trade.get('release_entry') == 'w')
+                            c_plus100 = bool((not is_w_trade) and ((_c_eq and growth >= 100 and not is_w_dump) or next_cat_id == '100_plus'))
+                            if is_w_trade:
+                                c_tp_drop = 0.17
+                                c_stop_rise = 0.145
+                            elif c_plus100:
                                 c_tp_drop = 0.25
                                 c_stop_rise = 0.225
                             else:
@@ -2209,7 +2230,7 @@ def process_markets(app_data):
                                 next_tp = round_price(next_entry * (1 - c_tp_drop))
                                 next_stop = round_price(next_entry * (1 + c_stop_rise))
                                 next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
-                                c_leverage = (4 if c_plus100 else next_cat_info.get('leverage', 6))
+                                c_leverage = (6 if is_w_trade else (4 if c_plus100 else next_cat_info.get('leverage', 6)))
 
                                 # ---------- قانون معاملات بحرانی در پشتبند تی‌پی (مرز ۴۸ معامله باز) ----------
                                 if CRITICAL_CLOSE_ENABLED and count_open_trades(trades) >= CRITICAL_OPEN_LIMIT:
@@ -2298,7 +2319,7 @@ def process_markets(app_data):
         #   * اگر بالای ۱۰۰٪ باشد: نشان z
         # - بعد از ۴۸ ساعت: محدودیت تمام شده و محاسبات به روال کاملاً عادی برمی‌گردد
         locked, only_100plus, equality_required, release_tag, base_floor = get_symbol_stop_state(
-            trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df)
+            trades, symbol, current_ts, high_24h=high_24h, growth=growth, df=df, is_w_dump=is_w_dump)
         if locked:
             continue
 
@@ -2326,6 +2347,7 @@ def process_markets(app_data):
 
         for cat_id in valid_cats:
             cascade_src = None
+            w_entry_flag = False
             # در مدت قفلِ بعد از استاپِ ورود اول، فقط دستهٔ ۱۰۰+ اجازهٔ ورود دارد
             if only_100plus and cat_id != '100_plus':
                 continue
@@ -2378,12 +2400,21 @@ def process_markets(app_data):
                         current_cat_idx = cat_order.index(cat_id) if cat_id in cat_order else 999
 
                         if cat_id == "100_plus":
-                            # ورود اولیه مثبت ۱۰۰ به بالا: منفی ۲۵ درصد سقف، تی‌پی منفی ۲۵ درصد ورود، استاپ مثبت ۲۵ درصد ورود
-                            entry_price = drop_price_25
-                            tp_price = round_price(entry_price * (1 - 0.25))
-                            stop_price = round_price(entry_price * (1 + 0.225))
-                            neg_pct = 25
-                            should_enter = (current_close <= entry_price and current_close > tp_price)
+                            if is_w_dump:
+                                # دسته w: کف جدید و ریزش ۱۰۰ درصدی کلوز از سقف -> استاپ ۱۴.۵٪، تی‌پی ۱۷٪، اهرم ۶
+                                entry_price = round_price(current_close)
+                                tp_price = round_price(entry_price * (1 - 0.17))
+                                stop_price = round_price(entry_price * (1 + 0.145))
+                                neg_pct = 15
+                                w_entry_flag = True
+                                should_enter = (entry_price > 0)
+                            else:
+                                # ورود اولیه مثبت ۱۰۰ به بالا: منفی ۲۵ درصد سقف، تی‌پی منفی ۲۵ درصد ورود، استاپ مثبت ۲۲.۵ درصد ورود
+                                entry_price = drop_price_25
+                                tp_price = round_price(entry_price * (1 - 0.25))
+                                stop_price = round_price(entry_price * (1 + 0.225))
+                                neg_pct = 25
+                                should_enter = (current_close <= entry_price and current_close > tp_price)
 
                             # اگر قبلاً در همین دسته tp خورده، ورود مجدد فقط وقتی مجاز است که
                             # قیمت بعد از آن tp دوباره به همین نقطه ورود برگشته باشد (مشروط به نرسیدن به سقف tp دسته)
@@ -2578,7 +2609,12 @@ def process_markets(app_data):
                 if CRITICAL_CLOSE_ENABLED and count_open_trades(trades) >= CRITICAL_OPEN_LIMIT:
                     handle_critical_open_trades(trades, market_overview, current_ts)
 
-                entry_leverage = (4 if (release_tag == 'y' or cat_id == '100_plus') else cat_info.get('leverage', 6))
+                if w_entry_flag:
+                    entry_leverage = 6
+                elif release_tag == 'y' or cat_id == '100_plus':
+                    entry_leverage = 4
+                else:
+                    entry_leverage = cat_info.get('leverage', 6)
 
                 # ---------- مدیریت سرمایه و بررسی حداقل سفارش (فعلاً غیرفعال) ----------
                 cap_size = None
@@ -2612,7 +2648,7 @@ def process_markets(app_data):
                 trades.append(new_trade)
 
                 # اگر این معامله دارای برچسب آزادسازی استاپ باشد (x یا y یا z)
-                rel_tag = release_tag or (cascade_src.get('release_entry') if cascade_src else '')
+                rel_tag = release_tag or ('w' if w_entry_flag else (cascade_src.get('release_entry') if cascade_src else ''))
                 if rel_tag:
                     new_trade['release_entry'] = rel_tag
 
