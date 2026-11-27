@@ -48,70 +48,70 @@ CATEGORIES = {
         "entry_channel": "-1004290922830",
         "report_channel": "-1003733086854",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "40_50": {
         "name_fa": "+40 الی 50 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003945753248",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "50_60": {
         "name_fa": "+50 الی 60 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003781040656",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "60_70": {
         "name_fa": "+60 الی 70 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004379515603",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "70_80": {
         "name_fa": "+70 الی 80 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1003820960180",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "80_90": {
         "name_fa": "+80 الی 90 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004310315552",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "90_100": {
         "name_fa": "+90 الی 100 %",
         "entry_channel": "-1004290922830",
         "report_channel": "-1004452909288",
         "entry_drop": 0.15,
-        "tp_drop": 0.15,
-        "stop_rise": 0.14,
+        "tp_drop": 0.17,
+        "stop_rise": 0.145,
         "trade_type": "short",
-        "leverage": 7
+        "leverage": 6
     },
     "100_plus": {
         "name_fa": "+100 % به بالا",
@@ -119,7 +119,7 @@ CATEGORIES = {
         "report_channel": "-1004458729980",
         "entry_drop": 0.25,
         "tp_drop": 0.25,
-        "stop_rise": 0.25,
+        "stop_rise": 0.225,
         "trade_type": "short",
         "leverage": 4
     }
@@ -450,11 +450,11 @@ def first_touch_after(symbol, tp_price, stop_price, start_utc_ts, trade_type='sh
     except Exception:
         return None
 
-def calculate_short_pnl(entry, exit_price, leverage=7):
+def calculate_short_pnl(entry, exit_price, leverage=6):
     pnl = ((entry - exit_price) / entry) * 100 * leverage
     return round(pnl, 2)
 
-def calculate_long_pnl(entry, exit_price, leverage=7):
+def calculate_long_pnl(entry, exit_price, leverage=6):
     pnl = ((exit_price - entry) / entry) * 100 * leverage
     return round(pnl, 2)
 
@@ -1466,7 +1466,7 @@ CAPITAL_SETTINGS = {
     'max_trades': 50,              # سرمایه روی ۵۰ معامله تقسیم می‌شود
     'min_per_trade': 0.20,         # کف مارجین هر معامله (۲۰ سنت)
     'max_per_trade': 10000.0,      # سقف مارجین هر معامله (۱۰,۰۰۰ دلار)
-    'default_leverage': 7,
+    'default_leverage': 6,
     'allow_tier_downgrade': False, # False: پس از ورود به دسته بالاتر مبلغ کم نمی‌شود | True: فقط با لمس کف دسته قبلی برمی‌گردد
 }
 
@@ -1682,9 +1682,9 @@ def get_min_order_notional(symbol, price):
 def get_position_size(symbol, price, leverage=None, margin=None, app_data=None, settings=None):
     """تعداد قرارداد و مارجین لازم برای یک معامله طبق سهم تعیین‌شده"""
     s = settings or CAPITAL_SETTINGS
-    lev = float(leverage or s.get('default_leverage', 7))
+    lev = float(leverage or s.get('default_leverage', 6))
     if lev <= 0:
-        lev = float(s.get('default_leverage', 7))
+        lev = float(s.get('default_leverage', 6))
     if margin is None:
         margin = get_margin_per_trade(get_wallet_capital(s), app_data=app_data, settings=s)
     margin = float(margin)
@@ -1791,7 +1791,7 @@ def handle_critical_open_trades(trades, market_overview, current_ts):
         cat_id = t.get('category_id') or '30_40'
         cat_info = CATEGORIES.get(cat_id, CATEGORIES['30_40'])
         trade_type = cat_info.get('trade_type', 'short')
-        t_lev = t.get('leverage') or cat_info.get('leverage', 7)
+        t_lev = t.get('leverage') or cat_info.get('leverage', 6)
         try:
             entry_p = float(t.get('entry') or 0)
         except Exception:
@@ -2053,7 +2053,7 @@ def process_markets(app_data):
                 trade['close_date_str'] = current_date_str
                 trade['close_price'] = exit_price
 
-                trade_lev = trade.get('leverage') or cat_info.get('leverage', 7)
+                trade_lev = trade.get('leverage') or cat_info.get('leverage', 6)
                 if trade_type == 'short':
                     pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=trade_lev)
                 else:
@@ -2109,7 +2109,7 @@ def process_markets(app_data):
                 duration_str = calculate_duration_str(start_ts, end_ts)
                 trade['duration_str'] = duration_str
                 
-                trade_lev = trade.get('leverage') or cat_info.get('leverage', 7)
+                trade_lev = trade.get('leverage') or cat_info.get('leverage', 6)
                 if trade_type == 'short':
                     pnl = calculate_short_pnl(trade['entry'], exit_price, leverage=trade_lev)
                 else:
@@ -2193,7 +2193,7 @@ def process_markets(app_data):
                             c_plus100 = bool((_c_eq and growth >= 100) or next_cat_id == '100_plus')
                             if c_plus100:
                                 c_tp_drop = 0.25
-                                c_stop_rise = 0.25
+                                c_stop_rise = 0.225
                             else:
                                 c_tp_drop = next_cat_info['tp_drop']
                                 c_stop_rise = next_cat_info['stop_rise']
@@ -2209,7 +2209,7 @@ def process_markets(app_data):
                                 next_tp = round_price(next_entry * (1 - c_tp_drop))
                                 next_stop = round_price(next_entry * (1 + c_stop_rise))
                                 next_neg_pct = drop_to_percent(next_cat_info['entry_drop'])
-                                c_leverage = (4 if c_plus100 else next_cat_info.get('leverage', 7))
+                                c_leverage = (4 if c_plus100 else next_cat_info.get('leverage', 6))
 
                                 # ---------- قانون معاملات بحرانی در پشتبند تی‌پی (مرز ۴۸ معامله باز) ----------
                                 if CRITICAL_CLOSE_ENABLED and count_open_trades(trades) >= CRITICAL_OPEN_LIMIT:
@@ -2381,7 +2381,7 @@ def process_markets(app_data):
                             # ورود اولیه مثبت ۱۰۰ به بالا: منفی ۲۵ درصد سقف، تی‌پی منفی ۲۵ درصد ورود، استاپ مثبت ۲۵ درصد ورود
                             entry_price = drop_price_25
                             tp_price = round_price(entry_price * (1 - 0.25))
-                            stop_price = round_price(entry_price * (1 + 0.25))
+                            stop_price = round_price(entry_price * (1 + 0.225))
                             neg_pct = 25
                             should_enter = (current_close <= entry_price and current_close > tp_price)
 
@@ -2414,7 +2414,7 @@ def process_markets(app_data):
                             # (ورود منفی ۲۵٪، tp ۲۵٪، stop ۲۵٪، اهرم ۴)
                             if equality_required and growth >= 100:
                                 sub_tp_drop = 0.25
-                                sub_stop_rise = 0.25
+                                sub_stop_rise = 0.225
                                 sub_entry_drop = 0.25
                             else:
                                 sub_tp_drop = cat_info['tp_drop']
@@ -2578,7 +2578,7 @@ def process_markets(app_data):
                 if CRITICAL_CLOSE_ENABLED and count_open_trades(trades) >= CRITICAL_OPEN_LIMIT:
                     handle_critical_open_trades(trades, market_overview, current_ts)
 
-                entry_leverage = (4 if (release_tag == 'y' or cat_id == '100_plus') else cat_info.get('leverage', 7))
+                entry_leverage = (4 if (release_tag == 'y' or cat_id == '100_plus') else cat_info.get('leverage', 6))
 
                 # ---------- مدیریت سرمایه و بررسی حداقل سفارش (فعلاً غیرفعال) ----------
                 cap_size = None
@@ -2822,7 +2822,7 @@ def generate_and_send_daily_report(app_data, target_date=None):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['30_40'])
             trade_type = cat_info.get('trade_type', 'short')
             
-            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
+            t_lev = t.get('leverage') or cat_info.get('leverage', 6)
             if trade_type == 'short':
                 live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
             else:
@@ -3044,7 +3044,7 @@ def generate_and_send_weekly_report(app_data):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['30_40'])
             trade_type = cat_info.get('trade_type', 'short')
             
-            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
+            t_lev = t.get('leverage') or cat_info.get('leverage', 6)
             if trade_type == 'short':
                 live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
             else:
@@ -3147,7 +3147,7 @@ def generate_and_send_monthly_report(app_data):
             cat_info = CATEGORIES.get(cat_id, CATEGORIES['30_40'])
             trade_type = cat_info.get('trade_type', 'short')
 
-            t_lev = t.get('leverage') or cat_info.get('leverage', 7)
+            t_lev = t.get('leverage') or cat_info.get('leverage', 6)
             if trade_type == 'short':
                 live_pnl = calculate_short_pnl(t['entry'], current_close, leverage=t_lev)
             else:
