@@ -193,7 +193,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "GUA_USDT",
@@ -352,7 +352,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 13,
             "coin_trade_num": 3,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "EVAA_USDT",
@@ -649,7 +649,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "BIGTIME_USDT",
@@ -674,7 +674,7 @@
             "cat_entry_num": 4,
             "global_entry_num": 7,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "INIT_USDT",
@@ -686,19 +686,22 @@
             "tp": 0.09437,
             "stop": 0.1302,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/09/06",
             "open_timestamp": 1795788642,
             "open_date_str": "1405 09 06 ساعت 14 : 10 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/09/06",
+            "close_price": 0.09437,
+            "pnl": 102.01,
             "leverage": 6,
             "leg": "tp",
             "cat_entry_num": 1,
             "global_entry_num": 8,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813535,
+            "close_timestamp": 1795813846,
+            "close_date_str": "1405 09 06 ساعت 21 : 10 دقیقه",
+            "duration_str": "7 ساعت"
         },
         {
             "symbol": "ELSA_USDT",
@@ -722,7 +725,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 9,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "CFG_USDT",
@@ -746,7 +749,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "SSV_USDT",
@@ -770,7 +773,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795813535
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "HAEDAL_USDT",
@@ -794,7 +797,8 @@
             "release_entry": "z",
             "cat_entry_num": 3,
             "global_entry_num": 12,
-            "coin_trade_num": 2
+            "coin_trade_num": 2,
+            "last_seen_ts": 1795813846
         },
         {
             "symbol": "COOKIE_USDT",
@@ -817,14 +821,38 @@
             "leverage": 6,
             "cat_entry_num": 1,
             "global_entry_num": 13,
-            "coin_trade_num": 1
+            "coin_trade_num": 1,
+            "last_seen_ts": 1795813846
+        },
+        {
+            "symbol": "INIT_USDT",
+            "category_id": "50_60",
+            "growth": 70.39690663027407,
+            "low": 0.08793,
+            "high": 0.14983,
+            "entry": 0.09909,
+            "tp": 0.08224,
+            "stop": 0.1135,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/09/06",
+            "open_timestamp": 1795813846,
+            "open_date_str": "1405 09 06 ساعت 21 : 10 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 6,
+            "leg": "tp",
+            "cat_entry_num": 4,
+            "global_entry_num": 14,
+            "coin_trade_num": 3
         }
     ],
     "market_state": {
-        "up": 528,
-        "down": 256,
-        "ts": 1795800939.4693315,
+        "up": 467,
+        "down": 314,
+        "ts": 1795801247.7504187,
         "total": 787,
-        "counted": 784
+        "counted": 781
     }
 }
