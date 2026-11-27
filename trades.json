@@ -57,7 +57,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         },
         {
             "symbol": "DOS_USDT",
@@ -162,7 +162,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         },
         {
             "symbol": "AT_USDT",
@@ -186,7 +186,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         },
         {
             "symbol": "GUA_USDT",
@@ -210,7 +210,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         },
         {
             "symbol": "MANTRA_USDT",
@@ -342,7 +342,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 13,
             "coin_trade_num": 3,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         },
         {
             "symbol": "EVAA_USDT",
@@ -462,19 +462,22 @@
             "tp": 0.001439,
             "stop": 0.00193,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/09/05",
             "open_timestamp": 1795732843,
             "open_date_str": "1405 09 05 ساعت 22 : 40 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/09/06",
+            "close_price": 0.001439,
+            "pnl": 105.02,
             "leverage": 7,
             "leg": "tp",
             "cat_entry_num": 2,
             "global_entry_num": 18,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764658,
+            "close_timestamp": 1795764936,
+            "close_date_str": "1405 09 06 ساعت 07 : 35 دقیقه",
+            "duration_str": "8 ساعت و 54 دقیقه"
         },
         {
             "symbol": "BULLA_USDT",
@@ -527,14 +530,14 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795764658
+            "last_seen_ts": 1795764936
         }
     ],
     "market_state": {
-        "up": 620,
-        "down": 165,
-        "ts": 1795749048.2626736,
+        "up": 600,
+        "down": 183,
+        "ts": 1795752340.9261312,
         "total": 787,
-        "counted": 785
+        "counted": 783
     }
 }
