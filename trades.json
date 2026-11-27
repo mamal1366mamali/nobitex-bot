@@ -57,7 +57,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "DOS_USDT",
@@ -162,7 +162,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "AT_USDT",
@@ -186,7 +186,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "GUA_USDT",
@@ -210,7 +210,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "MANTRA_USDT",
@@ -342,7 +342,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 13,
             "coin_trade_num": 3,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "EVAA_USDT",
@@ -558,7 +558,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 3,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "BLUR_USDT",
@@ -582,7 +582,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 4,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795772740
+            "last_seen_ts": 1795773046
         },
         {
             "symbol": "INIT_USDT",
@@ -605,7 +605,8 @@
             "leverage": 7,
             "cat_entry_num": 1,
             "global_entry_num": 5,
-            "coin_trade_num": 1
+            "coin_trade_num": 1,
+            "last_seen_ts": 1795773046
         }
     ],
     "market_state": {
