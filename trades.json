@@ -193,7 +193,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "GUA_USDT",
@@ -652,7 +652,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "BIGTIME_USDT",
@@ -665,19 +665,22 @@
             "tp": 0.005164,
             "stop": 0.006926,
             "neg_pct": 20,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/09/06",
             "open_timestamp": 1795787733,
             "open_date_str": "1405 09 06 ساعت 13 : 55 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/09/07",
+            "close_price": 0.005164,
+            "pnl": 104.97,
             "leverage": 7,
             "release_entry": "z",
             "cat_entry_num": 4,
             "global_entry_num": 7,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857341,
+            "close_timestamp": 1795857644,
+            "close_date_str": "1405 09 07 ساعت 09 : 20 دقیقه",
+            "duration_str": "19 ساعت و 25 دقیقه"
         },
         {
             "symbol": "INIT_USDT",
@@ -728,7 +731,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 9,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "CFG_USDT",
@@ -780,7 +783,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "HAEDAL_USDT",
@@ -805,7 +808,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 12,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "COOKIE_USDT",
@@ -818,18 +821,21 @@
             "tp": 0.007446,
             "stop": 0.01027,
             "neg_pct": 15,
-            "status": "OPEN",
+            "status": "tp",
             "open_time": "1405/09/06",
             "open_timestamp": 1795813535,
             "open_date_str": "1405 09 06 ساعت 21 : 05 دقیقه",
-            "close_time": "",
-            "close_price": 0.0,
-            "pnl": 0.0,
+            "close_time": "1405/09/07",
+            "close_price": 0.007446,
+            "pnl": 102.0,
             "leverage": 6,
             "cat_entry_num": 1,
             "global_entry_num": 13,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857341,
+            "close_timestamp": 1795857644,
+            "close_date_str": "1405 09 07 ساعت 09 : 20 دقیقه",
+            "duration_str": "12 ساعت و 15 دقیقه"
         },
         {
             "symbol": "INIT_USDT",
@@ -907,7 +913,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "THE_USDT",
@@ -931,7 +937,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "PORTAL_USDT",
@@ -1062,7 +1068,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 7,
             "coin_trade_num": 5,
-            "last_seen_ts": 1795857341
+            "last_seen_ts": 1795857644
         },
         {
             "symbol": "ROBO_USDT",
@@ -1085,14 +1091,15 @@
             "leverage": 6,
             "cat_entry_num": 2,
             "global_entry_num": 8,
-            "coin_trade_num": 1
+            "coin_trade_num": 1,
+            "last_seen_ts": 1795857644
         }
     ],
     "market_state": {
-        "up": 194,
-        "down": 592,
-        "ts": 1795844742.6575117,
+        "up": 191,
+        "down": 593,
+        "ts": 1795845049.364021,
         "total": 787,
-        "counted": 786
+        "counted": 784
     }
 }
