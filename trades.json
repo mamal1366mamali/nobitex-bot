@@ -193,7 +193,7 @@
             "cat_entry_num": 5,
             "global_entry_num": 7,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "GUA_USDT",
@@ -652,7 +652,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 6,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "BIGTIME_USDT",
@@ -787,7 +787,7 @@
             "cat_entry_num": 6,
             "global_entry_num": 11,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "HAEDAL_USDT",
@@ -812,7 +812,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 12,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "COOKIE_USDT",
@@ -917,7 +917,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 1,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "THE_USDT",
@@ -941,7 +941,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 2,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "PORTAL_USDT",
@@ -1072,7 +1072,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 7,
             "coin_trade_num": 5,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "ROBO_USDT",
@@ -1096,7 +1096,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 8,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "TAG_USDT",
@@ -1147,7 +1147,7 @@
             "cat_entry_num": 1,
             "global_entry_num": 10,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "CFG_USDT",
@@ -1172,7 +1172,7 @@
             "cat_entry_num": 3,
             "global_entry_num": 11,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "TAG_USDT",
@@ -1196,7 +1196,7 @@
             "cat_entry_num": 2,
             "global_entry_num": 12,
             "coin_trade_num": 2,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
         },
         {
             "symbol": "EVAA_USDT",
@@ -1275,14 +1275,37 @@
             "cat_entry_num": 4,
             "global_entry_num": 15,
             "coin_trade_num": 1,
-            "last_seen_ts": 1795889737
+            "last_seen_ts": 1795890044
+        },
+        {
+            "symbol": "IDOL_USDT",
+            "category_id": "40_50",
+            "growth": 45.981510223361894,
+            "low": 0.014819,
+            "high": 0.021633,
+            "leg": null,
+            "entry": 0.01839,
+            "tp": 0.01526,
+            "stop": 0.02106,
+            "neg_pct": 15,
+            "status": "OPEN",
+            "open_time": "1405/09/07",
+            "open_timestamp": 1795890044,
+            "open_date_str": "1405 09 07 ساعت 18 : 20 دقیقه",
+            "close_time": "",
+            "close_price": 0.0,
+            "pnl": 0.0,
+            "leverage": 6,
+            "cat_entry_num": 2,
+            "global_entry_num": 16,
+            "coin_trade_num": 1
         }
     ],
     "market_state": {
-        "up": 193,
-        "down": 592,
-        "ts": 1795869061.9044569,
+        "up": 269,
+        "down": 515,
+        "ts": 1795877448.2424085,
         "total": 787,
-        "counted": 785
+        "counted": 784
     }
 }
